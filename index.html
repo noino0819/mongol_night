@@ -794,6 +794,8 @@
         </div>
       </div>
       <div id="maf-roles"></div>
+      <button class="btn ghost mt" id="maf-help-btn">📖 직업 설명 보기</button>
+      <div class="reveal-card" id="maf-help" style="display:none"></div>
       <button class="btn mt" id="mafia-start">역할 나누기</button>
     </div>
     <div id="mafia-pass" style="display:none" class="pass-stage"></div>
@@ -2102,10 +2104,16 @@ const MAF_ROLES = [
     rule: "테러리스트: 투표로 처형되면 원하는 한 명을 지목해 동반 퇴장" },
   { id: "lovers", icon: "💞", name: "연인", team: "시민팀", n: 2,
     desc: "2명 · 죽으면 같이 죽는 운명",
+    help: "둘이 한 팀인 운명 공동체. 서로가 누군지 알고 시작해요. 한 명이 죽으면 남은 한 명도 다음 날 아침 따라가요.",
     rule: "연인: 한 명이 죽으면 남은 한 명도 다음 날 아침 함께 사망" },
   { id: "spy", icon: "🕵️", name: "스파이", team: "마피아팀", n: 1,
     desc: "마피아팀 · 마피아 명단을 앎",
+    help: "마피아가 누군지 알지만 마피아는 스파이를 몰라요. 시민인 척 여론을 흔들어 마피아를 승리시키면 같이 이겨요.",
     rule: "스파이: 마피아팀 소속! 시민인 척 마피아를 도와요. 마피아팀이 지면 같이 패배" }
+];
+const MAF_BASE = [
+  { icon: "🔪", name: "마피아", team: "마피아팀", help: "밤마다 한 명을 제거해요. 마피아끼리는 서로를 알아요. 시민 수와 같아지면 마피아팀 승리!" },
+  { icon: "👤", name: "시민", team: "시민팀", help: "특별한 능력은 없지만 추리와 투표가 무기! 마피아를 전부 찾아내면 시민팀 승리." }
 ];
 let maf = { count: 1, on: {}, list: [] };
 $("maf-minus").addEventListener("click", () => { if (maf.count > 1) maf.count--; $("maf-count").textContent = maf.count; });
@@ -2123,6 +2131,16 @@ $("maf-plus").addEventListener("click", () => { if (maf.count < 3) maf.count++; 
     });
   });
 })();
+$("maf-help-btn").addEventListener("click", () => {
+  const el = $("maf-help"), btn = $("maf-help-btn");
+  if (el.style.display !== "none"){ el.style.display = "none"; btn.textContent = "📖 직업 설명 보기"; return; }
+  const rows = MAF_BASE.concat(MAF_ROLES.map(r => ({ icon: r.icon, name: r.name + (r.n > 1 ? " (2명)" : ""), team: r.team, help: r.help || r.card })));
+  el.innerHTML = '<div class="lbl">직업 도감</div>' + rows.map(r =>
+    '<div style="margin-top:10px;text-align:left"><b>' + r.icon + ' ' + r.name + '</b> <small style="opacity:.65">· ' + r.team + '</small><br><small style="opacity:.85;line-height:1.6">' + r.help + '</small></div>'
+  ).join("");
+  el.style.display = "";
+  btn.textContent = "📖 설명 접기";
+});
 $("mafia-start").addEventListener("click", startMafia);
 $("mafia-again").addEventListener("click", startMafia);
 
