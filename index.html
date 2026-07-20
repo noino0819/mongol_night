@@ -3474,6 +3474,16 @@ function drPos(e){
   const r = dr.cv.getBoundingClientRect();
   return { x: e.clientX - r.left, y: e.clientY - r.top };
 }
+/* 진행 중인 획의 마지막 구간만 그림 (매 move마다 전체 리페인트 = 끊김의 원인) */
+function inkSeg(ctx, s){
+  const n = s.pts.length;
+  ctx.strokeStyle = s.color; ctx.lineWidth = s.size;
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  ctx.beginPath();
+  if (n < 2){ ctx.moveTo(s.pts[0].x, s.pts[0].y); ctx.lineTo(s.pts[0].x + 0.1, s.pts[0].y); }
+  else { ctx.moveTo(s.pts[n-2].x, s.pts[n-2].y); ctx.lineTo(s.pts[n-1].x, s.pts[n-1].y); }
+  ctx.stroke();
+}
 function drRepaint(){
   const w = parseFloat(dr.cv.style.width), h = parseFloat(dr.cv.style.height);
   dr.ctx.fillStyle = "#F7F2E6";
@@ -3495,13 +3505,13 @@ function drRepaint(){
     dr.drawing = true;
     dr.curStroke = { color: dr.erasing ? "#F7F2E6" : dr.color, size: dr.erasing ? 22 : dr.size, pts: [drPos(e)] };
     dr.strokes.push(dr.curStroke);
-    drRepaint();
+    inkSeg(dr.ctx, dr.curStroke);
   });
   cv.addEventListener("pointermove", (e) => {
     if (!dr.drawing) return;
     e.preventDefault();
     dr.curStroke.pts.push(drPos(e));
-    drRepaint();
+    inkSeg(dr.ctx, dr.curStroke);
   });
   const up = () => { dr.drawing = false; dr.curStroke = null; };
   cv.addEventListener("pointerup", up);
@@ -3726,13 +3736,13 @@ function cmRepaint(){
     cm.drawing = true;
     cm.cur = { color: cm.erasing ? "#F7F2E6" : cm.color, size: cm.erasing ? 22 : cm.size, pts: [cmPos(e)] };
     cm.strokes.push(cm.cur);
-    cmRepaint();
+    inkSeg(cm.ctx, cm.cur);
   });
   cv.addEventListener("pointermove", (e) => {
     if (!cm.drawing) return;
     e.preventDefault();
     cm.cur.pts.push(cmPos(e));
-    cmRepaint();
+    inkSeg(cm.ctx, cm.cur);
   });
   const up = () => { cm.drawing = false; cm.cur = null; };
   cv.addEventListener("pointerup", up);
@@ -5658,6 +5668,17 @@ window.alert = function(msg){
   const installBtn = $("pwa-install");
   const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  /* 카톡 등 인앱 브라우저: beforeinstallprompt 미발화(안드)·Safari 아님(iOS)이라 설치 불가 → 외부 브라우저로 탈출시킴 */
+  const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeapp/i.test(navigator.userAgent);
+  const openExternal = () => {
+    if (/android/i.test(navigator.userAgent)){
+      /* 안드로이드: 크롬으로 강제 오픈 (크롬 없으면 아무 일 없음 — 드문 케이스) */
+      location.href = "intent://" + location.href.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
+    } else {
+      lifeModal("🌐", "브라우저로 열어줘",
+        "카톡 안에서는 설치·오프라인 저장이 안 돼.<br><br>1. 화면 <b>아래(또는 위) 메뉴 버튼</b>을 눌러<br>2. <b>Safari로 열기</b> / <b>다른 브라우저로 열기</b> 선택<br>3. 열린 브라우저에서 다시 <b>설치</b>를 눌러", null);
+    }
+  };
 
   /* --- 오프라인 준비 배지 --- */
   const canSW = "serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost" || location.hostname === "127.0.0.1");
@@ -5723,6 +5744,15 @@ window.alert = function(msg){
 
   /* --- 설치 유도 --- */
   if (standalone) return; /* 이미 앱으로 실행 중 */
+  if (inApp){
+    /* 인앱 브라우저: 설치 버튼을 '브라우저로 열기'로 바꿔 노출 + 진입 즉시 1회 안내 */
+    installBtn.textContent = "🌐 브라우저로 열기";
+    installBtn.style.display = "";
+    installBtn.addEventListener("click", openExternal);
+    pwaToast("카톡 안에선 설치·오프라인이 안 돼", "🌐 브라우저로 열기", openExternal);
+    pwa.installAction = openExternal; /* 온보딩 '앱으로 설치하기'도 탈출로 연결 */
+    return;
+  }
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     pwa.deferredPrompt = e;
