@@ -9,7 +9,7 @@
 // ============================================================
 import { readFileSync } from "node:fs";
 
-const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const html = readFileSync(new URL("../games/ta.js", import.meta.url), "utf8");
 const cut = (tag) => {
   const m = html.match(new RegExp(`/\\*${tag}_BEGIN\\*/([\\s\\S]*?)/\\*${tag}_END\\*/`));
   if (!m) { console.error(`❌ index.html에서 /*${tag}_BEGIN*/ 블록을 못 찾음`); process.exit(1); }

@@ -1,7 +1,7 @@
 // 우리말 겨루기(um) 단위 테스트 — 문항 뱅크 무결성 + 순위/메달 정산 로직
 import fs from "node:fs";
 
-const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const html = fs.readFileSync(new URL("../games/um.js", import.meta.url), "utf8");
 let pass = 0, fail = 0;
 function ok(cond, name){
   if (cond){ pass++; console.log("  ✅", name); }

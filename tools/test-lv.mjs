@@ -1,7 +1,7 @@
 // 주사위 배팅(lv) 순수 로직 단위 테스트 — index.html에서 함수를 추출해 검증
 import fs from "node:fs";
 
-const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const html = fs.readFileSync(new URL("../games/lv.js", import.meta.url), "utf8");
 function extract(name){
   const m = html.match(new RegExp("function " + name + "\\([^)]*\\)\\{[\\s\\S]*?\\n\\}"));
   if (!m) throw new Error(name + " 추출 실패");

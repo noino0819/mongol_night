@@ -22,10 +22,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Stamp build version (sw.js / index.html)
+      - name: Stamp build version (sw.js / shell.js)
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          sed -i "s/__BUILD__/${SHORT_SHA}/g" sw.js index.html
+          sed -i "s/__BUILD__/${SHORT_SHA}/g" sw.js index.html shell.js
       - uses: actions/configure-pages@v5
         with:
           enablement: true
