@@ -4617,11 +4617,16 @@ $("ob-later").addEventListener("click", obDone);
 $("ob-install").addEventListener("click", () => { obDone(); if (pwa.installAction) pwa.installAction(); });
 
 /* --- 일행 영속화 --- */
+/* prefs.roster가 배열이면 사용자가 저장한 상태(빈 배열 포함) → 그대로 존중.
+   한 번도 저장한 적 없을 때만 기본 일행을 채운다. */
+const DEFAULT_ROSTER = ["시언","소연","예린","현서","재현","건호"];
 function saveRoster(){ prefs.roster = roster.slice(); savePrefs(); }
-if (Array.isArray(prefs.roster) && prefs.roster.length){
+if (Array.isArray(prefs.roster)){
   roster.push(...prefs.roster.filter((n) => typeof n === "string" && n.trim()).slice(0, 12));
-  renderChips();
+} else {
+  roster.push(...DEFAULT_ROSTER);
 }
+renderChips();
 
 /* --- 설정 페이지 --- */
 (function settingsInit(){
