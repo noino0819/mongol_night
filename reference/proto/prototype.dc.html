@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0E1526">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css">
+<script src="sprites.js"></script>
+<style>
+body{margin:0;background:#070A12;font-family:'Galmuri11','Galmuri9',monospace;color:#F4EEE0;word-break:keep-all}
+button{white-space:nowrap}
+a{color:#6FB8D6}a:hover{color:#E8C170}
+*{box-sizing:border-box}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes sn-fade{from{opacity:0}to{opacity:1}}
+@keyframes sn-twinkle{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes sn-skel{0%,49%{background:#232B44}50%,100%{background:#1A2138}}
+@keyframes sn-jump{0%,45%{transform:translateY(0)}50%,95%{transform:translateY(-16px)}100%{transform:translateY(0)}}
+@keyframes sn-fall{from{transform:translateY(-40px) rotate(0deg);opacity:1}to{transform:translateY(640px) rotate(180deg);opacity:1}}
+@keyframes sn-pop{from{transform:scale(1.9)}to{transform:scale(1)}}
+@keyframes sn-pop2{from{transform:scale(1.9)}to{transform:scale(1)}}
+@keyframes sn-prog{from{width:8%}to{width:100%}}
+@keyframes sn-up{from{transform:translateY(110%)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition:none !important}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 10px 32px;font-family:'Galmuri11','Galmuri9',monospace">
+  <div style="position:relative;width:390px;height:800px;max-width:100%;background:#0E1526;box-shadow:0 0 0 4px #2A2440,0 10px 0 4px #06080F;overflow:hidden;color:#F4EEE0;flex:none">
+    <sc-for list="{{ stars }}" as="st" hint-placeholder-count="0">
+      <div style="{{ st.style }}"></div>
+    </sc-for>
+
+    <sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;animation:sn-fade 200ms steps(4)">
+        <px-sprite name="bormoon" scale="8"></px-sprite>
+        <div style="font-size:34px;letter-spacing:4px;text-shadow:0 4px 0 #1A1423;white-space:nowrap">초원의 밤</div>
+        <div style="font-size:14px;color:#8892AC">인터넷 없는 밤, 게임은 여기 다 있어</div>
+        <div style="width:180px;height:12px;background:#1A1423;box-shadow:0 0 0 2px #2A2440;margin-top:24px">
+          <div style="height:100%;background:#E8C170;animation:sn-prog 1.2s steps(8) forwards"></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;animation:sn-fade 200ms steps(4)">
+        <div style="display:flex;justify-content:flex-end;padding:16px 18px">
+          <button onClick="{{ obSkip }}" style="background:none;border:0;color:#8892AC;font-family:inherit;font-size:14px;cursor:pointer">건너뛰기</button>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 28px;text-align:center">
+          <div style="display:flex;align-items:flex-end;gap:10px;min-height:130px">
+            <sc-for list="{{ obScene }}" as="sp" hint-placeholder-count="1">
+              <px-sprite name="{{ sp.name }}" scale="{{ sp.scale }}"></px-sprite>
+            </sc-for>
+          </div>
+          <div style="font-size:24px;line-height:1.5;text-shadow:0 3px 0 #1A1423">{{ obTitle }}</div>
+          <div style="font-size:15px;line-height:1.7;color:#B9C1D6;text-wrap:pretty">{{ obSub }}</div>
+          <sc-if value="{{ obIsLast }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;width:100%;margin-top:6px">
+              <button onClick="{{ openInstall }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:17px;padding:16px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">📲 앱으로 설치하기</button>
+              <button onClick="{{ obDone }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:16px;padding:14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">나중에</button>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 24px">
+          <button onClick="{{ obPrev }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:16px;padding:10px 16px;box-shadow:0 4px 0 #1A1423;cursor:pointer;visibility:{{ obPrevVis }}" style-active="transform:translateY(4px);box-shadow:none">←</button>
+          <div style="display:flex;gap:10px">
+            <sc-for list="{{ obDots }}" as="d" hint-placeholder-count="4">
+              <div style="{{ d.style }}"></div>
+            </sc-for>
+          </div>
+          <button onClick="{{ obNext }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:16px;padding:10px 16px;box-shadow:0 4px 0 #1A1423;cursor:pointer;visibility:{{ obNextVis }}" style-active="transform:translateY(4px);box-shadow:none">→</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;overflow-y:auto;animation:sn-fade 200ms steps(4)">
+        <div style="display:flex;flex-direction:column;gap:18px;padding:16px 16px 40px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <div style="{{ offBadge.style }}">{{ offBadge.text }}</div>
+            <div style="flex:1"></div>
+            <button onClick="{{ openInstall }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:13px;padding:8px 10px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">📲 설치</button>
+            <button onClick="{{ openSettings }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:13px;padding:8px 10px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">⚙️</button>
+            <button onClick="{{ openGuide }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:13px;padding:8px 10px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">📡 가이드</button>
+          </div>
+          <div onClick="{{ tapLogo }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none">
+            <px-sprite name="bormoon" scale="4"></px-sprite>
+            <div>
+              <div style="font-size:26px;letter-spacing:3px;text-shadow:0 3px 0 #1A1423">초원의 밤</div>
+              <div style="font-size:13px;color:#8892AC;margin-top:6px">오프라인 파티게임 20종</div>
+            </div>
+          </div>
+          <sc-if value="{{ homeSkel }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ skels }}" as="k" hint-placeholder-count="6">
+                <div style="height:56px;animation:sn-skel 500ms steps(1) infinite"></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ homeReady }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:8px;flex-wrap:wrap" data-coach="fav">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ setFilter }}" data-f="{{ c.label }}" style="{{ c.style }}" style-active="transform:translateY(3px);box-shadow:none">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:14px;color:#8892AC">⏱️ 최근 한 판</div>
+              <div onClick="{{ recentTap }}" style="display:flex;align-items:center;gap:12px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:10px 12px;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">
+                <px-sprite name="mole" scale="3"></px-sprite>
+                <div style="flex:1">
+                  <div style="font-size:16px">폭탄 돌리기</div>
+                  <div style="font-size:13px;color:#8892AC;margin-top:4px">어제 4명이 했어 · 바로 이어서 →</div>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ hasFavs }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:14px;color:#8892AC">⭐ 즐겨찾기</div>
+                <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px">
+                  <sc-for list="{{ favGames }}" as="g" hint-placeholder-count="1">
+                    <div onPointerDown="{{ cardDown }}" onPointerUp="{{ cardUp }}" onPointerLeave="{{ cardUp }}" onClick="{{ cardClick }}" data-g="{{ g.id }}" style="display:flex;align-items:center;gap:8px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:8px 12px;cursor:pointer;flex:none;user-select:none;-webkit-user-select:none">
+                      <px-sprite name="{{ g.spr }}" scale="2"></px-sprite>
+                      <div style="font-size:14px">{{ g.name }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ cats }}" as="cat" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div onClick="{{ toggleCat }}" data-c="{{ cat.id }}" style="display:flex;align-items:center;gap:10px;background:#1A2138;box-shadow:0 4px 0 #10162A;padding:8px 12px;cursor:pointer;user-select:none" style-active="transform:translateY(2px)">
+                    <px-sprite name="{{ cat.spr }}" scale="2"></px-sprite>
+                    <div style="font-size:16px;flex:1">{{ cat.emoji }} {{ cat.name }}</div>
+                    <div style="font-size:12px;background:#0E1526;color:#8892AC;padding:4px 8px;white-space:nowrap">{{ cat.count }}</div>
+                    <div style="font-size:14px;color:#8892AC">{{ cat.arrow }}</div>
+                  </div>
+                  <sc-if value="{{ cat.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:8px;padding-left:6px">
+                      <sc-for list="{{ cat.games }}" as="g" hint-placeholder-count="3">
+                        <div onPointerDown="{{ cardDown }}" onPointerUp="{{ cardUp }}" onPointerLeave="{{ cardUp }}" onClick="{{ cardClick }}" data-g="{{ g.id }}" style="display:flex;align-items:center;gap:12px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:10px 12px;cursor:pointer;user-select:none;-webkit-user-select:none" style-active="transform:translateY(4px);box-shadow:none">
+                          <px-sprite name="{{ g.spr }}" scale="3"></px-sprite>
+                          <div style="flex:1;min-width:0">
+                            <div style="font-size:16px">{{ g.name }} <span style="color:#E8C170">{{ g.star }}</span></div>
+                            <div style="font-size:13px;color:#8892AC;margin-top:4px">{{ g.desc }}</div>
+                          </div>
+                          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex:none">
+                            <div style="font-size:12px;background:#0E1526;color:#B9C1D6;padding:3px 6px;white-space:nowrap">👥 {{ g.ppl }}</div>
+                            <div style="font-size:12px;background:#0E1526;color:#B9C1D6;padding:3px 6px;white-space:nowrap">⏱️ {{ g.time }}분</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isGame }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;animation:sn-fade 200ms steps(4)">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 14px;background:#1A2138;box-shadow:0 4px 0 #10162A">
+          <button onClick="{{ gameBack }}" style="background:none;border:0;color:#8892AC;font-family:inherit;font-size:14px;cursor:pointer;padding:6px">← 심리전</button>
+          <div style="flex:1"></div>
+          <px-sprite name="fox" scale="2"></px-sprite>
+          <div style="font-size:17px">라이어</div>
+          <div style="flex:1"></div>
+          <button onClick="{{ openRules }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:14px;padding:8px 10px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">ℹ️ 룰</button>
+        </div>
+        <sc-if value="{{ liarPass }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 26px;text-align:center">
+            <px-sprite name="phone" scale="4"></px-sprite>
+            <div style="font-size:22px;line-height:1.5">지금 차례: <span style="color:#E8C170">{{ liarName }}</span></div>
+            <div style="font-size:14px;color:#8892AC">다른 사람은 눈 감아 ㅋㅋ</div>
+            <div onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" data-coach="secret" style="width:100%;height:150px;background:#2A2440;box-shadow:0 4px 0 #1A1423;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none">
+              <sc-if value="{{ liarHeld }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:15px;color:#8892AC">{{ liarRole }}</div>
+                <div style="font-size:28px;color:#E8C170">{{ liarWord }}</div>
+              </sc-if>
+              <sc-if value="{{ liarHidden }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size:30px">🔒</div>
+                <div style="font-size:15px;color:#B9C1D6">여길 꾹 누르면 비밀 공개</div>
+              </sc-if>
+            </div>
+            <button onClick="{{ liarNext }}" style="width:100%;background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:17px;padding:16px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">{{ liarNextLabel }}</button>
+            <div style="font-size:13px;color:#8892AC">{{ liarProgress }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ liarTalk }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 26px;text-align:center">
+            <px-sprite name="fox" scale="5"></px-sprite>
+            <div style="font-size:22px;line-height:1.6">모두 확인 끝!<br>이제 돌아가며 설명해</div>
+            <div style="font-size:14px;color:#B9C1D6;line-height:1.7">라이어는 티 안 나게 묻어가기.<br>한 바퀴 돌면 투표!</div>
+            <button onClick="{{ liarVictory }}" style="width:100%;background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:17px;padding:16px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">라이어 잡았다! (승리 연출 보기)</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;overflow-y:auto;animation:sn-fade 200ms steps(4)">
+        <div style="display:flex;flex-direction:column;gap:16px;padding:16px 16px 40px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onClick="{{ goHome }}" style="background:none;border:0;color:#8892AC;font-family:inherit;font-size:14px;cursor:pointer;padding:6px">← 홈</button>
+            <div style="font-size:20px">⚙️ 설정</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:14px">
+            <div style="flex:1;font-size:16px">🔊 사운드</div>
+            <button onClick="{{ toggleSound }}" style="{{ soundBtn.style }}" style-active="transform:translateY(3px);box-shadow:none">{{ soundBtn.label }}</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:14px">
+            <div style="flex:1;font-size:16px">📳 진동</div>
+            <button onClick="{{ toggleVibe }}" style="{{ vibeBtn.style }}" style-active="transform:translateY(3px);box-shadow:none">{{ vibeBtn.label }}</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:14px">
+            <div style="font-size:16px">💬 텍스트 속도 (TRPG)</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ speeds }}" as="sp" hint-placeholder-count="3">
+                <button onClick="{{ setSpeed }}" data-s="{{ sp.label }}" style="{{ sp.style }}" style-active="transform:translateY(3px);box-shadow:none">{{ sp.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;background:#2A2440;box-shadow:0 4px 0 #1A1423;padding:14px">
+            <div style="font-size:16px">👥 일행 관리</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ rosterChips }}" as="r" hint-placeholder-count="4">
+                <button onClick="{{ removeMate }}" data-n="{{ r.name }}" style="background:#0E1526;color:#F4EEE0;border:0;font-family:inherit;font-size:14px;padding:8px 10px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">{{ r.name }} ✕</button>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input value="{{ rosterInput }}" onChange="{{ rosterType }}" placeholder="이름 추가" style="flex:1;background:#0E1526;border:0;box-shadow:inset 0 0 0 2px #1A1423;color:#F4EEE0;font-family:inherit;font-size:15px;padding:10px;min-width:0">
+              <button onClick="{{ addMate }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:15px;padding:10px 14px;box-shadow:0 3px 0 #1A1423;cursor:pointer" style-active="transform:translateY(3px);box-shadow:none">+ 등록</button>
+            </div>
+          </div>
+          <button onClick="{{ askReset }}" style="background:#2A2440;color:#D95763;border:0;font-family:inherit;font-size:15px;padding:14px;box-shadow:0 4px 0 #1A1423;cursor:pointer;text-align:left" style-active="transform:translateY(4px);box-shadow:none">🗑️ 데이터 초기화</button>
+          <div style="font-size:12px;color:#8892AC;line-height:1.8;margin-top:8px">초원의 밤 v2.0.0 — 프로토타입<br>픽셀 폰트: Galmuri (SIL Open Font License 1.1)<br>© 2026 steppe-night</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isKitchen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;overflow-y:auto;animation:sn-fade 200ms steps(4)">
+        <div style="display:flex;flex-direction:column;gap:22px;padding:16px 16px 60px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onClick="{{ goHome }}" style="background:none;border:0;color:#8892AC;font-family:inherit;font-size:14px;cursor:pointer;padding:6px">← 홈</button>
+            <div style="font-size:20px">🧪 kitchen-sink</div>
+          </div>
+          <div style="font-size:13px;color:#8892AC">QA용 숨김 화면 — 홈 로고 7연타로 진입</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">팔레트 8색</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ palette }}" as="p" hint-placeholder-count="8">
+                <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+                  <div style="{{ p.style }}"></div>
+                  <div style="font-size:10px;color:#8892AC">{{ p.hex }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">버튼</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ toastDemo }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:16px;padding:12px 18px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">시작!</button>
+              <button onClick="{{ toastDemo }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:16px;padding:12px 18px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">판 접기</button>
+              <button onClick="{{ toastDemo }}" style="background:#D95763;color:#F4EEE0;border:0;font-family:inherit;font-size:16px;padding:12px 18px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">💣 폭탄!</button>
+              <button disabled style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:16px;padding:12px 18px;box-shadow:0 4px 0 #1A1423;opacity:.45">비활성</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">연출 트리거</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ countdownDemo }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:10px 14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">3-2-1 카운트다운</button>
+              <button onClick="{{ liarVictory }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:10px 14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">🎉 승리 연출</button>
+              <button onClick="{{ updDemo }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:10px 14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">🆕 업데이트 토스트</button>
+              <button onClick="{{ toastDemo }}" style="background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:10px 14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">토스트</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">픽셀 스켈레톤 (.px-skel, 500ms 2프레임)</div>
+            <div style="height:48px;animation:sn-skel 500ms steps(1) infinite"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">빈 상태</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;background:#1A2138;padding:24px;box-shadow:0 4px 0 #10162A">
+              <div style="opacity:.5"><px-sprite name="bor" scale="4"></px-sprite></div>
+              <div style="font-size:15px;color:#B9C1D6">일행을 등록하면 시작!</div>
+              <button onClick="{{ openSettings }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:15px;padding:10px 16px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">+ 등록</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">에러 (RPG 대화창)</div>
+            <div style="display:flex;gap:12px;background:#1A1423;box-shadow:0 0 0 2px #E8C170,0 0 0 6px #1A1423,0 0 0 8px #2A2440;padding:14px;margin:8px">
+              <px-sprite name="tengri" scale="3"></px-sprite>
+              <div style="flex:1">
+                <div style="font-size:14px;color:#6FB8D6">텡그리</div>
+                <div style="font-size:14px;line-height:1.7;margin-top:6px">...이건 예상 밖이군. 잠시 별이 흐트러졌다.</div>
+                <button onClick="{{ toastDemo }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:14px;padding:8px 12px;box-shadow:0 3px 0 #000;cursor:pointer;margin-top:10px" style-active="transform:translateY(3px);box-shadow:none">다시 시도</button>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="font-size:15px;color:#E8C170">마스코트 스프라이트 20종</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+              <sc-for list="{{ mascots }}" as="m" hint-placeholder-count="8">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#1A2138;padding:10px 4px">
+                  <px-sprite name="{{ m.key }}" scale="3"></px-sprite>
+                  <div style="font-size:11px;color:#B9C1D6;text-align:center;line-height:1.4">{{ m.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetInstall }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(6,8,15,.7)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;background:#1A2138;box-shadow:0 -4px 0 #2A2440;padding:20px 20px 28px;display:flex;flex-direction:column;gap:16px;animation:sn-up 200ms steps(4)">
+        <div style="display:flex;align-items:center">
+          <div style="font-size:18px;flex:1">📲 홈 화면에 설치하기</div>
+          <div style="font-size:11px;background:#0E1526;color:#6FB8D6;padding:4px 8px">사파리에서만 가능해요</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:#0E1526;padding:14px 6px">
+            <div style="font-size:22px">1️⃣</div>
+            <px-sprite name="arrowdn" scale="3"></px-sprite>
+            <div style="font-size:12px;color:#B9C1D6;text-align:center;line-height:1.5">공유 버튼 탭</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:#0E1526;padding:14px 6px">
+            <div style="font-size:22px">2️⃣</div>
+            <px-sprite name="phone" scale="3"></px-sprite>
+            <div style="font-size:12px;color:#B9C1D6;text-align:center;line-height:1.5">"홈 화면에 추가"</div>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;background:#0E1526;padding:14px 6px">
+            <div style="font-size:22px">3️⃣</div>
+            <px-sprite name="bor" scale="3"></px-sprite>
+            <div style="font-size:12px;color:#B9C1D6;text-align:center;line-height:1.5">완성! 오프라인 OK</div>
+          </div>
+        </div>
+        <button onClick="{{ installDone }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:16px;padding:14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">알겠어, 해볼게</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ sheetRules }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(6,8,15,.7)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;background:#1A2138;box-shadow:0 -4px 0 #2A2440;padding:20px 20px 28px;display:flex;flex-direction:column;gap:14px;animation:sn-up 200ms steps(4)">
+        <div style="display:flex;align-items:center;gap:10px">
+          <px-sprite name="fox" scale="2"></px-sprite>
+          <div style="font-size:18px;flex:1">라이어 — 룰 요약</div>
+        </div>
+        <div style="font-size:14px;line-height:1.9;color:#B9C1D6">1. 전원 폰을 돌려 제시어 확인 (1명은 라이어)<br>2. 돌아가며 제시어를 한 문장으로 설명<br>3. 라이어는 아는 척 묻어가기<br>4. 한 바퀴 후 투표 — 라이어를 잡아라!</div>
+        <button onClick="{{ closeSheet }}" style="background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:16px;padding:14px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">계속 하기</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ modalQuit }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(6,8,15,.7);display:flex;align-items:center;justify-content:center;padding:30px">
+        <div style="background:#1A1423;box-shadow:0 0 0 2px #E8C170,0 0 0 6px #1A1423,0 0 0 8px #2A2440;padding:22px;display:flex;flex-direction:column;gap:16px;width:100%">
+          <div style="font-size:18px">판이 날아가요! 나갈까?</div>
+          <div style="font-size:14px;color:#8892AC;line-height:1.6">진행 중인 게임은 저장되지 않아</div>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ quitYes }}" style="flex:1;background:#D95763;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:12px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">판 접기</button>
+            <button onClick="{{ closeModal }}" style="flex:1;background:#E8C170;color:#1A1423;border:0;font-family:inherit;font-size:15px;padding:12px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">계속 하기</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ modalReset }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(6,8,15,.7);display:flex;align-items:center;justify-content:center;padding:30px">
+        <div style="background:#1A1423;box-shadow:0 0 0 2px #D95763,0 0 0 6px #1A1423,0 0 0 8px #2A2440;padding:22px;display:flex;flex-direction:column;gap:16px;width:100%">
+          <div style="font-size:18px">{{ resetTitle }}</div>
+          <div style="font-size:14px;color:#8892AC;line-height:1.6">{{ resetSub }}</div>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ resetGo }}" style="flex:1;background:#D95763;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:12px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">{{ resetBtn }}</button>
+            <button onClick="{{ closeModal }}" style="flex:1;background:#2A2440;color:#F4EEE0;border:0;font-family:inherit;font-size:15px;padding:12px;box-shadow:0 4px 0 #1A1423;cursor:pointer" style-active="transform:translateY(4px);box-shadow:none">그대로 두기</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ coachOn }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:20px;right:20px;bottom:90px;background:#E8C170;color:#1A1423;box-shadow:0 4px 0 #1A1423;padding:14px;display:flex;align-items:center;gap:12px;animation:sn-fade 200ms steps(4)">
+        <div style="font-size:14px;line-height:1.6;flex:1">{{ coachText }}</div>
+        <button onClick="{{ coachOk }}" style="background:#1A1423;color:#F4EEE0;border:0;font-family:inherit;font-size:14px;padding:8px 12px;box-shadow:0 3px 0 #000;cursor:pointer;flex:none" style-active="transform:translateY(3px);box-shadow:none">알겠어</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ updToast }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ updApply }}" style="position:absolute;left:16px;right:16px;bottom:16px;background:#2A2440;box-shadow:0 0 0 2px #6FB8D6,0 4px 0 #1A1423;padding:14px;font-size:14px;cursor:pointer;animation:sn-up 200ms steps(4)">🆕 새 버전 도착! 탭해서 적용</div>
+    </sc-if>
+
+    <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:50%;transform:translateX(-50%);bottom:24px;background:#1A1423;box-shadow:0 0 0 2px #E8C170;padding:12px 18px;font-size:14px;white-space:nowrap;animation:sn-fade 200ms steps(4)">{{ toast }}</div>
+    </sc-if>
+
+    <sc-if value="{{ cdOn }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(6,8,15,.9);display:flex;align-items:center;justify-content:center">
+        <div style="{{ cdBoxStyle }}">
+          <div style="font-size:120px;line-height:1;color:#F4EEE0;text-shadow:0 8px 0 #D95763">{{ cdNum }}</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ victory }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ victoryClose }}" style="position:absolute;inset:0;background:rgba(6,8,15,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer;overflow:hidden">
+        <sc-for list="{{ confetti }}" as="cf" hint-placeholder-count="0">
+          <div style="{{ cf.style }}"></div>
+        </sc-for>
+        <div style="animation:sn-jump 700ms steps(2) infinite"><px-sprite name="bor" scale="6"></px-sprite></div>
+        <div style="font-size:36px;color:#E8C170;text-shadow:0 4px 0 #1A1423">승리!</div>
+        <div style="font-size:14px;color:#8892AC">탭해서 닫기</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;max-width:420px">
+    <sc-for list="{{ navChips }}" as="n" hint-placeholder-count="6">
+      <button onClick="{{ navGo }}" data-nav="{{ n.id }}" style="{{ n.style }}">{{ n.label }}</button>
+    </sc-for>
+  </div>
+  <div style="font-size:12px;color:#5A648200;color:#5A6482">프로토타입 점프 · 홈 로고 7연타 = kitchen-sink</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:960},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;splash&quot;,&quot;onboarding&quot;,&quot;home&quot;,&quot;kitchen&quot;],&quot;default&quot;:&quot;splash&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;프로토타입&quot;},&quot;offlineState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;loading&quot;,&quot;ready&quot;,&quot;error&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;프로토타입&quot;}}">
+class Component extends DCLogic {
+  constructor(p){
+    super(p);
+    this.CATS=[
+      {id:'psych',emoji:'🕵️',name:'심리전',spr:'fox',games:[
+        {id:'liar',name:'라이어',spr:'fox',desc:'말로 속이고 눈치로 잡아',p:[3,8],t:15},
+        {id:'mafia',name:'마피아',spr:'crow',desc:'밤이 되면 누군가 사라진다',p:[5,10],t:20},
+        {id:'were',name:'늑대인간',spr:'wolf',desc:'보름달 아래 정체 숨기기',p:[5,10],t:25},
+        {id:'indian',name:'인디언 포커',spr:'hawk',desc:'내 카드만 나만 몰라',p:[3,6],t:10}]},
+      {id:'speed',emoji:'⚡',name:'스피드',spr:'mole',games:[
+        {id:'fruit',name:'과일 종!',spr:'hedgehog',desc:'같은 과일 5개면 종 쳐',p:[2,6],t:10},
+        {id:'bomb',name:'폭탄 돌리기',spr:'mole',desc:'터지기 전에 넘겨',p:[3,10],t:5},
+        {id:'buzzer',name:'버저 퀴즈',spr:'rooster',desc:'먼저 누르면 임자',p:[2,8],t:15},
+        {id:'forehead',name:'이마 퀴즈',spr:'goat',desc:'내 이마에 뭐 있게',p:[3,8],t:10},
+        {id:'choseong',name:'초성 퀴즈',spr:'squirrel',desc:'ㄱㄴ만 보고 맞혀',p:[2,8],t:10}]},
+      {id:'draw',emoji:'🎨',name:'그림',spr:'rabbit',games:[
+        {id:'relay',name:'그림 릴레이',spr:'rabbit',desc:'그림으로 전하는 전화게임',p:[4,10],t:15},
+        {id:'drawq',name:'그림 퀴즈',spr:'otter',desc:'내 그림 실력을 믿지 마',p:[3,8],t:15}]},
+      {id:'board',emoji:'🎲',name:'보드·두뇌',spr:'bor',games:[
+        {id:'journey',name:'몽골 대장정 2.0',spr:'bor',desc:'초원 횡단 보드 레이스',p:[2,6],t:40},
+        {id:'omok',name:'오목',spr:'turtle',desc:'다섯 알을 먼저 놓아라',p:[2,2],t:10},
+        {id:'dicebet',name:'주사위 배팅',spr:'badger',desc:'감으로 거는 한 판',p:[2,8],t:15},
+        {id:'baseball',name:'숫자야구',spr:'crane',desc:'3자리 숫자 추리 대결',p:[2,4],t:15}]},
+      {id:'talk',emoji:'💬',name:'토크·퀴즈',spr:'camel',games:[
+        {id:'balance',name:'밸런스 게임',spr:'camel',desc:'A냐 B냐 그것이 문제',p:[2,10],t:10},
+        {id:'tele',name:'텔레파시',spr:'owl2',desc:'같은 생각이면 승리',p:[2,10],t:10},
+        {id:'roulette',name:'복불복 룰렛',spr:'marmot',desc:'운명의 화살을 돌려',p:[2,10],t:5},
+        {id:'quiz',name:'상식퀴즈',spr:'owlprof',desc:'초원의 골든벨',p:[2,10],t:20}]},
+      {id:'story',emoji:'📜',name:'스토리',spr:'tengri',games:[
+        {id:'gobi',name:'고비의 별',spr:'tengri',desc:'텡그리와 떠나는 3일 밤',p:[2,6],t:35}]}];
+    this.MASCOTS=[['bor','보르 (대표 마스코트·대장정)'],['bormoon','보르+달 (로고 심볼)'],['fox','여우 (라이어)'],['crow','까마귀 (마피아)'],['wolf','늑대 (늑대인간)'],['hawk','매 (인디언포커)'],['hedgehog','고슴도치 (과일 종!)'],['mole','두더지 (폭탄)'],['rooster','수탉 (버저)'],['goat','염소 (이마 퀴즈)'],['squirrel','다람쥐 (초성)'],['rabbit','토끼 (그림 릴레이)'],['otter','수달 (그림 퀴즈)'],['turtle','거북 (오목)'],['badger','오소리 (주사위 배팅)'],['crane','학 (숫자야구)'],['camel','낙타 (밸런스)'],['owl2','올빼미 쌍둥이 (텔레파시)'],['marmot','마멋 (룰렛)'],['owlprof','부엉이 박사 (상식퀴즈)'],['tengri','텡그리 (고비의 별)']];
+    this.PAL=['#1A1423','#2A2440','#E8C170','#5FA052','#6FB8D6','#D95763','#F4EEE0','#8A6044'];
+    this.OB=[
+      {t:'와이파이? 필요 없어',s:'비행기 모드에서도 전부 돌아가는 파티게임 20종',scene:[{name:'fox',scale:4},{name:'fire',scale:5},{name:'bor',scale:4}]},
+      {t:'폰 하나면 충분',s:'돌려가며 하는 패스앤플레이. 비밀은 꾹 눌러 확인!',scene:[{name:'bor',scale:4},{name:'phone',scale:5},{name:'wolf',scale:4}]},
+      {t:'가볍게도, 진하게도',s:'5분 폭탄 돌리기부터 40분 어드벤처까지',scene:[{name:'dice',scale:4},{name:'mole',scale:5},{name:'tengri',scale:4}]},
+      {t:'홈 화면에 설치하면 완성',s:'설치해 두면 앱 아이콘으로 바로 실행돼',scene:[{name:'arrowdn',scale:4},{name:'bor',scale:5}]}];
+    this._stars=[];
+    for(let i=0;i<20;i++){const s=Math.random()<.3?4:2;this._stars.push({style:'position:absolute;left:'+Math.round(Math.random()*96)+'%;top:'+Math.round(Math.random()*92)+'%;width:'+s+'px;height:'+s+'px;background:#F4EEE0;opacity:.7;animation:sn-twinkle '+(2+Math.random()*3).toFixed(1)+'s steps(2) infinite;pointer-events:none'});}
+  }
+  state={screen:'splash',ob:0,sheet:null,modal:null,toast:null,filter:'전체',openCats:{psych:true},favs:{liar:false},homeSkel:false,homeVisited:false,offline:'loading',logoTaps:0,coach:null,coachDone:{},sound:false,vibe:true,tspeed:'보통',roster:['지우','민준','하늘','보람'],rosterInput:'',resetStep:1,countdown:null,victory:false,liar:{phase:'pass',turn:0,liarIdx:2,held:false,word:'수박'},updToast:false};
+  timers={};
+  componentDidMount(){
+    const s=this.props.startScreen;
+    if(s&&s!=='splash'){this.setState({screen:s==='onboarding'?'onboard':s,homeVisited:true});}
+    else{this.timers.splash=setTimeout(()=>this.go('onboard'),1400);}
+    const off=this.props.offlineState;
+    if(off&&off!=='auto')this.setState({offline:off});
+    else this.timers.off=setTimeout(()=>this.setState({offline:'ready'}),3000);
+  }
+  componentWillUnmount(){Object.values(this.timers).forEach(t=>{clearTimeout(t);clearInterval(t);});}
+  haptic(p){if(this.state.vibe&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
+  showToast(msg){clearTimeout(this.timers.toast);this.setState({toast:msg});this.timers.toast=setTimeout(()=>this.setState({toast:null}),2400);}
+  go(screen){
+    this.setState(st=>{
+      const o={screen,sheet:null,modal:null};
+      if(screen==='home'&&!st.homeVisited){o.homeVisited=true;o.homeSkel=true;
+        this.timers.skel=setTimeout(()=>{this.setState({homeSkel:false});if(!this.state.coachDone.fav)this.setState({coach:'fav'});},700);}
+      if(screen==='game'&&!st.coachDone.secret)o.coach='secret';
+      return o;});
+  }
+  chipStyle(on){return 'border:0;font-family:inherit;font-size:14px;padding:9px 14px;cursor:pointer;box-shadow:0 3px 0 #1A1423;background:'+(on?'#E8C170':'#2A2440')+';color:'+(on?'#1A1423':'#B9C1D6');}
+  renderVals(){
+    const st=this.state;
+    const filt=g=>{const[mn,mx]=g.p;if(st.filter==='2인')return mn<=2;if(st.filter==='3-4인')return mn<=4&&mx>=3;if(st.filter==='5인+')return mx>=5;return true;};
+    const cats=this.CATS.map(c=>{const games=c.games.filter(filt).map(g=>({...g,ppl:g.p[0]===g.p[1]?g.p[0]+'인':g.p[0]+'-'+g.p[1]+'인',time:g.t,star:st.favs[g.id]?'⭐':''}));return{...c,games,count:games.length+'개',open:!!st.openCats[c.id],arrow:st.openCats[c.id]?'▲':'▼'};}).filter(c=>c.games.length>0);
+    const allGames=this.CATS.flatMap(c=>c.games);
+    const favGames=allGames.filter(g=>st.favs[g.id]);
+    const off={loading:{text:'⏳ 다운로드 중... 와이파이 유지',col:'#E8C170'},ready:{text:'✅ 오프라인 준비 완료',col:'#5FA052'},error:{text:'⚠️ 저장 실패 — 새로고침 해주세요',col:'#D95763'}}[st.offline]||{text:'',col:'#8892AC'};
+    const roster=st.roster.length?st.roster:['플레이어1','플레이어2'];
+    const turn=Math.min(st.liar.turn,roster.length-1);
+    const isLiar=turn===Math.min(st.liar.liarIdx,roster.length-1);
+    const cdOn=st.countdown!==null;
+    const confetti=[];
+    if(st.victory)for(let i=0;i<12;i++)confetti.push({style:'position:absolute;top:-20px;left:'+(6+i*7.5)+'%;width:8px;height:8px;background:'+this.PAL[[2,3,4,5,6][i%5]]+';animation:sn-fall '+(1.4+(i%4)*.4)+'s steps(10) '+(i*.12).toFixed(2)+'s infinite'});
+    const navDefs=[['splash','스플래시'],['onboard','온보딩'],['home','홈'],['game','게임 셸'],['settings','설정'],['kitchen','kitchen-sink']];
+    return{
+      stars:this._stars,
+      isSplash:st.screen==='splash',isOnboard:st.screen==='onboard',isHome:st.screen==='home',isGame:st.screen==='game',isSettings:st.screen==='settings',isKitchen:st.screen==='kitchen',
+      obTitle:this.OB[st.ob].t,obSub:this.OB[st.ob].s,obScene:this.OB[st.ob].scene,obIsLast:st.ob===3,
+      obPrevVis:st.ob>0?'visible':'hidden',obNextVis:st.ob<3?'visible':'hidden',
+      obDots:this.OB.map((_,i)=>({style:'width:10px;height:10px;background:'+(i===st.ob?'#E8C170':'#2A2440')+';box-shadow:0 2px 0 #1A1423'})),
+      obNext:()=>this.setState(s=>({ob:Math.min(3,s.ob+1)})),
+      obPrev:()=>this.setState(s=>({ob:Math.max(0,s.ob-1)})),
+      obSkip:()=>this.go('home'),obDone:()=>this.go('home'),
+      openInstall:()=>this.setState({sheet:'install'}),
+      installDone:()=>{this.setState({sheet:null});if(st.screen==='onboard')this.go('home');this.showToast('설치하면 비행기 모드에서도 OK ㅋㅋ');},
+      closeSheet:()=>this.setState({sheet:null}),
+      sheetInstall:st.sheet==='install',sheetRules:st.sheet==='rules',
+      openRules:()=>this.setState({sheet:'rules'}),
+      homeSkel:st.homeSkel,homeReady:!st.homeSkel,skels:[1,2,3,4,5,6],
+      offBadge:{text:off.text,style:'font-size:12px;padding:8px 10px;background:#1A2138;box-shadow:0 3px 0 #10162A;white-space:nowrap;color:'+off.col},
+      guideTap:()=>this.showToast('연결 가이드는 다음 스프린트에!'),
+      openSettings:()=>this.go('settings'),goHome:()=>this.go('home'),
+      tapLogo:()=>{const n=st.logoTaps+1;if(n>=7){this.setState({logoTaps:0});this.showToast('🧪 kitchen-sink 오픈!');this.go('kitchen');}else{this.setState({logoTaps:n});clearTimeout(this.timers.taps);this.timers.taps=setTimeout(()=>this.setState({logoTaps:0}),1600);if(n>=4)this.showToast((7-n)+'번 더 누르면 비밀 화면 ㅋㅋ');}},
+      chips:['전체','2인','3-4인','5인+'].map(l=>({label:l,style:this.chipStyle(st.filter===l)})),
+      setFilter:e=>{this.haptic(10);this.setState({filter:e.currentTarget.dataset.f});},
+      cats,hasFavs:favGames.length>0,favGames,
+      toggleCat:e=>{const id=e.currentTarget.dataset.c;this.haptic(10);this.setState(s=>({openCats:{...s.openCats,[id]:!s.openCats[id]}}));},
+      cardDown:e=>{const id=e.currentTarget.dataset.g;this._lpFired=false;clearTimeout(this.timers.lp);this.timers.lp=setTimeout(()=>{this._lpFired=true;this.haptic(30);this.setState(s=>{const on=!s.favs[id];this.showToast(on?'⭐ 즐겨찾기 등록!':'즐겨찾기 해제');return{favs:{...s.favs,[id]:on}};});},500);},
+      cardUp:()=>clearTimeout(this.timers.lp),
+      cardClick:e=>{clearTimeout(this.timers.lp);if(this._lpFired){this._lpFired=false;return;}const id=e.currentTarget.dataset.g;this.haptic(10);if(id==='liar'){this.setState({liar:{phase:'pass',turn:0,liarIdx:Math.floor(Math.random()*roster.length),held:false,word:'수박'}});let n=3;this.setState({countdown:n});clearInterval(this.timers.cd);this.timers.cd=setInterval(()=>{n--;if(n<=0){clearInterval(this.timers.cd);this.setState({countdown:null});this.go('game');}else this.setState({countdown:n});},900);}else this.showToast('프로토타입에선 라이어만 열려 ㅋㅋ');},
+      recentTap:()=>this.showToast('프로토타입에선 라이어만 열려 ㅋㅋ'),
+      liarPass:st.liar.phase==='pass',liarTalk:st.liar.phase==='talk',
+      liarName:roster[turn],liarHeld:st.liar.held,liarHidden:!st.liar.held,
+      liarRole:isLiar?'당신은...':'제시어',liarWord:isLiar?'라이어! 🦊':st.liar.word,
+      liarNextLabel:turn>=roster.length-1?'다 봤어, 토론 시작!':'다음 사람에게 →',
+      liarProgress:(turn+1)+' / '+roster.length+' 명 확인',
+      holdStart:()=>{this.haptic(10);this.setState(s=>({liar:{...s.liar,held:true}}));},
+      holdEnd:()=>this.setState(s=>({liar:{...s.liar,held:false}})),
+      liarNext:()=>{this.haptic(10);this.setState(s=>{const t=s.liar.turn;if(t>=roster.length-1)return{liar:{...s.liar,phase:'talk',held:false}};return{liar:{...s.liar,turn:t+1,held:false}};});},
+      gameBack:()=>this.setState({modal:'quit'}),
+      modalQuit:st.modal==='quit',modalReset:st.modal==='reset',
+      quitYes:()=>{this.setState({modal:null});this.go('home');},
+      closeModal:()=>this.setState({modal:null,resetStep:1}),
+      liarVictory:()=>{this.haptic([30,40,30]);this.setState({victory:true});},
+      victory:st.victory,confetti,
+      victoryClose:()=>{this.setState({victory:false});if(st.screen==='game')this.go('home');},
+      cdOn,cdNum:st.countdown,
+      cdBoxStyle:'width:190px;height:190px;background:#1A1423;box-shadow:0 0 0 4px #E8C170,0 8px 0 4px #06080F;display:flex;align-items:center;justify-content:center;animation:'+((st.countdown%2)?'sn-pop':'sn-pop2')+' 300ms steps(2)',
+      soundBtn:{label:st.sound?'ON':'OFF',style:this.chipStyle(st.sound)+'min-width:56px'},
+      vibeBtn:{label:st.vibe?'ON':'OFF',style:this.chipStyle(st.vibe)+'min-width:56px'},
+      toggleSound:()=>this.setState(s=>({sound:!s.sound})),
+      toggleVibe:()=>this.setState(s=>({vibe:!s.vibe})),
+      speeds:['보통','빠름','즉시'].map(l=>({label:l,style:this.chipStyle(st.tspeed===l)})),
+      setSpeed:e=>this.setState({tspeed:e.currentTarget.dataset.s}),
+      rosterChips:st.roster.map(n=>({name:n})),rosterInput:st.rosterInput,
+      rosterType:e=>this.setState({rosterInput:e.target.value}),
+      addMate:()=>{const n=st.rosterInput.trim();if(!n)return;if(st.roster.includes(n)){this.showToast('이미 있는 이름이야');return;}this.setState(s=>({roster:[...s.roster,n],rosterInput:''}));this.showToast(n+' 등록 완료!');},
+      removeMate:e=>{const n=e.currentTarget.dataset.n;this.setState(s=>({roster:s.roster.filter(x=>x!==n)}));},
+      askReset:()=>this.setState({modal:'reset',resetStep:1}),
+      resetTitle:st.resetStep===1?'데이터를 초기화할까?':'진짜 마지막 확인이야',
+      resetSub:st.resetStep===1?'즐겨찾기·설정·일행·세이브가 전부 사라져':'되돌릴 수 없어. 온보딩부터 다시 시작해',
+      resetBtn:st.resetStep===1?'초기화 진행':'전부 지우기',
+      resetGo:()=>{if(st.resetStep===1)this.setState({resetStep:2});else{this.setState({modal:null,resetStep:1,favs:{},coachDone:{},coach:null,homeVisited:false,filter:'전체',openCats:{psych:true},roster:['지우','민준','하늘','보람'],screen:'splash',ob:0});this.timers.splash=setTimeout(()=>this.go('onboard'),1400);}},
+      coachOn:!!st.coach&&!st.modal&&!st.sheet,
+      coachText:st.coach==='fav'?'게임 카드를 길게 누르면 즐겨찾기 ⭐ 에 등록돼':'비밀은 꾹 누르는 동안만 보여 — 손 떼면 바로 잠겨',
+      coachOk:()=>this.setState(s=>({coach:null,coachDone:{...s.coachDone,[s.coach]:true}})),
+      toastOn:!!st.toast,toast:st.toast,
+      updToast:st.updToast,updDemo:()=>this.setState({updToast:true}),
+      updApply:()=>{this.setState({updToast:false});this.showToast('새 버전 적용 완료! (데모)');},
+      toastDemo:()=>this.showToast('토스트는 2.4초 뒤에 사라져'),
+      countdownDemo:()=>{let n=3;this.setState({countdown:n});clearInterval(this.timers.cd);this.timers.cd=setInterval(()=>{n--;if(n<=0){clearInterval(this.timers.cd);this.setState({countdown:null});}else this.setState({countdown:n});},900);},
+      palette:this.PAL.map(h=>({hex:h,style:'width:34px;height:34px;background:'+h+';box-shadow:0 0 0 2px #1A1423'})),
+      mascots:this.MASCOTS.map(([key,label])=>({key,label})),
+      navChips:navDefs.map(([id,label])=>({id,label,style:'border:0;font-family:inherit;font-size:12px;padding:8px 10px;cursor:pointer;box-shadow:0 3px 0 #06080F;background:'+(st.screen===id?'#E8C170':'#1A2138')+';color:'+(st.screen===id?'#1A1423':'#8892AC')})),
+      navGo:e=>{const id=e.currentTarget.dataset.nav;if(id==='splash'){this.setState({screen:'splash',ob:0});clearTimeout(this.timers.splash);this.timers.splash=setTimeout(()=>this.go('onboard'),1400);}else if(id==='game'){this.setState({liar:{phase:'pass',turn:0,liarIdx:2,held:false,word:'수박'}});this.go('game');}else this.go(id);}
+    };
+  }
+}
+</script>
+</body>
+</html>
