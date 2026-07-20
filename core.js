@@ -108,7 +108,7 @@ function resetGame(name){
   if (name === "mafia"){ $("mafia-setup").style.display = ""; $("mafia-pass").style.display = "none"; $("mafia-play").style.display = "none"; }
   if (name === "choseong"){ $("cho-setup").style.display = ""; $("cho-play").style.display = "none"; }
   if (name === "balance"){ balNext(); }
-  if (name === "roulette"){ $("rou-name").textContent = "···"; $("rou-penalty").textContent = ""; }
+  if (name === "roulette"){ $("rou-name").textContent = "···"; $("rou-name").className = "roulette-name"; $("rou-penalty").textContent = ""; $("rou-tag").textContent = "오늘의 주인공은?"; }
   if (name === "fruit"){ fruitReset(); }
   if (name === "omok"){ omokNew(); }
   if (name === "forehead"){ fhReset(); }
@@ -121,7 +121,9 @@ function resetGame(name){
   if (name === "lv"){ lvReset(); }
   if (name === "bz"){ bzReset(); }
   if (name === "um"){ umReset(); }
+  if (name === "gq"){ gqReset(); }
   if (name === "ta"){ taReset(); }
+  if (name === "nb"){ nbReset(); }
 }
 
 /* ================= 일행 등록 ================= */
