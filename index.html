@@ -4029,13 +4029,14 @@ function wfSecret(){
     }));
   }
   el.querySelector("#wf-secret-done").addEventListener("click", () => {
+    if (role === "주정뱅이" && !wf.drunk) return alert("가운데 카드 1장을 골라야 잘 수 있어요");
     wf.i++;
     if (wf.i >= wf.order.length) return wfNightResolve();
     snPassCover(wf.order[wf.i], wfShowPass);
   });
 }
 function wfNightResolve(){
-  /* 공식 순서: 강도 교환 → 말썽꾸러기 교환 */
+  /* 공식 순서: 강도 교환 → 말썽꾸러기 교환 → 주정뱅이 교환 */
   wf.final = wf.cards.slice();
   if (wf.robber){
     const t = wf.final[wf.robber.from];
@@ -4047,10 +4048,16 @@ function wfNightResolve(){
     wf.final[wf.tmSwap[0]] = wf.final[wf.tmSwap[1]];
     wf.final[wf.tmSwap[1]] = t;
   }
+  if (wf.drunk){
+    const c = wf.order.length + wf.drunk.k;
+    const t = wf.final[wf.drunk.from];
+    wf.final[wf.drunk.from] = wf.final[c];
+    wf.final[c] = t;
+  }
   wfShow("wf-day");
-  const swappers = [wf.on.robber ? "강도" : "", wf.on.trouble ? "말썽꾸러기" : ""].filter(Boolean);
+  const swappers = [wf.on.robber ? "강도" : "", wf.on.trouble ? "말썽꾸러기" : "", wf.on.drunk ? "주정뱅이" : ""].filter(Boolean);
   $("wf-day-hint").innerHTML = "밤 사이 무슨 일이? 늑대를 찾아내세요!" +
-    (swappers.length ? " " + swappers.join("와 ") + " 때문에 <b>지금 내 역할이 바뀌었을 수도</b> 있습니다..." : "");
+    (swappers.length ? " " + swappers.join("·") + " 때문에 <b>지금 내 역할이 바뀌었을 수도</b> 있습니다..." : "");
   let left = wf.time;
   $("wf-day-timer").textContent = fmt(left);
   clearInterval(wf.dayTid);
