@@ -1193,45 +1193,6 @@
     <div id="wf-result" style="display:none"></div>
   </div>
 
-  <!-- ============ 인디언 포커 ============ -->
-  <div class="screen" id="scr-indian">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🃏 인디언 포커</h2></div>
-    <div id="in-setup">
-      <p class="hint">1~10 카드(각 2장)를 한 장씩 받아요. <b>남의 카드는 보이고 내 카드만 안 보임!</b> 폰을 이마에 대면 다른 사람들이 내 숫자를 보게 됩니다. 표정을 읽고 콜(양 2)이냐 다이냐! 참가비 양 1, 최고 숫자가 판돈 싹쓸이. <b style="color:var(--danger)">다이했는데 알고 보니 최고 카드였다면 벌칙!</b></p>
-      <div class="field"><label>참여자 선택 (2~8명, 시작 양 10마리)</label><div class="seg" id="in-players"></div></div>
-      <button class="btn" id="in-start">카드 돌리기!</button>
-    </div>
-    <div id="in-view" style="display:none" class="pass-stage">
-      <div class="who-label" id="in-view-step">카드 공개</div>
-      <div class="who" id="in-view-name">-</div>
-      <div class="hint" id="in-view-hint" style="margin:0">폰 화면을 바깥으로 해서 이마에 대세요!<br>본인은 천장 보기 or 눈 감기 🙈</div>
-      <div id="in-view-card" style="font-size:110px;font-weight:900;line-height:1.2;display:none"></div>
-      <button class="btn pass-next" id="in-view-go">이마에 댔어요, 공개! →</button>
-    </div>
-    <div id="in-bet" style="display:none">
-      <div class="mb-strip" id="in-strip"></div>
-      <div class="stage-center" style="flex:0;gap:6px;margin:18px 0">
-        <span class="tag">💰 판돈: <b id="in-pot">0</b>양</span>
-        <div class="who" id="in-bet-name" style="font-size:34px">-</div>
-        <div class="hint" style="margin:0">다른 사람 카드와 표정을 보고 결정하세요!</div>
-      </div>
-      <button class="btn" id="in-call">✅ 콜! (양 2 배팅)</button>
-      <button class="btn ghost mt" id="in-die">🏳️ 다이 (포기)</button>
-    </div>
-    <div id="in-showdown" style="display:none">
-      <div class="stage-center" style="flex:0;gap:8px;margin-bottom:10px"><span class="tag">쇼다운!</span></div>
-      <div id="in-cards"></div>
-      <div class="reveal-card" id="in-round-result" style="margin-top:12px"></div>
-      <button class="btn mt" id="in-next">다음 라운드 →</button>
-      <button class="btn ghost mt" id="in-finish">그만하고 결과 보기</button>
-    </div>
-    <div id="in-end" style="display:none" class="stage-center">
-      <span class="tag">최종 결과</span>
-      <div class="reveal-card" id="in-rank"></div>
-      <button class="btn" id="in-again">다시 하기</button>
-    </div>
-  </div>
-
   <!-- ============ 폭탄 돌리기 ============ -->
   <div class="screen" id="scr-bomb">
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>💣 폭탄 돌리기</h2></div>
@@ -2043,7 +2004,7 @@ document.querySelectorAll("[data-go]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.go;
     if (target !== "home"){
-      const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, indian: 2, bomb: 3, tele: 3, ta: 2 }[target] || 0;
+      const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, bomb: 3, tele: 3, ta: 2 }[target] || 0;
       if (roster.length < need){
         alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
         return;
@@ -2066,7 +2027,6 @@ function resetGame(name){
   if (name === "drawrelay"){ drReset(); }
   if (name === "catchmind"){ cmReset(); }
   if (name === "wolf"){ wfReset(); }
-  if (name === "indian"){ inReset(); }
   if (name === "bomb"){ bombReset(); }
   if (name === "tele"){ teReset(); }
   if (name === "lv"){ lvReset(); }
@@ -4165,148 +4125,6 @@ function wfResult(){
   $("wf-again").addEventListener("click", wfReset);
 }
 
-/* ================= 인디언 포커 ================= */
-let ip = { sel: [], p: [], deck: [], pot: 0, viewI: 0, betI: 0, shown: false, tid: null };
-function inReset(){
-  clearInterval(ip.tid); ip.tid = null;
-  ["in-setup","in-view","in-bet","in-showdown","in-end"].forEach(id => $(id).style.display = "none");
-  $("in-setup").style.display = "";
-  const box = $("in-players");
-  box.innerHTML = "";
-  ip.sel = roster.slice(0, 8);
-  roster.forEach(n => {
-    const b = document.createElement("button");
-    b.textContent = n;
-    if (ip.sel.includes(n)) b.classList.add("sel");
-    b.addEventListener("click", () => {
-      if (ip.sel.includes(n)) ip.sel = ip.sel.filter(x => x !== n);
-      else if (ip.sel.length < 8) ip.sel.push(n);
-      else return alert("최대 8명!");
-      b.classList.toggle("sel", ip.sel.includes(n));
-    });
-    box.appendChild(b);
-  });
-}
-$("in-start").addEventListener("click", () => {
-  if (ip.sel.length < 2) return alert("2명 이상 선택!");
-  ip.p = ip.sel.map(n => ({ name: n, sheep: 10, card: 0, folded: false, out: false }));
-  inNewRound();
-});
-function inShow(id){
-  ["in-setup","in-view","in-bet","in-showdown","in-end"].forEach(x => $(x).style.display = "none");
-  $(id).style.display = (id === "in-view" || id === "in-end") ? "flex" : "";
-}
-function inNewRound(){
-  const alive = ip.p.filter(x => !x.out);
-  if (alive.length < 2) return inEnd();
-  ip.deck = shuffle([1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]);
-  ip.pot = 0;
-  ip.p.forEach(x => {
-    x.folded = false;
-    if (x.out) return;
-    x.card = ip.deck.pop();
-    const ante = Math.min(1, x.sheep);
-    x.sheep -= ante; ip.pot += ante;
-  });
-  ip.viewI = -1;
-  inNextView();
-}
-function inNextView(){
-  do { ip.viewI++; } while (ip.viewI < ip.p.length && ip.p[ip.viewI].out);
-  if (ip.viewI >= ip.p.length){ ip.betI = -1; inNextBet(); return; }
-  inShow("in-view");
-  ip.shown = false;
-  const x = ip.p[ip.viewI];
-  $("in-view-step").textContent = "카드 공개 (" + x.name + ")";
-  $("in-view-name").textContent = x.name;
-  $("in-view-hint").style.display = "";
-  $("in-view-card").style.display = "none";
-  $("in-view-go").textContent = "이마에 댔어요, 공개! →";
-  $("in-view-go").disabled = false;
-}
-$("in-view-go").addEventListener("click", () => {
-  if (ip.shown) return;
-  ip.shown = true;
-  const x = ip.p[ip.viewI];
-  $("in-view-go").disabled = true;
-  let cd = 3;
-  $("in-view-hint").style.display = "none";
-  $("in-view-card").style.display = "";
-  $("in-view-card").textContent = cd;
-  $("in-view-card").style.color = "var(--dim)";
-  clearInterval(ip.tid);
-  ip.tid = setInterval(() => {
-    cd--;
-    if (cd > 0){ $("in-view-card").textContent = cd; return; }
-    if (cd === 0){
-      $("in-view-card").textContent = x.card;
-      $("in-view-card").style.color = "var(--fire)";
-      $("in-view-name").textContent = x.name + " (본인 보지 마!)";
-      return;
-    }
-    if (cd <= -5){
-      clearInterval(ip.tid); ip.tid = null;
-      inNextView();
-    }
-  }, 1000);
-});
-function inNextBet(){
-  do { ip.betI++; } while (ip.betI < ip.p.length && (ip.p[ip.betI].out || ip.p[ip.betI].folded));
-  const active = ip.p.filter(x => !x.out && !x.folded);
-  if (active.length === 1 || ip.betI >= ip.p.length) return inShowdown();
-  inShow("in-bet");
-  inStrip();
-  $("in-pot").textContent = ip.pot;
-  const x = ip.p[ip.betI];
-  $("in-bet-name").textContent = x.name;
-  $("in-call").textContent = x.sheep >= 2 ? "✅ 콜! (양 2 배팅)" : "✅ 올인 콜! (양 " + x.sheep + ")";
-}
-function inStrip(){
-  $("in-strip").innerHTML = ip.p.map((x, i) => {
-    let st = x.out ? "💀" : x.folded ? "🏳️" : (i === ip.betI ? "🤔" : "");
-    return '<div class="sp' + (i === ip.betI ? " now" : "") + (x.out ? " dead" : "") + '">' + x.name + ' 🐑' + x.sheep + ' ' + st + '</div>';
-  }).join("");
-}
-$("in-call").addEventListener("click", () => {
-  const x = ip.p[ip.betI];
-  const bet = Math.min(2, x.sheep);
-  x.sheep -= bet; ip.pot += bet;
-  inNextBet();
-});
-$("in-die").addEventListener("click", () => {
-  ip.p[ip.betI].folded = true;
-  inNextBet();
-});
-function inShowdown(){
-  inShow("in-showdown");
-  const contenders = ip.p.filter(x => !x.out && !x.folded);
-  const alive = ip.p.filter(x => !x.out);
-  const best = Math.max(...contenders.map(x => x.card));
-  const winners = contenders.filter(x => x.card === best);
-  const share = Math.floor(ip.pot / winners.length);
-  let rem = ip.pot - share * winners.length;
-  winners.forEach(w => { w.sheep += share; if (rem > 0){ w.sheep++; rem--; } });
-  const allBest = Math.max(...alive.map(x => x.card));
-  const foolFolders = alive.filter(x => x.folded && x.card === allBest && allBest > best);
-  $("in-cards").innerHTML = alive.map(x =>
-    '<div class="mb-teamcard" style="opacity:' + (x.folded ? ".55" : "1") + '"><b>' + x.name + (winners.includes(x) ? " 🏆" : "") + (x.folded ? " 🏳️다이" : "") + '</b><span style="font-size:22px;font-weight:900;color:var(--fire)">' + x.card + '</span></div>'
-  ).join("");
-  let msg = "🏆 " + winners.map(w => w.name).join(", ") + " 승리! 판돈 " + ip.pot + "양 획득";
-  if (foolFolders.length) msg += "<br><b style='color:var(--danger)'>🍺 " + foolFolders.map(f => f.name).join(", ") + " — 최고 카드 들고 다이?! 벌칙!</b>";
-  ip.p.forEach(x => { if (!x.out && x.sheep <= 0){ x.out = true; msg += "<br>💀 " + x.name + " 파산 탈락"; } });
-  $("in-round-result").innerHTML = '<div class="val" style="font-size:16px;line-height:1.7">' + msg + '</div>';
-}
-$("in-next").addEventListener("click", inNewRound);
-$("in-finish").addEventListener("click", inEnd);
-function inEnd(){
-  inShow("in-end");
-  const rank = ip.p.slice().sort((a, b) => b.sheep - a.sheep);
-  const medals = ["🥇","🥈","🥉"];
-  $("in-rank").innerHTML = '<div class="lbl">타짜 랭킹</div><div class="val" style="font-size:18px;line-height:2">' +
-    rank.map((r, i) => (medals[i] || "·") + " " + r.name + " — 🐑 " + r.sheep + (r.out ? " (파산)" : "")).join("<br>") + '</div>';
-}
-$("in-again").addEventListener("click", inReset);
-
 /* ================= 폭탄 돌리기 ================= */
 const BOMB_TOPICS = ["치킨 브랜드","라면 종류","김씨 성 연예인","아이돌 그룹","한국 도시","과일 이름","영화 제목","네발 동물","편의점에서 파는 것","몽골에서 볼 수 있는 것","빨간색인 것","차가운 것","부엌에 있는 물건","세 글자 음식","나라 이름","스포츠 종목","직업 이름","꽃 이름","술 이름","전자제품","학교 과목","바다 생물","겨울에 하는 것","캠핑 준비물","여행 필수템","노래 제목","드라마 제목","탈 것","신체 부위","조미료/양념","반찬 종류","길거리 음식","커피/음료 메뉴","게임 이름","전래동화 등장인물","색깔 이름","동그란 것","냄새나는 것","하늘에 있는 것","학용품"];
 const BOMB_CHO = ["ㄱㅅ","ㅅㄹ","ㅁㅈ","ㅂㅅ","ㄷㅂ","ㅎㄱ","ㅈㄱ","ㅇㅅ","ㄱㅂ","ㅅㅈ","ㅊㄱ","ㅋㅍ","ㅌㅈ","ㅎㅅ","ㄴㅁ","ㅇㅈ","ㄱㄹ","ㅁㅅ","ㅂㄹ","ㅅㄱ","ㅈㅁ","ㅇㄹ","ㄷㅈ","ㅅㅁ"];
@@ -5947,7 +5765,6 @@ const SN_CATS = [
     { id:"were",     go:"wolf",      need:4, name:"늑대인간",      spr:"wolf",     desc:"보름달 아래 정체 숨기기",       p:[4,10], t:25 } ] },
   { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
     { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐",     p:[2,6],  t:10 },
-    { id:"indian",   go:"indian",    need:2, name:"인디언 포커",   spr:"hawk",     desc:"내 카드만 나만 몰라",           p:[2,8],  t:10 },
     { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
     { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
     { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
