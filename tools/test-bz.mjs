@@ -59,10 +59,24 @@ ok("선택한 유형만 출제", mixOk);
 ok("선택한 유형이 모두 등장", seen.size === 2);
 ok("단일 선택이면 그 유형만", bzPickType(["cho"]) === "cho");
 
-console.log("BZ_OX 뱅크");
-ok("정확히 40문항", BZ_OX.length === 40);
-ok("전 문항 {q:문자열, a:불리언}", BZ_OX.every(x => typeof x.q === "string" && x.q.length > 0 && typeof x.a === "boolean"));
-ok("O/X 답 분포가 한쪽으로 쏠리지 않음(각 12개 이상)", BZ_OX.filter(x => x.a).length >= 12 && BZ_OX.filter(x => !x.a).length >= 12);
+console.log("BZ_OX 뱅크 (" + BZ_OX.length + "문항)");
+ok("90문항 이상", BZ_OX.length >= 90);
+ok("전 문항 {q:문자열, a:불리언, d:1|2|3}", BZ_OX.every(x => typeof x.q === "string" && x.q.length > 0 && typeof x.a === "boolean" && [1, 2, 3].includes(x.d)));
+ok("난이도별 최소 25문항", [1, 2, 3].every(d => BZ_OX.filter(x => x.d === d).length >= 25));
+ok("O/X 분포 각 40% 이상", BZ_OX.filter(x => x.a).length >= BZ_OX.length * 0.4 && BZ_OX.filter(x => !x.a).length >= BZ_OX.length * 0.4);
+ok("문항 중복 없음", new Set(BZ_OX.map(x => x.q.replace(/[\s·,.!?~'"()]/g, ""))).size === BZ_OX.length);
+
+console.log("bzPickDiff (난이도 램프)");
+const bzPickDiff = new Function("return (" + extract("bzPickDiff") + ")")();
+function dist(p, n){
+  const c = { 1: 0, 2: 0, 3: 0 };
+  for (let t = 0; t < n; t++) c[bzPickDiff(p)]++;
+  return c;
+}
+const early = dist(0, 2000), mid = dist(0.5, 2000), late = dist(0.9, 2000);
+ok("초반(진행 0)엔 어려움 안 나옴", early[3] === 0 && early[1] > 0 && early[2] > 0);
+ok("중반(0.5)엔 세 난이도 모두 등장", mid[1] > 0 && mid[2] > 0 && mid[3] > 0);
+ok("후반(0.9)엔 어려움이 최다", late[3] > late[2] && late[2] > late[1]);
 
 console.log(fail ? "❌ " + fail + "개 실패" : "✅ 전부 통과 (" + pass + "케이스)");
 process.exit(fail ? 1 : 0);
