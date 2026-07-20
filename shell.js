@@ -293,7 +293,7 @@ const SN_CATS = [
     { id:"journey",  go:"life",      need:2, name:"몽골 대장정 2.0", spr:"bor",    desc:"초원 횡단 보드 레이스",         p:[2,6],  t:40 },
     { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아라",         p:[2,2],  t:10 },
     { id:"dicebet",  go:"lv",        need:2, name:"주사위 배팅",   spr:"badger",   desc:"눈치로 거는 상금 독식전",       p:[2,5],  t:15 },
-    { id:"baseball", go:null,        need:2, name:"숫자야구",      spr:"crane",    desc:"3자리 숫자 추리 대결",          p:[2,4],  t:15 } ] },
+    { id:"baseball", go:"nb",        need:2, name:"숫자야구",      spr:"crane",    desc:"3자리 숫자 추리 대결",          p:[2,4],  t:15 } ] },
   { id:"talk", emoji:"💬", name:"토크·퀴즈", spr:"camel", games:[
     { id:"balance",  go:"balance",   need:0, name:"밸런스 게임",   spr:"camel",    desc:"A냐 B냐 그것이 문제",           p:[2,10], t:10 },
     { id:"tele",     go:"tele",      need:3, name:"텔레파시",      spr:"owl2",     desc:"같은 생각이면 승리",            p:[3,10], t:10 },
