@@ -20,3 +20,24 @@ $("rou-penalty-btn").addEventListener("click", () => {
   $("rou-penalty").textContent = "벌칙: " + PENALTIES[Math.floor(Math.random() * PENALTIES.length)];
 });
 
+/* 벌칙 목록 보기 / 직접 수정 (localStorage 저장, 룰렛·폭탄 공용) */
+$("rou-list-btn").addEventListener("click", () => {
+  const panel = $("rou-list-panel");
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) { $("rou-list-edit").value = PENALTIES.join("\n"); $("rou-list-saved").textContent = ""; }
+});
+$("rou-list-save").addEventListener("click", () => {
+  const list = $("rou-list-edit").value.split("\n").map(s => s.trim()).filter(Boolean);
+  if (!list.length) { $("rou-list-saved").textContent = "최소 1개는 있어야 해"; return; }
+  PENALTIES = list;
+  try { localStorage.setItem(PENALTY_KEY, JSON.stringify(list)); } catch (e) { /* 무시 */ }
+  $("rou-list-edit").value = list.join("\n");
+  $("rou-list-saved").textContent = "저장됨 · " + list.length + "개";
+});
+$("rou-list-reset").addEventListener("click", () => {
+  PENALTIES = PENALTY_DEFAULTS.slice();
+  try { localStorage.removeItem(PENALTY_KEY); } catch (e) { /* 무시 */ }
+  $("rou-list-edit").value = PENALTIES.join("\n");
+  $("rou-list-saved").textContent = "기본값으로 복원됨";
+});
+

@@ -180,6 +180,12 @@
   /* ---------- 룰렛 ---------- */
   .roulette-name{font-size:42px;font-weight:800;min-height:60px;word-break:keep-all}
   .penalty{font-size:18px;font-weight:700;color:var(--fire);min-height:28px;line-height:1.5;word-break:keep-all}
+  .pen-panel{width:100%;margin-top:12px;text-align:left}
+  .pen-hint{font-size:12px;color:var(--dim);margin:0 0 8px}
+  .pen-edit{width:100%;box-sizing:border-box;background:var(--night2);color:var(--milk);border:1px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:15px;line-height:1.7;resize:vertical}
+  .pen-actions{display:flex;gap:10px;margin-top:10px}
+  .pen-actions .btn{flex:1}
+  .pen-saved{font-size:13px;color:var(--steppe);font-weight:700;min-height:20px;margin-top:8px;text-align:center}
 
   /* ---------- 과일 종! (할리갈리) ---------- */
   .fruit-arena{position:relative;flex:1;min-height:480px;border:1px solid var(--line);border-radius:20px;background:var(--night2);overflow:hidden;margin-top:4px}
@@ -1417,6 +1423,16 @@
       <div class="penalty" id="rou-penalty"></div>
       <button class="btn" id="rou-spin">돌리기!</button>
       <button class="btn ghost" id="rou-penalty-btn">벌칙도 뽑기</button>
+      <button class="btn ghost" id="rou-list-btn">벌칙 목록 / 수정</button>
+      <div class="pen-panel" id="rou-list-panel" hidden>
+        <p class="pen-hint">한 줄에 벌칙 하나. 룰렛·폭탄 게임 공용으로 쓰여.</p>
+        <textarea class="pen-edit" id="rou-list-edit" rows="10" spellcheck="false" autocapitalize="off"></textarea>
+        <div class="pen-actions">
+          <button class="btn" id="rou-list-save">저장</button>
+          <button class="btn ghost" id="rou-list-reset">기본값 복원</button>
+        </div>
+        <div class="pen-saved" id="rou-list-saved"></div>
+      </div>
     </div>
   </div>
 

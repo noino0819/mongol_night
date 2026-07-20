@@ -263,7 +263,7 @@ renderChips();
         "전부 지우기", "그대로 두기",
         () => {
           try {
-            ["sn_prefs_v1", "balance_seen_v1", "ta_save_v1"].forEach((k) => localStorage.removeItem(k));
+            ["sn_prefs_v1", "balance_seen_v1", "ta_save_v1", "sn_penalties_v1"].forEach((k) => localStorage.removeItem(k));
           } catch (e) { /* 무시 */ }
           location.reload();
         }, () => {}),
