@@ -418,6 +418,7 @@
     box-shadow:0 2px 0 rgba(0,0,0,.4);
   }
   .pwa-install:active{transform:translateY(2px);box-shadow:none}
+  .pwa-install.navy{background:var(--px-navy);color:var(--milk)}
 
   /* --- 스플래시 --- */
   .splash{
@@ -508,7 +509,9 @@
   <div class="screen on" id="scr-home">
     <div class="pwa-row">
       <span class="pwa-badge" id="pwa-badge">⏳ 오프라인 준비 중...</span>
-      <button class="pwa-install" id="pwa-install" style="display:none">📲 앱으로 설치</button>
+      <span style="flex:1"></span>
+      <button class="pwa-install" id="pwa-install" style="display:none">📲 설치</button>
+      <button class="pwa-install navy" data-go="settings">⚙️</button>
     </div>
     <div class="home-logo" id="home-logo">
       <px-sprite name="bormoon" scale="4"></px-sprite>
@@ -516,14 +519,6 @@
         <div class="t">초원의 밤</div>
         <div class="s">오프라인 파티게임 20종</div>
       </div>
-    </div>
-    <div class="roster-box">
-      <label>오늘의 일행 (한 번만 등록하면 모든 게임에서 사용)</label>
-      <div class="roster-row">
-        <input id="name-input" type="text" placeholder="이름 입력 후 추가" maxlength="8" enterkeyhint="done">
-        <button class="btn" style="width:auto;padding:0 18px" id="add-name">추가</button>
-      </div>
-      <div class="chips" id="chips"></div>
     </div>
 
     <div class="game-list">
@@ -605,6 +600,29 @@
     </div>
 
     <div class="footer-note">인터넷 연결 불필요 · 폰 하나로 진행<br>게임 데이터는 화면을 닫으면 초기화됩니다</div>
+  </div>
+
+  <!-- ============ 설정 ============ -->
+  <div class="screen" id="scr-settings">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚙️ 설정</h2></div>
+    <div class="roster-box">
+      <label>👥 일행 관리 (한 번만 등록하면 모든 게임에서 사용)</label>
+      <div class="roster-row">
+        <input id="name-input" type="text" placeholder="이름 입력 후 추가" maxlength="8" enterkeyhint="done">
+        <button class="btn" style="width:auto;padding:0 18px" id="add-name">추가</button>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="toggle-row"><span>🔊 사운드</span><button class="tg" id="set-sound"></button></div>
+    <div class="toggle-row"><span>📳 진동</span><button class="tg" id="set-vibe"></button></div>
+    <div class="field" style="margin-top:4px">
+      <label>💬 텍스트 속도 (텍스트 어드벤처)</label>
+      <div class="seg" id="set-speed">
+        <button data-s="보통">보통</button><button data-s="빠름">빠름</button><button data-s="즉시">즉시</button>
+      </div>
+    </div>
+    <button class="btn ghost mt" id="set-reset" style="color:var(--danger);text-align:left">🗑️ 데이터 초기화</button>
+    <div class="footer-note">초원의 밤 v2.0.0<br>픽셀 폰트: Galmuri — SIL Open Font License 1.1<br>© 2026 steppe-night</div>
   </div>
 
   <!-- ============ 라이어 ============ -->
@@ -1661,7 +1679,7 @@ document.querySelectorAll("[data-go]").forEach(b => {
     if (target !== "home"){
       const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, indian: 2, bomb: 3, tele: 3 }[target] || 0;
       if (roster.length < need){
-        alert("이 게임은 " + need + "명 이상 필요해요!\n홈 화면에서 일행을 등록해주세요 🙌");
+        alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
         return;
       }
     }
@@ -1697,7 +1715,7 @@ function renderChips(){
     const c = document.createElement("div");
     c.className = "chip";
     c.innerHTML = n + " <b>✕</b>";
-    c.addEventListener("click", () => { roster.splice(i, 1); renderChips(); });
+    c.addEventListener("click", () => { roster.splice(i, 1); renderChips(); saveRoster(); });
     box.appendChild(c);
   });
 }
@@ -1707,7 +1725,7 @@ function addName(){
   if (!v) return;
   if (roster.includes(v)){ alert("같은 이름이 이미 있어요!"); return; }
   if (roster.length >= 12){ alert("최대 12명까지 가능해요"); return; }
-  roster.push(v); inp.value = ""; renderChips(); inp.focus();
+  roster.push(v); inp.value = ""; renderChips(); saveRoster(); inp.focus();
 }
 $("add-name").addEventListener("click", addName);
 $("name-input").addEventListener("keydown", (e) => { if (e.key === "Enter") addName(); });
@@ -3942,6 +3960,57 @@ $("ob-prev").addEventListener("click", () => { if (ob.page > 0){ ob.page--; obRe
 $("ob-skip").addEventListener("click", obDone);
 $("ob-later").addEventListener("click", obDone);
 $("ob-install").addEventListener("click", () => { obDone(); if (pwa.installAction) pwa.installAction(); });
+
+/* --- 일행 영속화 --- */
+function saveRoster(){ prefs.roster = roster.slice(); savePrefs(); }
+if (Array.isArray(prefs.roster) && prefs.roster.length){
+  roster.push(...prefs.roster.filter((n) => typeof n === "string" && n.trim()).slice(0, 12));
+  renderChips();
+}
+
+/* --- 설정 페이지 --- */
+(function settingsInit(){
+  /* 토글: 사운드(기본 off)·진동(기본 on) */
+  const bindTg = (id, key, def) => {
+    const el = $(id);
+    const cur = () => (key in prefs ? !!prefs[key] : def);
+    el.classList.toggle("on", cur());
+    el.addEventListener("click", () => {
+      prefs[key] = !cur();
+      savePrefs();
+      el.classList.toggle("on", prefs[key]);
+      if (key === "vibe" && prefs.vibe && navigator.vibrate) navigator.vibrate(10);
+    });
+  };
+  bindTg("set-sound", "sound", false);
+  bindTg("set-vibe", "vibe", true);
+
+  /* 텍스트 속도 seg */
+  const seg = $("set-speed");
+  const applySpeed = () => seg.querySelectorAll("button").forEach((b) =>
+    b.classList.toggle("sel", b.dataset.s === (prefs.tspeed || "보통")));
+  applySpeed();
+  seg.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    prefs.tspeed = b.dataset.s;
+    savePrefs();
+    applySpeed();
+  }));
+
+  /* 데이터 초기화: 2단계 확인 */
+  $("set-reset").addEventListener("click", () => {
+    mbAsk("🗑️", "데이터를 초기화할까?", "즐겨찾기·설정·일행·세이브가 전부 사라져",
+      "초기화 진행", "그대로 두기",
+      () => mbAsk("⚠️", "진짜 마지막 확인이야", "되돌릴 수 없어. 온보딩부터 다시 시작해",
+        "전부 지우기", "그대로 두기",
+        () => {
+          try {
+            ["sn_prefs_v1", "balance_seen_v1", "ta_save_v1"].forEach((k) => localStorage.removeItem(k));
+          } catch (e) { /* 무시 */ }
+          location.reload();
+        }, () => {}),
+      () => {});
+  });
+})();
 
 /* --- 스플래시: 폰트 준비 + 최소 노출 후 해제, 최대 1.2s --- */
 (function splashInit(){
