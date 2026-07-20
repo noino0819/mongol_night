@@ -419,6 +419,44 @@
   }
   .pwa-install:active{transform:translateY(2px);box-shadow:none}
 
+  /* --- 스플래시 --- */
+  .splash{
+    position:fixed;inset:0;z-index:200;background:var(--night);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  }
+  .splash.hide{opacity:0;transition:opacity .2s steps(4);pointer-events:none}
+  .splash .tt{font-family:var(--font-px);font-size:34px;letter-spacing:4px;text-shadow:0 4px 0 var(--px-black);white-space:nowrap}
+  .splash .sub{font-size:14px;color:var(--dim)}
+  .splash .bar{width:180px;height:12px;background:var(--px-black);box-shadow:0 0 0 2px var(--px-navy);margin-top:24px}
+  .splash .bar i{display:block;height:100%;background:var(--px-sand);animation:sn-prog 1.1s steps(8) forwards}
+  @keyframes sn-prog{from{width:8%}to{width:100%}}
+
+  /* --- 온보딩 --- */
+  .onboard{position:fixed;inset:0;z-index:190;background:var(--night);display:flex;flex-direction:column;animation:fadein .2s steps(4)}
+  .onboard .skip-row{display:flex;justify-content:flex-end;padding:16px 18px}
+  .onboard .skip-row button{background:none;border:0;color:var(--dim);font-family:inherit;font-size:14px;cursor:pointer;padding:6px}
+  .onboard .body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 28px;text-align:center}
+  .onboard .scene{display:flex;align-items:flex-end;gap:10px;min-height:130px}
+  .onboard .tt{font-family:var(--font-px);font-size:24px;line-height:1.5;text-shadow:0 3px 0 var(--px-black);word-break:keep-all}
+  .onboard .sub{font-size:15px;line-height:1.7;color:#B9C1D6;word-break:keep-all}
+  .onboard .cta{display:flex;flex-direction:column;gap:14px;width:100%;margin-top:6px}
+  .onboard .nav{display:flex;align-items:center;justify-content:space-between;padding:22px 24px}
+  .onboard .nav button{
+    font-family:var(--font-px);background:var(--px-navy);color:var(--milk);border:0;font-size:16px;
+    padding:10px 16px;box-shadow:0 4px 0 var(--px-black);cursor:pointer;
+  }
+  .onboard .nav button.next{background:var(--px-sand);color:var(--px-black)}
+  .onboard .nav button:active{transform:translateY(4px);box-shadow:none}
+  .onboard .dots{display:flex;gap:10px}
+  .onboard .dots i{width:10px;height:10px;background:var(--px-navy);box-shadow:0 2px 0 var(--px-black)}
+  .onboard .dots i.on{background:var(--px-sand)}
+  .ob-btn{
+    display:block;width:100%;border:0;font-family:inherit;font-size:17px;padding:16px;cursor:pointer;
+    background:var(--px-sand);color:var(--px-black);box-shadow:0 4px 0 var(--px-black);font-weight:800;
+  }
+  .ob-btn.ghost2{background:var(--px-navy);color:var(--milk);font-size:16px;padding:14px}
+  .ob-btn:active{transform:translateY(4px);box-shadow:none}
+
   /* --- 업데이트 토스트 --- */
   .px-toast{
     position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99;
@@ -438,6 +476,33 @@
 
   <!-- 별하늘 배경 (전 화면 공통, 프로토타입 스펙) -->
   <div class="skybg" id="sky"></div>
+
+  <!-- 스플래시 (폰트 파싱 동안 노출, 최대 1.2s) -->
+  <div class="splash" id="splash">
+    <px-sprite name="bormoon" scale="8"></px-sprite>
+    <div class="tt">초원의 밤</div>
+    <div class="sub">인터넷 없는 밤, 게임은 여기 다 있어</div>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <!-- 온보딩 (첫 방문 1회) -->
+  <div class="onboard" id="onboard" style="display:none">
+    <div class="skip-row"><button id="ob-skip">건너뛰기</button></div>
+    <div class="body">
+      <div class="scene" id="ob-scene"></div>
+      <div class="tt" id="ob-title"></div>
+      <div class="sub" id="ob-sub"></div>
+      <div class="cta" id="ob-cta" style="display:none">
+        <button class="ob-btn" id="ob-install">📲 앱으로 설치하기</button>
+        <button class="ob-btn ghost2" id="ob-later">나중에</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button id="ob-prev">←</button>
+      <div class="dots" id="ob-dots"></div>
+      <button class="next" id="ob-next">→</button>
+    </div>
+  </div>
 
   <!-- ============ 홈 ============ -->
   <div class="screen on" id="scr-home">
@@ -3821,14 +3886,76 @@ function pwaToast(msg, btnLabel, onBtn){
     installBtn.textContent = "📲 홈 화면에 추가";
     installBtn.style.display = "";
   }
-  installBtn.addEventListener("click", () => {
+  pwa.installAction = () => {
     if (pwa.deferredPrompt){
       pwa.deferredPrompt.prompt();
       pwa.deferredPrompt.userChoice.finally(() => { pwa.deferredPrompt = null; installBtn.style.display = "none"; });
     } else if (isIOS){
       lifeModal("📲", "홈 화면에 설치하기",
         "1. Safari 하단 <b>공유 버튼(⬆️)</b>을 눌러요<br>2. <b>홈 화면에 추가</b>를 선택해요<br>3. 끝! 이제 비행기 모드에서도 열려요<br><br><span style='color:var(--dim)'>Safari에서만 가능해요. 크롬이라면 Safari로 열어주세요</span>", null);
+    } else {
+      pwaToast("이 브라우저에선 설치 안내가 없어 — 폰의 크롬/사파리로 열어봐");
     }
+  };
+  installBtn.addEventListener("click", pwa.installAction);
+})();
+
+/* ================================================================
+   v2 앱 셸: prefs(localStorage) + 스플래시 + 온보딩
+   ================================================================ */
+const PREFS_KEY = "sn_prefs_v1";
+const prefs = (() => {
+  try { return JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") || {}; }
+  catch (e) { return {}; } /* localStorage 불가 환경 → 인메모리 폴백 */
+})();
+function savePrefs(){
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch (e) { /* 무시 */ }
+}
+
+/* --- 온보딩 (프로토타입 OB 데이터) --- */
+const OB_PAGES = [
+  { t:"와이파이? 필요 없어", s:"비행기 모드에서도 전부 돌아가는 파티게임 20종", scene:[["fox",4],["fire",5],["bor",4]] },
+  { t:"폰 하나면 충분", s:"돌려가며 하는 패스앤플레이. 비밀은 꾹 눌러 확인!", scene:[["bor",4],["phone",5],["wolf",4]] },
+  { t:"가볍게도, 진하게도", s:"5분 폭탄 돌리기부터 40분 어드벤처까지", scene:[["dice",4],["mole",5],["tengri",4]] },
+  { t:"홈 화면에 설치하면 완성", s:"설치해 두면 앱 아이콘으로 바로 실행돼", scene:[["arrowdn",4],["bor",5]] }
+];
+const ob = { page: 0 };
+function obRender(){
+  const p = OB_PAGES[ob.page];
+  const last = ob.page === OB_PAGES.length - 1;
+  $("ob-scene").innerHTML = p.scene.map(([n, s]) => '<px-sprite name="' + n + '" scale="' + s + '"></px-sprite>').join("");
+  $("ob-title").textContent = p.t;
+  $("ob-sub").textContent = p.s;
+  $("ob-cta").style.display = last ? "" : "none";
+  $("ob-prev").style.visibility = ob.page > 0 ? "visible" : "hidden";
+  $("ob-next").style.visibility = last ? "hidden" : "visible";
+  $("ob-dots").innerHTML = OB_PAGES.map((_, i) => '<i class="' + (i === ob.page ? "on" : "") + '"></i>').join("");
+}
+function obShow(){ ob.page = 0; obRender(); $("onboard").style.display = ""; }
+function obDone(){
+  prefs.onboarded = true;
+  savePrefs();
+  $("onboard").style.display = "none";
+}
+$("ob-next").addEventListener("click", () => { if (ob.page < OB_PAGES.length - 1){ ob.page++; obRender(); } });
+$("ob-prev").addEventListener("click", () => { if (ob.page > 0){ ob.page--; obRender(); } });
+$("ob-skip").addEventListener("click", obDone);
+$("ob-later").addEventListener("click", obDone);
+$("ob-install").addEventListener("click", () => { obDone(); if (pwa.installAction) pwa.installAction(); });
+
+/* --- 스플래시: 폰트 준비 + 최소 노출 후 해제, 최대 1.2s --- */
+(function splashInit(){
+  const t0 = Date.now();
+  const MIN = 400, MAX = 1200;
+  const ready = ("fonts" in document) ? document.fonts.ready : Promise.resolve();
+  Promise.race([ready, new Promise((r) => setTimeout(r, MAX))]).then(() => {
+    const wait = Math.max(0, MIN - (Date.now() - t0));
+    setTimeout(() => {
+      const sp = $("splash");
+      sp.classList.add("hide");
+      setTimeout(() => sp.remove(), 260);
+      if (!prefs.onboarded) obShow();
+    }, wait);
   });
 })();
 
