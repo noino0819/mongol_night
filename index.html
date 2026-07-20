@@ -471,6 +471,7 @@
   }
   .pwa-install:active{transform:translateY(2px);box-shadow:none}
   .pwa-install.navy{background:var(--px-navy);color:var(--milk)}
+  .ks-sm{width:auto;font-size:14px;padding:10px 14px}
 
   /* --- 스플래시 --- */
   .splash{
@@ -629,6 +630,50 @@
     </div>
     <div id="home-cats"></div>
     <div class="footer-note">인터넷 연결 불필요 · 폰 하나로 진행<br>일행·즐겨찾기·설정은 이 폰에 저장돼요</div>  </div>
+
+  <!-- ============ kitchen-sink (QA 숨김 화면, 홈 로고 7연타) ============ -->
+  <div class="screen" id="scr-kitchen">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🧪 kitchen-sink</h2></div>
+    <p class="hint">QA용 숨김 화면 — 홈 로고 7연타로 진입. 전 컴포넌트를 여기서 잡아 검사!</p>
+    <div class="field"><label>팔레트 8색</label><div id="ks-pal" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+    <div class="field"><label>버튼</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ks-toast" style="width:auto">시작!</button>
+        <button class="btn ghost ks-toast" style="width:auto">판 접기</button>
+        <button class="btn ks-toast" style="width:auto;background:var(--px-red);color:var(--milk)">💣 폭탄!</button>
+        <button class="btn ghost" style="width:auto" disabled>비활성</button>
+      </div>
+    </div>
+    <div class="field"><label>연출 트리거</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost ks-sm" id="ks-cd">3-2-1 카운트다운</button>
+        <button class="btn ghost ks-sm" id="ks-vic">🎉 승리 연출</button>
+        <button class="btn ghost ks-sm" id="ks-upd">🆕 업데이트 토스트</button>
+        <button class="btn ghost ks-sm ks-toast">토스트</button>
+      </div>
+    </div>
+    <div class="field"><label>픽셀 스켈레톤 (500ms 2프레임)</label><div class="px-skel"></div></div>
+    <div class="field"><label>빈 상태</label>
+      <div class="home-empty" style="margin:0">
+        <div style="opacity:.55"><px-sprite name="bor" scale="4"></px-sprite></div>
+        <div class="tx">일행을 등록하면 시작!</div>
+        <button class="ob-btn ks-toast" style="width:auto;padding:10px 16px;font-size:15px">+ 등록</button>
+      </div>
+    </div>
+    <div class="field"><label>에러 (RPG 대화창)</label>
+      <div class="rpg-err">
+        <px-sprite name="tengri" scale="3"></px-sprite>
+        <div style="flex:1">
+          <div class="who-nm">텡그리</div>
+          <div class="msg">...이건 예상 밖이군. 잠시 별이 흐트러졌다.</div>
+          <button class="btn ks-toast" style="width:auto;padding:8px 12px;font-size:14px;margin-top:10px">다시 시도</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>마스코트 스프라이트 21종</label>
+      <div id="ks-mascots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+    </div>
+  </div>
 
   <!-- ============ 설정 ============ -->
   <div class="screen" id="scr-settings">
@@ -4252,6 +4297,53 @@ go = function(name){
 };
 renderHome();
 if (prefs.onboarded) coachShow("fav"); /* 온보딩 직후가 아닌 재방문 첫 홈에서 */
+
+/* --- kitchen-sink: 홈 로고 7연타 진입 + 데모 콘텐츠 --- */
+(function kitchenInit(){
+  let taps = 0, tapId = null;
+  $("home-logo").addEventListener("click", () => {
+    taps++;
+    clearTimeout(tapId);
+    tapId = setTimeout(() => { taps = 0; }, 1600);
+    if (taps >= 7){
+      taps = 0;
+      pwaToast("🧪 kitchen-sink 오픈!");
+      go("kitchen");
+    } else if (taps >= 4){
+      pwaToast((7 - taps) + "번 더 누르면 비밀 화면 ㅋㅋ");
+    }
+  });
+
+  /* 팔레트 스와치 */
+  $("ks-pal").innerHTML = window.SN_SPRITES.PAL.map((h) =>
+    '<div style="display:flex;flex-direction:column;gap:4px;align-items:center">' +
+    '<div style="width:34px;height:34px;background:' + h + ';box-shadow:0 0 0 2px var(--px-black)"></div>' +
+    '<div style="font-size:10px;color:var(--dim)">' + h + '</div></div>').join("");
+
+  /* 마스코트 21종 (프로토타입 라벨) */
+  const MASCOTS = [
+    ["bor", "보르 (대표·대장정)"], ["bormoon", "보르+달 (로고)"], ["fox", "여우 (라이어)"],
+    ["crow", "까마귀 (마피아)"], ["wolf", "늑대 (늑대인간)"], ["hawk", "매 (인디언포커)"],
+    ["hedgehog", "고슴도치 (과일 종!)"], ["mole", "두더지 (폭탄)"], ["rooster", "수탉 (버저)"],
+    ["goat", "염소 (이마 퀴즈)"], ["squirrel", "다람쥐 (초성)"], ["rabbit", "토끼 (그림 릴레이)"],
+    ["otter", "수달 (그림 퀴즈)"], ["turtle", "거북 (오목)"], ["badger", "오소리 (주사위 배팅)"],
+    ["crane", "학 (숫자야구)"], ["camel", "낙타 (밸런스)"], ["owl2", "올빼미 쌍둥이 (텔레파시)"],
+    ["marmot", "마멋 (룰렛)"], ["owlprof", "부엉이 박사 (상식퀴즈)"], ["tengri", "텡그리 (고비의 별)"]
+  ];
+  $("ks-mascots").innerHTML = MASCOTS.map(([k, label]) =>
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;background:#1A2138;padding:10px 4px">' +
+    '<px-sprite name="' + k + '" scale="3"></px-sprite>' +
+    '<div style="font-size:11px;color:#B9C1D6;text-align:center;line-height:1.4;word-break:keep-all">' + label + '</div></div>').join("");
+
+  /* QA용 직행: index.html#kitchen */
+  if (location.hash === "#kitchen") go("kitchen");
+
+  /* 트리거 */
+  $("ks-cd").addEventListener("click", () => snCountdown(() => pwaToast("시작!")));
+  $("ks-vic").addEventListener("click", () => snVictory("bor"));
+  $("ks-upd").addEventListener("click", () => pwaToast("🌙 새 버전 도착!", "새로고침", () => pwaToast("데모라서 진짜로는 안 껐어 ㅋㅋ")));
+  document.querySelectorAll(".ks-toast").forEach((b) => b.addEventListener("click", () => pwaToast("토스트는 2.4초 뒤에 사라져")));
+})();
 
 /* --- 공통 연출: 3-2-1 카운트다운 / 승리 컨페티 (전 게임 공용) --- */
 function snCountdown(onDone){
