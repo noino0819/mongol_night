@@ -1,6 +1,7 @@
 "use strict";
 /* ================= 몽골 대장정 (인생게임 스타일) ================= */
 const LIFE_COLORS = ["#FF7A45","#8FBF9F","#6FA8DC","#E8B84D","#C98BD9","#F27B9B"];
+const MB_DICE = ["⚀","⚁","⚂","⚃","⚄","⚅"];
 const MB_TEAM_NAMES = ["🔥 불꽃 기마단","🌊 푸른 늑대단","⭐ 황금 독수리단"];
 /* 존별 시세: p=초원 가격, t=통행료 (게르 있으면 통행료 2배, 게르 건설비 = 가격) */
 const MB_Z = [{ p: 3, t: 2 }, { p: 4, t: 3 }, { p: 5, t: 4 }];
@@ -176,7 +177,7 @@ function mbAssets(u){
   Object.keys(mb.owner).forEach(k => { if (mb.owner[k] === mb.units.indexOf(u)) a += mbLandValue(+k); });
   return a;
 }
-function mbRender(diceText){
+function mbRender(diceText, moving){
   const cur = mb.units[mb.turn];
   $("mb-strip").innerHTML = mb.units.map((u, i) => {
     const lands = Object.keys(mb.owner).filter(k => mb.owner[k] === i).length;
@@ -190,8 +191,12 @@ function mbRender(diceText){
     if (!(g in tileAt)){ cells.push('<div class="mb-cell"></div>'); continue; }
     const i = tileAt[g], t = MB_TILES[i];
     const ownIdx = mb.owner[i];
-    const toks = mb.units.filter(u => u.alive && u.pos === i).map(u => '<i style="background:' + u.color + '"></i>').join("");
+    const toks = mb.units.filter(u => u.alive && u.pos === i).map(u => {
+      const hop = (moving && u === mb.units[mb.turn]) ? ' class="mb-hop"' : "";
+      return '<i' + hop + ' style="background:' + u.color + '"></i>';
+    }).join("");
     let inner = "", cls = "mb-tile";
+    if (i === mb.fxGer) cls += " mb-built";
     if (t.t === "land"){
       const z = MB_Z[t.z];
       if (ownIdx !== undefined){
@@ -214,6 +219,7 @@ function mbRender(diceText){
     '<div class="info">' + (mb.limit - cur.turns) + '턴 남음' + (cur.dbl ? " · 🔥이동 2배" : "") + (cur.jail ? " · 🏜️조난 " + cur.jail + "턴" : "") + '</div>' +
     '</div>';
   $("mb-board").innerHTML = cells.join("") + center;
+  mb.fxGer = -1;
 }
 function mbNextUnit(){
   mb.doubles = 0;
@@ -260,15 +266,17 @@ $("mb-roll").addEventListener("click", () => {
   mb.busy = true;
   let d1 = 1 + Math.floor(Math.random() * 6), d2 = 1 + Math.floor(Math.random() * 6);
   let ticks = 0;
+  const dice = $("mb-dice");
+  if (dice) dice.classList.add("mb-rolling");
   const anim = setInterval(() => {
-    const dice = $("mb-dice");
-    if (dice) dice.textContent = (1 + Math.floor(Math.random() * 6)) + " · " + (1 + Math.floor(Math.random() * 6));
+    const d = $("mb-dice");
+    if (d) d.textContent = MB_DICE[Math.floor(Math.random() * 6)] + MB_DICE[Math.floor(Math.random() * 6)];
     ticks++;
     if (ticks >= 10){
       clearInterval(anim);
       const dbl = d1 === d2;
-      const dice2 = $("mb-dice");
-      if (dice2) dice2.textContent = d1 + " · " + d2 + (dbl ? " 🔥" : "");
+      const d2el = $("mb-dice");
+      if (d2el){ d2el.classList.remove("mb-rolling"); d2el.textContent = MB_DICE[d1 - 1] + MB_DICE[d2 - 1] + (dbl ? " 🔥" : ""); }
       setTimeout(() => mbResolveRoll(cur, d1 + d2, dbl), 550);
     }
   }, 70);
@@ -301,18 +309,23 @@ function mbResolveRoll(cur, sum, dbl){
   mbMove(cur, sum * mult, dbl);
 }
 function mbMove(cur, steps, dbl){
-  let np = cur.pos + steps;
-  let salary = false;
-  if (steps > 0 && np >= MB_N) salary = true;
-  cur.pos = ((np % MB_N) + MB_N) % MB_N;
   cur.rollIdx++;
-  mbRender("");
-  const go = () => mbResolveTile(cur, dbl);
-  if (salary){
-    cur.sheep += 5;
-    mbRender("");
-    lifeModal("💵", "월급날!", "울란바토르를 지나며 양 +5", go);
-  } else go();
+  const dir = steps >= 0 ? 1 : -1;
+  let remaining = Math.abs(steps), salary = false;
+  const hop = () => {
+    if (remaining === 0){
+      const go = () => mbResolveTile(cur, dbl);
+      if (salary){ cur.sheep += 5; mbRender(""); lifeModal("💵", "월급날!", "울란바토르를 지나며 양 +5", go); }
+      else go();
+      return;
+    }
+    cur.pos = ((cur.pos + dir) % MB_N + MB_N) % MB_N;
+    if (dir > 0 && cur.pos === 0) salary = true; // 출발지 통과
+    remaining--;
+    mbRender("", true);
+    setTimeout(hop, 130);
+  };
+  hop();
 }
 function mbResolveTile(cur, dbl){
   const i = cur.pos, t = MB_TILES[i];
@@ -369,7 +382,7 @@ function mbResolveTile(cur, dbl){
       if (!mb.ger[i] && cur.sheep >= z.p){
         mbAsk("⛺", t.nm + " (내 초원)", "게르를 지으면 통행료가 2배! 건설비 양 " + z.p,
           "⛺ 건설 (" + z.p + ")", "다음에",
-          () => { cur.sheep -= z.p; mb.ger[i] = true; mbEndTurn(dbl); },
+          () => { cur.sheep -= z.p; mb.ger[i] = true; mb.fxGer = i; mbEndTurn(dbl); },
           () => mbEndTurn(dbl));
       } else {
         lifeModal("🏡", t.nm, mb.ger[i] ? "내 게르에서 편안한 하룻밤~" : "내 초원! (게르 건설비 부족)", () => mbEndTurn(dbl));
@@ -413,7 +426,7 @@ function mbApplyKey(cur, fx, dbl){
     const owned = Object.keys(mb.owner).filter(k => mb.owner[k] === myIdx && !mb.ger[k]).map(Number);
     if (owned.length){
       owned.sort((a, b) => MB_Z[MB_TILES[b].z].p - MB_Z[MB_TILES[a].z].p);
-      mb.ger[owned[0]] = true;
+      mb.ger[owned[0]] = true; mb.fxGer = owned[0];
     } else cur.sheep += 2;
   }
   if (fx.goIsland){ cur.pos = 7; cur.jail = 2; return mbEndTurn(false); }
