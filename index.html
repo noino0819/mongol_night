@@ -393,6 +393,58 @@
   @keyframes twinkle{0%,100%{opacity:.15}50%{opacity:1}}
   @media (prefers-reduced-motion:reduce){.skybg .star{animation:none;opacity:.7}}
 
+  /* --- 홈 IA --- */
+  .home-empty{display:flex;flex-direction:column;align-items:center;gap:12px;background:#1A2138;padding:24px;box-shadow:0 4px 0 #10162A;margin:6px 0}
+  .home-empty .tx{font-size:15px;color:#B9C1D6}
+  .home-sec{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .sec-label{font-size:14px;color:var(--dim)}
+  #home-filter{margin-top:8px}
+  .fav-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .fav-card{
+    display:flex;align-items:center;gap:8px;background:var(--px-navy);box-shadow:0 4px 0 var(--px-black);
+    padding:8px 12px;cursor:pointer;flex:none;user-select:none;-webkit-user-select:none;
+    border:0;color:var(--milk);font-family:var(--font-px);font-size:14px;
+  }
+  .fav-card:active{transform:translateY(4px);box-shadow:none}
+  #home-cats{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .cat-block{display:flex;flex-direction:column;gap:8px}
+  .cat-head{
+    display:flex;align-items:center;gap:10px;background:#1A2138;box-shadow:0 4px 0 #10162A;
+    padding:8px 12px;cursor:pointer;user-select:none;-webkit-user-select:none;
+    border:0;color:var(--milk);font-family:inherit;width:100%;text-align:left;
+  }
+  .cat-head:active{transform:translateY(2px)}
+  .cat-head .nm{font-family:var(--font-px);font-size:16px;flex:1}
+  .cat-head .cnt{font-size:12px;background:var(--night);color:var(--dim);padding:4px 8px;white-space:nowrap}
+  .cat-head .arw{font-size:13px;color:var(--dim)}
+  .cat-games{display:flex;flex-direction:column;gap:8px;padding-left:6px}
+  .g-card{
+    display:flex;align-items:center;gap:12px;background:var(--px-navy);box-shadow:0 4px 0 var(--px-black);
+    padding:10px 12px;cursor:pointer;user-select:none;-webkit-user-select:none;
+    border:0;color:var(--milk);font-family:inherit;text-align:left;width:100%;
+  }
+  .g-card:active{transform:translateY(4px);box-shadow:none}
+  .g-card .info{flex:1;min-width:0}
+  .g-card .nm{font-family:var(--font-px);font-size:16px}
+  .g-card .nm .st{color:var(--px-sand)}
+  .g-card .ds{font-size:13px;color:var(--dim);margin-top:4px}
+  .g-card .meta{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex:none}
+  .g-card .meta i{font-style:normal;font-size:12px;background:var(--night);color:#B9C1D6;padding:3px 6px;white-space:nowrap}
+  .g-card.soon{opacity:.55}
+
+  /* --- 코치마크 (1회성 툴팁, 화면당 1개) --- */
+  .coach{
+    position:fixed;left:20px;right:20px;bottom:24px;z-index:80;
+    background:var(--px-sand);color:var(--px-black);box-shadow:0 4px 0 var(--px-black);
+    padding:14px;display:flex;align-items:center;gap:12px;animation:fadein .2s steps(4);
+    max-width:390px;margin:0 auto;
+  }
+  .coach .tx{font-size:14px;line-height:1.6;flex:1;font-weight:700;word-break:keep-all}
+  .coach button{
+    background:var(--px-black);color:var(--milk);border:0;font-family:inherit;font-size:14px;
+    padding:8px 12px;box-shadow:0 3px 0 #000;cursor:pointer;flex:none;
+  }
+
   /* --- 홈 로고행 --- */
   .home-logo{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;-webkit-user-select:none;margin-bottom:6px}
   .home-logo .t{font-family:var(--font-px);font-size:26px;font-weight:700;letter-spacing:3px;text-shadow:0 3px 0 var(--px-black)}
@@ -505,6 +557,12 @@
     </div>
   </div>
 
+  <!-- 코치마크 (1회성) -->
+  <div class="coach" id="coach" style="display:none">
+    <div class="tx" id="coach-tx"></div>
+    <button id="coach-ok">알겠어</button>
+  </div>
+
   <!-- ============ 홈 ============ -->
   <div class="screen on" id="scr-home">
     <div class="pwa-row">
@@ -521,86 +579,23 @@
       </div>
     </div>
 
-    <div class="game-list">
-      <button class="game-card" data-go="liar">
-        <div class="icon">🐺</div>
-        <div class="txt"><b>라이어 게임</b><span>한 명만 제시어를 몰라요. 티 안 나게 버티기</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="mafia">
-        <div class="icon">🌙</div>
-        <div class="txt"><b>마피아</b><span>역할 비밀 분배 + 진행 가이드</span></div>
-        <div class="need">4인+</div>
-      </button>
-      <button class="game-card" data-go="choseong">
-        <div class="icon">⚡</div>
-        <div class="txt"><b>초성 퀴즈</b><span>먼저 외치는 사람이 승리</span></div>
-        <div class="need">2인+</div>
-      </button>
-      <button class="game-card" data-go="balance">
-        <div class="icon">⚖️</div>
-        <div class="txt"><b>밸런스 게임</b><span>둘 중 하나만. 소수파는 벌칙?</span></div>
-        <div class="need">2인+</div>
-      </button>
-      <button class="game-card" data-go="fruit">
-        <div class="icon">🔔</div>
-        <div class="txt"><b>과일 종!</b><span>과일 합이 5가 되면 내 버튼을 먼저 탭! (할리갈리 스타일)</span></div>
-        <div class="need">2~6인</div>
-      </button>
-      <button class="game-card" data-go="omok">
-        <div class="icon">⚫</div>
-        <div class="txt"><b>오목</b><span>폰 하나로 마주 앉아 대국</span></div>
-        <div class="need">2인</div>
-      </button>
-      <button class="game-card" data-go="forehead">
-        <div class="icon">🎤</div>
-        <div class="txt"><b>이마 퀴즈</b><span>폰을 이마에! 설명 듣고 단어 맞히기</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="catchmind">
-        <div class="icon">🖍️</div>
-        <div class="txt"><b>그림 퀴즈</b><span>캐치마인드식! 그리는 동안 다같이 정답 외치기</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="wolf">
-        <div class="icon">🌕</div>
-        <div class="txt"><b>한밤의 늑대인간</b><span>10분 컷 마피아! 단 하룻밤, 단 한 번의 투표</span></div>
-        <div class="need">4인+</div>
-      </button>
-      <button class="game-card" data-go="indian">
-        <div class="icon">🃏</div>
-        <div class="txt"><b>인디언 포커</b><span>내 카드만 못 봄! 표정 읽고 양 배팅</span></div>
-        <div class="need">2인+</div>
-      </button>
-      <button class="game-card" data-go="bomb">
-        <div class="icon">💣</div>
-        <div class="txt"><b>폭탄 돌리기</b><span>제시어 답하고 빨리 패스! 터질 때 든 사람 벌칙</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="tele">
-        <div class="icon">💭</div>
-        <div class="txt"><b>텔레파시 게임</b><span>같은 답을 쓰면 점수! 우리 얼마나 통할까</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="drawrelay">
-        <div class="icon">🎨</div>
-        <div class="txt"><b>그림 릴레이</b><span>갈틱폰 스타일! 그림→추측→그림, 마지막에 변천사 대공개</span></div>
-        <div class="need">3인+</div>
-      </button>
-      <button class="game-card" data-go="life">
-        <div class="icon">🐑</div>
-        <div class="txt"><b>몽골 대장정 2.0</b><span>부루마블 스타일! 초원 사서 통행료 걷기, 결투는 현피, 팀전 가능</span></div>
-        <div class="need">2인+</div>
-      </button>
-      <button class="game-card" data-go="roulette">
-        <div class="icon">🎯</div>
-        <div class="txt"><b>복불복 룰렛</b><span>오늘의 희생양 + 벌칙 뽑기</span></div>
-        <div class="need">2인+</div>
-      </button>
+    <!-- 홈 본문: 필터·최근·즐겨찾기·카테고리 (JS 렌더) -->
+    <div class="seg" id="home-filter" data-coach="fav"></div>
+    <div class="home-empty" id="home-empty" style="display:none">
+      <div style="opacity:.55"><px-sprite name="bor" scale="4"></px-sprite></div>
+      <div class="tx">일행을 등록하면 시작!</div>
+      <button class="ob-btn" style="width:auto;padding:10px 16px;font-size:15px" data-go="settings">+ 등록</button>
     </div>
-
-    <div class="footer-note">인터넷 연결 불필요 · 폰 하나로 진행<br>게임 데이터는 화면을 닫으면 초기화됩니다</div>
-  </div>
+    <div class="home-sec" id="home-recent-sec" style="display:none">
+      <div class="sec-label">⏱️ 최근 한 판</div>
+      <div class="g-card" id="home-recent"></div>
+    </div>
+    <div class="home-sec" id="home-favs-sec" style="display:none">
+      <div class="sec-label">⭐ 즐겨찾기</div>
+      <div class="fav-row" id="home-favs"></div>
+    </div>
+    <div id="home-cats"></div>
+    <div class="footer-note">인터넷 연결 불필요 · 폰 하나로 진행<br>일행·즐겨찾기·설정은 이 폰에 저장돼요</div>  </div>
 
   <!-- ============ 설정 ============ -->
   <div class="screen" id="scr-settings">
@@ -3954,6 +3949,7 @@ function obDone(){
   prefs.onboarded = true;
   savePrefs();
   $("onboard").style.display = "none";
+  if (typeof coachShow === "function") coachShow("fav");
 }
 $("ob-next").addEventListener("click", () => { if (ob.page < OB_PAGES.length - 1){ ob.page++; obRender(); } });
 $("ob-prev").addEventListener("click", () => { if (ob.page > 0){ ob.page--; obRender(); } });
@@ -4011,6 +4007,218 @@ if (Array.isArray(prefs.roster) && prefs.roster.length){
       () => {});
   });
 })();
+
+/* ================================================================
+   v2 홈 IA: 카테고리 6종 · 인원 필터 · 즐겨찾기 · 최근 한 판 · 코치마크
+   go:null 게임은 아직 미구현 (M3~M4에서 채움)
+   ================================================================ */
+const SN_CATS = [
+  { id:"psych", emoji:"🕵️", name:"심리전", spr:"fox", games:[
+    { id:"liar",     go:"liar",      need:3, name:"라이어",        spr:"fox",      desc:"말로 속이고 눈치로 잡아",       p:[3,8],  t:15 },
+    { id:"mafia",    go:"mafia",     need:4, name:"마피아",        spr:"crow",     desc:"밤이 되면 누군가 사라진다",     p:[4,10], t:20 },
+    { id:"were",     go:"wolf",      need:4, name:"늑대인간",      spr:"wolf",     desc:"보름달 아래 정체 숨기기",       p:[4,10], t:25 },
+    { id:"indian",   go:"indian",    need:2, name:"인디언 포커",   spr:"hawk",     desc:"내 카드만 나만 몰라",           p:[2,8],  t:10 } ] },
+  { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
+    { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"같은 과일 5개면 종 쳐",         p:[2,6],  t:10 },
+    { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
+    { id:"buzzer",   go:null,        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
+    { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
+    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 } ] },
+  { id:"draw", emoji:"🎨", name:"그림", spr:"rabbit", games:[
+    { id:"relay",    go:"drawrelay", need:3, name:"그림 릴레이",   spr:"rabbit",   desc:"그림으로 전하는 전화게임",      p:[3,10], t:15 },
+    { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마",        p:[3,8],  t:15 } ] },
+  { id:"board", emoji:"🎲", name:"보드·두뇌", spr:"bor", games:[
+    { id:"journey",  go:"life",      need:2, name:"몽골 대장정 2.0", spr:"bor",    desc:"초원 횡단 보드 레이스",         p:[2,6],  t:40 },
+    { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아라",         p:[2,2],  t:10 },
+    { id:"dicebet",  go:null,        need:2, name:"주사위 배팅",   spr:"badger",   desc:"감으로 거는 한 판",             p:[2,5],  t:15 },
+    { id:"baseball", go:null,        need:2, name:"숫자야구",      spr:"crane",    desc:"3자리 숫자 추리 대결",          p:[2,4],  t:15 } ] },
+  { id:"talk", emoji:"💬", name:"토크·퀴즈", spr:"camel", games:[
+    { id:"balance",  go:"balance",   need:0, name:"밸런스 게임",   spr:"camel",    desc:"A냐 B냐 그것이 문제",           p:[2,10], t:10 },
+    { id:"tele",     go:"tele",      need:3, name:"텔레파시",      spr:"owl2",     desc:"같은 생각이면 승리",            p:[3,10], t:10 },
+    { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려",            p:[2,10], t:5 },
+    { id:"quiz",     go:null,        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
+  { id:"story", emoji:"📜", name:"스토리", spr:"tengri", games:[
+    { id:"gobi",     go:null,        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 } ] }
+];
+const SN_GAME_BY_ID = {};
+SN_CATS.forEach((c) => c.games.forEach((g) => { SN_GAME_BY_ID[g.id] = g; }));
+if (!prefs.openCats) prefs.openCats = { psych: true };
+if (!prefs.favs) prefs.favs = {};
+if (!prefs.coachDone) prefs.coachDone = {};
+
+function haptic(pattern){
+  if (("vibe" in prefs ? prefs.vibe : true) && navigator.vibrate){
+    try { navigator.vibrate(pattern); } catch (e) { /* 무시 */ }
+  }
+}
+
+/* --- 코치마크 --- */
+const COACH_TEXTS = {
+  fav: "게임 카드를 길게 누르면 즐겨찾기 ⭐ 에 등록돼",
+  secret: "비밀은 꾹 누르는 동안만 보여 — 손 떼면 바로 잠겨",
+  roster: "여기서 일행을 등록하면 모든 게임에서 그대로 쓰여"
+};
+let coachCur = null;
+function coachShow(key){
+  if (prefs.coachDone[key] || coachCur) return;
+  coachCur = key;
+  $("coach-tx").textContent = COACH_TEXTS[key];
+  $("coach").style.display = "";
+}
+$("coach-ok").addEventListener("click", () => {
+  if (coachCur){ prefs.coachDone[coachCur] = true; savePrefs(); coachCur = null; }
+  $("coach").style.display = "none";
+});
+
+/* --- 게임 실행 (필터/카드/최근/즐겨찾기 공용 경로) --- */
+function launchGame(g){
+  if (!g.go){
+    pwaToast("🚧 " + g.name + "은(는) 준비 중이야, 곧 나와 ㅋㅋ");
+    return;
+  }
+  if (roster.length < g.need){
+    alert("이 게임은 " + g.need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
+    return;
+  }
+  prefs.recent = { id: g.id, when: Date.now(), n: roster.length };
+  savePrefs();
+  haptic(10);
+  resetGame(g.go);
+  go(g.go);
+  coachShow("secret");
+}
+
+/* 길게 누르면 즐겨찾기 토글, 짧게 탭이면 실행 */
+function bindGameCard(el, g){
+  let lpId = null, lpFired = false;
+  el.addEventListener("pointerdown", () => {
+    lpFired = false;
+    clearTimeout(lpId);
+    lpId = setTimeout(() => {
+      lpFired = true;
+      haptic(30);
+      prefs.favs[g.id] = !prefs.favs[g.id];
+      savePrefs();
+      pwaToast(prefs.favs[g.id] ? "⭐ 즐겨찾기 등록!" : "즐겨찾기 해제");
+      renderHome();
+    }, 500);
+  });
+  const cancel = () => clearTimeout(lpId);
+  el.addEventListener("pointerup", cancel);
+  el.addEventListener("pointerleave", cancel);
+  el.addEventListener("pointercancel", cancel);
+  el.addEventListener("click", () => { if (lpFired){ lpFired = false; return; } launchGame(g); });
+  el.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+function relTime(ts){
+  const d = Math.floor((Date.now() - ts) / 86400000);
+  return d <= 0 ? "오늘" : d === 1 ? "어제" : d + "일 전";
+}
+function gameCardHtml(g){
+  const star = prefs.favs[g.id] ? ' <span class="st">⭐</span>' : "";
+  const ppl = g.p[0] === g.p[1] ? g.p[0] + "인" : g.p[0] + "-" + g.p[1] + "인";
+  return '<px-sprite name="' + g.spr + '" scale="3"></px-sprite>' +
+    '<div class="info"><div class="nm">' + g.name + (g.go ? star : ' <span style="font-size:11px;color:var(--dim)">준비 중</span>') + '</div>' +
+    '<div class="ds">' + g.desc + '</div></div>' +
+    '<div class="meta"><i>👥 ' + ppl + '</i><i>⏱️ ' + g.t + '분</i></div>';
+}
+
+function renderHome(){
+  /* 빈 상태 */
+  $("home-empty").style.display = roster.length ? "none" : "";
+
+  /* 인원 필터 칩 */
+  const FILTERS = ["전체", "2인", "3-4인", "5인+"];
+  const cur = prefs.filter || "전체";
+  const fbox = $("home-filter");
+  fbox.innerHTML = "";
+  FILTERS.forEach((f) => {
+    const b = document.createElement("button");
+    b.textContent = f;
+    b.classList.toggle("sel", f === cur);
+    b.addEventListener("click", () => { haptic(10); prefs.filter = f; savePrefs(); renderHome(); });
+    fbox.appendChild(b);
+  });
+  const pass = (g) => {
+    const [mn, mx] = g.p;
+    if (cur === "2인") return mn <= 2;
+    if (cur === "3-4인") return mn <= 4 && mx >= 3;
+    if (cur === "5인+") return mx >= 5;
+    return true;
+  };
+
+  /* 최근 한 판 */
+  const rec = prefs.recent && SN_GAME_BY_ID[prefs.recent.id];
+  $("home-recent-sec").style.display = rec ? "" : "none";
+  if (rec){
+    const rc = $("home-recent");
+    rc.innerHTML = '<px-sprite name="' + rec.spr + '" scale="3"></px-sprite>' +
+      '<div class="info"><div class="nm">' + rec.name + '</div>' +
+      '<div class="ds">' + relTime(prefs.recent.when) + " " + prefs.recent.n + '명이 했어 · 바로 이어서 →</div></div>';
+    rc.onclick = () => launchGame(rec);
+  }
+
+  /* 즐겨찾기 가로 스크롤 */
+  const favs = Object.keys(prefs.favs).filter((id) => prefs.favs[id] && SN_GAME_BY_ID[id]);
+  $("home-favs-sec").style.display = favs.length ? "" : "none";
+  const fr = $("home-favs");
+  fr.innerHTML = "";
+  favs.forEach((id) => {
+    const g = SN_GAME_BY_ID[id];
+    const b = document.createElement("button");
+    b.className = "fav-card";
+    b.innerHTML = '<px-sprite name="' + g.spr + '" scale="2"></px-sprite><span>' + g.name + '</span>';
+    bindGameCard(b, g);
+    fr.appendChild(b);
+  });
+
+  /* 카테고리 아코디언 */
+  const box = $("home-cats");
+  box.innerHTML = "";
+  SN_CATS.forEach((cat) => {
+    const games = cat.games.filter(pass);
+    if (!games.length) return;
+    const open = !!prefs.openCats[cat.id];
+    const block = document.createElement("div");
+    block.className = "cat-block";
+    const head = document.createElement("button");
+    head.className = "cat-head";
+    head.innerHTML = '<px-sprite name="' + cat.spr + '" scale="2"></px-sprite>' +
+      '<span class="nm">' + cat.emoji + " " + cat.name + '</span>' +
+      '<span class="cnt">' + games.length + '개</span><span class="arw">' + (open ? "▲" : "▼") + '</span>';
+    head.addEventListener("click", () => {
+      haptic(10);
+      prefs.openCats[cat.id] = !open;
+      savePrefs();
+      renderHome();
+    });
+    block.appendChild(head);
+    if (open){
+      const list = document.createElement("div");
+      list.className = "cat-games";
+      games.forEach((g) => {
+        const b = document.createElement("button");
+        b.className = "g-card" + (g.go ? "" : " soon");
+        b.innerHTML = gameCardHtml(g);
+        bindGameCard(b, g);
+        list.appendChild(b);
+      });
+      block.appendChild(list);
+    }
+    box.appendChild(block);
+  });
+}
+
+/* go() 래핑: 홈 복귀 시 항상 최신 상태로 재렌더 + 설정 첫 진입 코치 */
+const goV1 = go;
+go = function(name){
+  goV1(name);
+  if (name === "home") renderHome();
+  if (name === "settings" && !roster.length) coachShow("roster");
+};
+renderHome();
+if (prefs.onboarded) coachShow("fav"); /* 온보딩 직후가 아닌 재방문 첫 홈에서 */
 
 /* --- 스플래시: 폰트 준비 + 최소 노출 후 해제, 최대 1.2s --- */
 (function splashInit(){
