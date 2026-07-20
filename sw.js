@@ -1,0 +1,51 @@
+/* 초원의 밤 — 서비스워커: 전체 precache + cache-first (오프라인 절대 보장) */
+"use strict";
+const V = "v2.0.0"; /* 릴리스마다 반드시 bump */
+const CACHE = "steppe-night-" + V;
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/maskable-512.png",
+  "./icons/apple-touch-icon.png",
+  "./icons/favicon.ico"
+];
+
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+});
+
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("fetch", (e) => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(
+    caches.match(e.request, { ignoreSearch: true }).then((hit) => {
+      if (hit) return hit;
+      return fetch(e.request).then((res) => {
+        /* 프리캐시 목록 밖 요청도 성공하면 담아둠 (동일 오리진만) */
+        if (res.ok && new URL(e.request.url).origin === location.origin) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+        }
+        return res;
+      }).catch(() => {
+        /* 오프라인 + 미캐시: 내비게이션이면 앱 셸로 */
+        if (e.request.mode === "navigate") return caches.match("./index.html");
+        return Response.error();
+      });
+    })
+  );
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data === "SKIP_WAITING") self.skipWaiting();
+});

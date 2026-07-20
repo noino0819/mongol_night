@@ -1,0 +1,17 @@
+{
+  "name": "초원의 밤 — 몽골 파티게임",
+  "short_name": "초원의밤",
+  "description": "인터넷 없는 밤, 게임은 여기 다 있어. 폰 1대로 즐기는 오프라인 파티게임 20종.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E1526",
+  "theme_color": "#0E1526",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
