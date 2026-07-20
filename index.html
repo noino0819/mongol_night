@@ -544,8 +544,10 @@
   .pwa-badge{
     font-family:var(--font-px);font-size:12px;font-weight:700;color:var(--dim);
     background:var(--night2);border:1px solid var(--line);padding:7px 11px;
+    transition:opacity .6s;
   }
   .pwa-badge.ok{color:var(--steppe);border-color:var(--steppe)}
+  .pwa-badge.bye{opacity:0}
   .pwa-badge.err{color:var(--danger);border-color:var(--danger)}
   .pwa-install{
     font-family:var(--font-px);font-size:12px;font-weight:800;cursor:pointer;
@@ -734,7 +736,7 @@
   <!-- ============ 홈 ============ -->
   <div class="screen on" id="scr-home">
     <div class="pwa-row">
-      <span class="pwa-badge" id="pwa-badge">⏳ 오프라인 준비 중...</span>
+      <span class="pwa-badge" id="pwa-badge">⏳ 오프라인 저장 중... 인터넷 켠 채로 잠깐만!</span>
       <span style="flex:1"></span>
       <button class="pwa-install" id="pwa-install" style="display:none">📲 설치</button>
       <button class="pwa-install navy" data-go="settings">⚙️</button>
@@ -1189,6 +1191,45 @@
       </div>
     </div>
     <div id="wf-result" style="display:none"></div>
+  </div>
+
+  <!-- ============ 인디언 포커 ============ -->
+  <div class="screen" id="scr-indian">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🃏 인디언 포커</h2></div>
+    <div id="in-setup">
+      <p class="hint">1~10 카드(각 2장)를 한 장씩 받아요. <b>남의 카드는 보이고 내 카드만 안 보임!</b> 폰을 이마에 대면 다른 사람들이 내 숫자를 보게 됩니다. 표정을 읽고 콜(양 2)이냐 다이냐! 참가비 양 1, 최고 숫자가 판돈 싹쓸이. <b style="color:var(--danger)">다이했는데 알고 보니 최고 카드였다면 벌칙!</b></p>
+      <div class="field"><label>참여자 선택 (2~8명, 시작 양 10마리)</label><div class="seg" id="in-players"></div></div>
+      <button class="btn" id="in-start">카드 돌리기!</button>
+    </div>
+    <div id="in-view" style="display:none" class="pass-stage">
+      <div class="who-label" id="in-view-step">카드 공개</div>
+      <div class="who" id="in-view-name">-</div>
+      <div class="hint" id="in-view-hint" style="margin:0">폰 화면을 바깥으로 해서 이마에 대세요!<br>본인은 천장 보기 or 눈 감기 🙈</div>
+      <div id="in-view-card" style="font-size:110px;font-weight:900;line-height:1.2;display:none"></div>
+      <button class="btn pass-next" id="in-view-go">이마에 댔어요, 공개! →</button>
+    </div>
+    <div id="in-bet" style="display:none">
+      <div class="mb-strip" id="in-strip"></div>
+      <div class="stage-center" style="flex:0;gap:6px;margin:18px 0">
+        <span class="tag">💰 판돈: <b id="in-pot">0</b>양</span>
+        <div class="who" id="in-bet-name" style="font-size:34px">-</div>
+        <div class="hint" style="margin:0">다른 사람 카드와 표정을 보고 결정하세요!</div>
+      </div>
+      <button class="btn" id="in-call">✅ 콜! (양 2 배팅)</button>
+      <button class="btn ghost mt" id="in-die">🏳️ 다이 (포기)</button>
+    </div>
+    <div id="in-showdown" style="display:none">
+      <div class="stage-center" style="flex:0;gap:8px;margin-bottom:10px"><span class="tag">쇼다운!</span></div>
+      <div id="in-cards"></div>
+      <div class="reveal-card" id="in-round-result" style="margin-top:12px"></div>
+      <button class="btn mt" id="in-next">다음 라운드 →</button>
+      <button class="btn ghost mt" id="in-finish">그만하고 결과 보기</button>
+    </div>
+    <div id="in-end" style="display:none" class="stage-center">
+      <span class="tag">최종 결과</span>
+      <div class="reveal-card" id="in-rank"></div>
+      <button class="btn" id="in-again">다시 하기</button>
+    </div>
   </div>
 
   <!-- ============ 폭탄 돌리기 ============ -->
@@ -2002,7 +2043,7 @@ document.querySelectorAll("[data-go]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.go;
     if (target !== "home"){
-      const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, bomb: 3, tele: 3, ta: 2 }[target] || 0;
+      const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, indian: 2, bomb: 3, tele: 3, ta: 2 }[target] || 0;
       if (roster.length < need){
         alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
         return;
@@ -2025,6 +2066,7 @@ function resetGame(name){
   if (name === "drawrelay"){ drReset(); }
   if (name === "catchmind"){ cmReset(); }
   if (name === "wolf"){ wfReset(); }
+  if (name === "indian"){ inReset(); }
   if (name === "bomb"){ bombReset(); }
   if (name === "tele"){ teReset(); }
   if (name === "lv"){ lvReset(); }
@@ -4058,36 +4100,212 @@ function wfCastVote(target){
   if (wf.i >= wf.order.length) return wfResult();
   wfVotePass();
 }
-function wfResult(){
-  const n = wf.order.length;
+function wfJudge(finals, votes){
+  /* 원작(ONUW) 승리 조건: 무두장이 처형 → 무두장이 단독승 · 늑대 있으면 늑대 1명 이상 처형 시 마을승 ·
+     늑대 없음: 평화 투표 = 마을승, 하수인만 있으면 하수인 외 처형 시 하수인승, 하수인 처형 시 승자 없음 */
+  const n = finals.length;
   const count = Array(n).fill(0);
   let peace = 0;
-  wf.votes.forEach(v => { if (v === -1) peace++; else count[v]++; });
+  votes.forEach(v => { if (v === -1) peace++; else count[v]++; });
   const maxV = Math.max(peace, ...count);
   const executed = (peace >= maxV) ? [] : count.map((c, j) => c === maxV ? j : -1).filter(j => j >= 0);
-  const wolves = wf.final.map((r, j) => j < n && r === "늑대인간" ? j : -1).filter(j => j >= 0);
-  let villageWin;
-  if (executed.length === 0) villageWin = wolves.length === 0;
-  else villageWin = executed.some(j => wf.final[j] === "늑대인간");
+  const hunterKills = [];
+  for (let guard = 0; guard < n; guard++){
+    const add = executed.filter(j => finals[j] === "사냥꾼" && votes[j] >= 0 && !executed.includes(votes[j])).map(j => votes[j]);
+    if (!add.length) break;
+    add.forEach(t => { if (!executed.includes(t)){ executed.push(t); hunterKills.push(t); } });
+  }
+  const deadWolf = executed.some(j => finals[j] === "늑대인간");
+  const deadTanner = executed.some(j => finals[j] === "무두장이");
+  const hasWolf = finals.includes("늑대인간");
+  const hasMinion = finals.includes("하수인");
+  let win;
+  if (deadTanner) win = "tanner";
+  else if (hasWolf) win = deadWolf ? "village" : "wolf";
+  else if (!executed.length) win = "village";
+  else if (hasMinion && executed.some(j => finals[j] !== "하수인")) win = "minion";
+  else if (hasMinion) win = "nobody";
+  else win = "lose";
+  return { count, peace, executed, hunterKills, win, deadWolf };
+}
+function wfResult(){
+  const n = wf.order.length;
+  const finals = wf.final.slice(0, n);
+  const jd = wfJudge(finals, wf.votes);
+  const V = {
+    tanner:  { em:"🪓", txt:"무두장이 승리!", color:"var(--fire)",   sub:"처형이 소원이었던 무두장이의 큰 그림. 늑대팀은 무조건 패배!" + (jd.deadWolf ? " 늑대도 잡혔으니 마을팀도 같이 승리!" : "") },
+    village: { em:"🌞", txt:"마을 승리!",     color:"var(--steppe)", sub: jd.executed.length ? "늑대를 잡아냈다!" : "늑대는 없었다. 평화 투표 정답! 👏" },
+    wolf:    { em:"🌕", txt:"늑대팀 승리!",   color:"var(--danger)", sub: finals.includes("하수인") ? "하수인도 같이 승리!" : "늑대는 유유히 사라졌다..." },
+    minion:  { em:"😈", txt:"하수인 승리!",   color:"var(--danger)", sub:"늑대 한 마리 없이 혼자 마을을 속여넘겼다..." },
+    nobody:  { em:"💀", txt:"모두 패배...",   color:"var(--danger)", sub:"늑대는 없었고 하수인만 잡혔다. 승자 없는 밤" },
+    lose:    { em:"💀", txt:"마을 패배...",   color:"var(--danger)", sub:"늑대는 없었는데 무고한 사람을 처형해버렸다..." }
+  }[jd.win];
   wfShow("wf-result");
-  const voteLines = wf.order.map((nm, j) => nm + " " + count[j] + "표").join(" · ") + (peace ? " · 🕊️평화 " + peace + "표" : "");
-  const execLine = executed.length ? "⚰️ 처형: " + executed.map(j => wf.order[j]).join(", ") : "🕊️ 아무도 처형되지 않음";
+  const voteLines = wf.order.map((nm, j) => nm + " " + jd.count[j] + "표").join(" · ") + (jd.peace ? " · 🕊️평화 " + jd.peace + "표" : "");
+  const execLine = (jd.executed.length ? "⚰️ 처형: " + jd.executed.map(j => wf.order[j]).join(", ") : "🕊️ 아무도 처형되지 않음") +
+    (jd.hunterKills.length ? "<br>🏹 사냥꾼의 마지막 화살: " + jd.hunterKills.map(j => wf.order[j]).join(", ") + " 동반 처형!" : "");
   const table = wf.order.map((nm, j) => {
     const orig = wf.cards[j], fin = wf.final[j];
-    return '<div class="mb-teamcard"><b>' + nm + (executed.includes(j) ? " ⚰️" : "") + '</b><span>' +
+    return '<div class="mb-teamcard"><b>' + nm + (jd.executed.includes(j) ? " ⚰️" : "") + '</b><span>' +
       WF_ROLE_INFO[fin].em + " " + fin + (orig !== fin ? ' <s style="opacity:.55">(밤 시작: ' + orig + ')</s>' : "") + '</span></div>';
   }).join("");
-  const center = wf.cards.slice(n).map(r => WF_ROLE_INFO[r].em + r).join(" · ");
+  const center = wf.final.slice(n).map((r, k) => {
+    const orig = wf.cards[n + k];
+    return WF_ROLE_INFO[r].em + r + (orig !== r ? ' <s style="opacity:.55">(' + orig + ')</s>' : "");
+  }).join(" · ");
   $("wf-result").innerHTML =
     '<div class="stage-center" style="flex:0;gap:8px;margin-bottom:12px">' +
-    '<div style="font-size:70px">' + (villageWin ? "🌞" : "🌕") + '</div>' +
-    '<div class="who" style="font-size:32px;color:' + (villageWin ? "var(--steppe)" : "var(--danger)") + '">' + (villageWin ? "마을 승리!" : "늑대 승리!") + '</div>' +
+    '<div style="font-size:70px">' + V.em + '</div>' +
+    '<div class="who" style="font-size:32px;color:' + V.color + '">' + V.txt + '</div>' +
+    '<p class="hint" style="margin:0">' + V.sub + '</p>' +
     '<p class="hint" style="margin:0">' + execLine + '<br>' + voteLines + '</p></div>' +
     table +
     '<div class="reveal-card" style="margin-top:8px"><div class="lbl">가운데 3장</div><div class="val" style="font-size:15px">' + center + '</div></div>' +
     '<button class="btn mt" id="wf-again">한 판 더!</button>';
   $("wf-again").addEventListener("click", wfReset);
 }
+
+/* ================= 인디언 포커 ================= */
+let ip = { sel: [], p: [], deck: [], pot: 0, viewI: 0, betI: 0, shown: false, tid: null };
+function inReset(){
+  clearInterval(ip.tid); ip.tid = null;
+  ["in-setup","in-view","in-bet","in-showdown","in-end"].forEach(id => $(id).style.display = "none");
+  $("in-setup").style.display = "";
+  const box = $("in-players");
+  box.innerHTML = "";
+  ip.sel = roster.slice(0, 8);
+  roster.forEach(n => {
+    const b = document.createElement("button");
+    b.textContent = n;
+    if (ip.sel.includes(n)) b.classList.add("sel");
+    b.addEventListener("click", () => {
+      if (ip.sel.includes(n)) ip.sel = ip.sel.filter(x => x !== n);
+      else if (ip.sel.length < 8) ip.sel.push(n);
+      else return alert("최대 8명!");
+      b.classList.toggle("sel", ip.sel.includes(n));
+    });
+    box.appendChild(b);
+  });
+}
+$("in-start").addEventListener("click", () => {
+  if (ip.sel.length < 2) return alert("2명 이상 선택!");
+  ip.p = ip.sel.map(n => ({ name: n, sheep: 10, card: 0, folded: false, out: false }));
+  inNewRound();
+});
+function inShow(id){
+  ["in-setup","in-view","in-bet","in-showdown","in-end"].forEach(x => $(x).style.display = "none");
+  $(id).style.display = (id === "in-view" || id === "in-end") ? "flex" : "";
+}
+function inNewRound(){
+  const alive = ip.p.filter(x => !x.out);
+  if (alive.length < 2) return inEnd();
+  ip.deck = shuffle([1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]);
+  ip.pot = 0;
+  ip.p.forEach(x => {
+    x.folded = false;
+    if (x.out) return;
+    x.card = ip.deck.pop();
+    const ante = Math.min(1, x.sheep);
+    x.sheep -= ante; ip.pot += ante;
+  });
+  ip.viewI = -1;
+  inNextView();
+}
+function inNextView(){
+  do { ip.viewI++; } while (ip.viewI < ip.p.length && ip.p[ip.viewI].out);
+  if (ip.viewI >= ip.p.length){ ip.betI = -1; inNextBet(); return; }
+  inShow("in-view");
+  ip.shown = false;
+  const x = ip.p[ip.viewI];
+  $("in-view-step").textContent = "카드 공개 (" + x.name + ")";
+  $("in-view-name").textContent = x.name;
+  $("in-view-hint").style.display = "";
+  $("in-view-card").style.display = "none";
+  $("in-view-go").textContent = "이마에 댔어요, 공개! →";
+  $("in-view-go").disabled = false;
+}
+$("in-view-go").addEventListener("click", () => {
+  if (ip.shown) return;
+  ip.shown = true;
+  const x = ip.p[ip.viewI];
+  $("in-view-go").disabled = true;
+  let cd = 3;
+  $("in-view-hint").style.display = "none";
+  $("in-view-card").style.display = "";
+  $("in-view-card").textContent = cd;
+  $("in-view-card").style.color = "var(--dim)";
+  clearInterval(ip.tid);
+  ip.tid = setInterval(() => {
+    cd--;
+    if (cd > 0){ $("in-view-card").textContent = cd; return; }
+    if (cd === 0){
+      $("in-view-card").textContent = x.card;
+      $("in-view-card").style.color = "var(--fire)";
+      $("in-view-name").textContent = x.name + " (본인 보지 마!)";
+      return;
+    }
+    if (cd <= -5){
+      clearInterval(ip.tid); ip.tid = null;
+      inNextView();
+    }
+  }, 1000);
+});
+function inNextBet(){
+  do { ip.betI++; } while (ip.betI < ip.p.length && (ip.p[ip.betI].out || ip.p[ip.betI].folded));
+  const active = ip.p.filter(x => !x.out && !x.folded);
+  if (active.length === 1 || ip.betI >= ip.p.length) return inShowdown();
+  inShow("in-bet");
+  inStrip();
+  $("in-pot").textContent = ip.pot;
+  const x = ip.p[ip.betI];
+  $("in-bet-name").textContent = x.name;
+  $("in-call").textContent = x.sheep >= 2 ? "✅ 콜! (양 2 배팅)" : "✅ 올인 콜! (양 " + x.sheep + ")";
+}
+function inStrip(){
+  $("in-strip").innerHTML = ip.p.map((x, i) => {
+    let st = x.out ? "💀" : x.folded ? "🏳️" : (i === ip.betI ? "🤔" : "");
+    return '<div class="sp' + (i === ip.betI ? " now" : "") + (x.out ? " dead" : "") + '">' + x.name + ' 🐑' + x.sheep + ' ' + st + '</div>';
+  }).join("");
+}
+$("in-call").addEventListener("click", () => {
+  const x = ip.p[ip.betI];
+  const bet = Math.min(2, x.sheep);
+  x.sheep -= bet; ip.pot += bet;
+  inNextBet();
+});
+$("in-die").addEventListener("click", () => {
+  ip.p[ip.betI].folded = true;
+  inNextBet();
+});
+function inShowdown(){
+  inShow("in-showdown");
+  const contenders = ip.p.filter(x => !x.out && !x.folded);
+  const alive = ip.p.filter(x => !x.out);
+  const best = Math.max(...contenders.map(x => x.card));
+  const winners = contenders.filter(x => x.card === best);
+  const share = Math.floor(ip.pot / winners.length);
+  let rem = ip.pot - share * winners.length;
+  winners.forEach(w => { w.sheep += share; if (rem > 0){ w.sheep++; rem--; } });
+  const allBest = Math.max(...alive.map(x => x.card));
+  const foolFolders = alive.filter(x => x.folded && x.card === allBest && allBest > best);
+  $("in-cards").innerHTML = alive.map(x =>
+    '<div class="mb-teamcard" style="opacity:' + (x.folded ? ".55" : "1") + '"><b>' + x.name + (winners.includes(x) ? " 🏆" : "") + (x.folded ? " 🏳️다이" : "") + '</b><span style="font-size:22px;font-weight:900;color:var(--fire)">' + x.card + '</span></div>'
+  ).join("");
+  let msg = "🏆 " + winners.map(w => w.name).join(", ") + " 승리! 판돈 " + ip.pot + "양 획득";
+  if (foolFolders.length) msg += "<br><b style='color:var(--danger)'>🍺 " + foolFolders.map(f => f.name).join(", ") + " — 최고 카드 들고 다이?! 벌칙!</b>";
+  ip.p.forEach(x => { if (!x.out && x.sheep <= 0){ x.out = true; msg += "<br>💀 " + x.name + " 파산 탈락"; } });
+  $("in-round-result").innerHTML = '<div class="val" style="font-size:16px;line-height:1.7">' + msg + '</div>';
+}
+$("in-next").addEventListener("click", inNewRound);
+$("in-finish").addEventListener("click", inEnd);
+function inEnd(){
+  inShow("in-end");
+  const rank = ip.p.slice().sort((a, b) => b.sheep - a.sheep);
+  const medals = ["🥇","🥈","🥉"];
+  $("in-rank").innerHTML = '<div class="lbl">타짜 랭킹</div><div class="val" style="font-size:18px;line-height:2">' +
+    rank.map((r, i) => (medals[i] || "·") + " " + r.name + " — 🐑 " + r.sheep + (r.out ? " (파산)" : "")).join("<br>") + '</div>';
+}
+$("in-again").addEventListener("click", inReset);
 
 /* ================= 폭탄 돌리기 ================= */
 const BOMB_TOPICS = ["치킨 브랜드","라면 종류","김씨 성 연예인","아이돌 그룹","한국 도시","과일 이름","영화 제목","네발 동물","편의점에서 파는 것","몽골에서 볼 수 있는 것","빨간색인 것","차가운 것","부엌에 있는 물건","세 글자 음식","나라 이름","스포츠 종목","직업 이름","꽃 이름","술 이름","전자제품","학교 과목","바다 생물","겨울에 하는 것","캠핑 준비물","여행 필수템","노래 제목","드라마 제목","탈 것","신체 부위","조미료/양념","반찬 종류","길거리 음식","커피/음료 메뉴","게임 이름","전래동화 등장인물","색깔 이름","동그란 것","냄새나는 것","하늘에 있는 것","학용품"];
@@ -5521,9 +5739,17 @@ window.alert = function(msg){
     /* file:// 등: SW 불가 환경. 배지 숨김 (기능엔 지장 없음) */
     badge.style.display = "none";
   } else {
-    if (navigator.serviceWorker.controller){
-      badge.textContent = "✅ 오프라인 준비 완료";
+    /* 성공 배지는 잠깐 확인시킨 뒤 스르륵 퇴장 — ⏳/⚠️는 계속 표시 */
+    const badgeOk = (msg) => {
+      badge.textContent = msg;
       badge.classList.add("ok");
+      setTimeout(() => {
+        badge.classList.add("bye");
+        setTimeout(() => { badge.style.display = "none"; }, 700);
+      }, 3000);
+    };
+    if (navigator.serviceWorker.controller){
+      badgeOk("✅ 오프라인 준비 완료");
     }
     const promptUpdate = (w) => {
       pwaToast("🌙 새 버전 도착!", "새로고침", () => {
@@ -5542,8 +5768,7 @@ window.alert = function(msg){
           if (navigator.serviceWorker.controller){
             promptUpdate(w);
           } else {
-            badge.textContent = "✅ 오프라인 준비 완료 — 비행기 모드에서도 됩니다";
-            badge.classList.add("ok");
+            badgeOk("✅ 오프라인 저장 끝! 이제 비행기 모드에서도 돼");
           }
         });
       });
@@ -5554,7 +5779,10 @@ window.alert = function(msg){
       window.addEventListener("online", checkUpdate);
       setInterval(checkUpdate, 60 * 60 * 1000);
     }).catch(() => {
-      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해주세요";
+      /* 성공 배지가 이미 퇴장했더라도 실패는 다시 보여준다 */
+      badge.style.display = "";
+      badge.classList.remove("ok", "bye");
+      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해줘";
       badge.classList.add("err");
     });
     /* 첫 설치 때 clients.claim()도 controllerchange를 발화시키므로,
@@ -5719,6 +5947,7 @@ const SN_CATS = [
     { id:"were",     go:"wolf",      need:4, name:"늑대인간",      spr:"wolf",     desc:"보름달 아래 정체 숨기기",       p:[4,10], t:25 } ] },
   { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
     { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐",     p:[2,6],  t:10 },
+    { id:"indian",   go:"indian",    need:2, name:"인디언 포커",   spr:"hawk",     desc:"내 카드만 나만 몰라",           p:[2,8],  t:10 },
     { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
     { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
     { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
