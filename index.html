@@ -345,6 +345,30 @@
   .lv-faces button .fl{font-size:11px;color:var(--dim);font-weight:700;margin-top:2px}
   .lv-junk{color:var(--danger);font-weight:800}
 
+  /* ---------- 버저 퀴즈쇼 ---------- */
+  .bz-stage{display:flex;flex-direction:column;height:calc(100dvh - 150px);min-height:440px;gap:8px}
+  .bz-row{display:flex;gap:8px;height:23%}
+  .bz-zone{flex:1;background:var(--night2);border:2px solid var(--line);border-radius:14px;color:var(--milk);font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  .bz-zone b{font-size:18px;font-weight:800}
+  .bz-zone .sc{font-size:13px;color:var(--dim);font-weight:700}
+  .bz-zone.live{border-color:var(--fire);animation:bzPulse 1s steps(2) infinite}
+  .bz-zone.win{border-color:var(--fire);color:var(--fire);animation:none}
+  .bz-zone.lock{opacity:.32;animation:none}
+  .bz-row.top .bz-zone{transform:rotate(180deg)}
+  @keyframes bzPulse{0%,100%{border-color:var(--fire)}50%{border-color:var(--line)}}
+  .bz-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;padding:2px 0}
+  .bz-q{font-size:19px;font-weight:800;text-align:center;line-height:1.45;min-height:1.4em;padding:0 4px;word-break:keep-all}
+  .bz-q.flip,.bz-mid.flip{transform:rotate(180deg)}
+  .bz-q .bz-sub{display:block;font-size:12px;color:var(--dim);font-weight:700}
+  .bz-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:110px}
+  .bz-timer{font-size:30px;font-weight:900;color:var(--ember)}
+  .bz-btns{display:flex;gap:10px}
+  .bz-btns button{background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--milk);font-size:26px;padding:10px 22px;font-family:inherit;font-weight:800}
+  .bz-btns button:active{border-color:var(--fire);color:var(--fire)}
+  .bz-btns button.bz-sm{font-size:14px;padding:10px 14px}
+  .bz-ans{font-size:26px;font-weight:900;color:var(--fire)}
+  .bz-next{width:auto;padding:10px 18px;font-size:15px}
+
   .footer-note{text-align:center;font-size:11px;color:#5A6486;margin-top:auto;padding-top:30px;line-height:1.7}
 
   /* ================================================================
@@ -1206,6 +1230,39 @@
     </div>
   </div>
 
+  <!-- ============ 버저 퀴즈쇼 ============ -->
+  <div class="screen" id="scr-bz">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 버저 퀴즈쇼</h2></div>
+    <div id="bz-setup">
+      <p class="hint">폰을 테이블 <b>한가운데</b> 놓고 각자 자기 버저 앞에! 문제 뜨면 <b>먼저 탭한 사람만</b> 답할 권리를 얻어요. 맞으면 +1, 틀리면 −1이고 <b style="color:var(--danger)">그 문제엔 재도전 금지</b> — 남은 사람들이 같은 문제로 재버저! 5명 이상이면 2인 1팀으로 뭉쳐 ㅋㅋ</p>
+      <div class="field"><label>버저 인원 (2~4명, 마주 보고 앉기)</label><div class="seg" id="bz-players"></div></div>
+      <div class="field"><label>문제 유형 (복수 선택 가능)</label><div class="seg" id="bz-types">
+        <button data-t="ox" class="sel">OX 상식</button><button data-t="cho">초성 퀴즈</button><button data-t="calc">빠른 계산</button>
+      </div></div>
+      <div class="field"><label>목표 점수 (선취)</label><div class="seg" id="bz-goal">
+        <button data-g="5">5점</button><button data-g="7" class="sel">7점</button><button data-g="10">10점</button>
+      </div></div>
+      <button class="btn" id="bz-start">🔔 퀴즈쇼 시작!</button>
+    </div>
+    <div id="bz-play" style="display:none">
+      <div class="bz-stage">
+        <div class="bz-row top" id="bz-top"></div>
+        <div class="bz-center">
+          <div class="bz-q flip" id="bz-q-flip"></div>
+          <div class="bz-mid" id="bz-mid"></div>
+          <div class="bz-q" id="bz-q"></div>
+        </div>
+        <div class="bz-row" id="bz-bottom"></div>
+      </div>
+    </div>
+    <div id="bz-end" style="display:none" class="stage-center">
+      <span class="tag">퀴즈쇼 종료!</span>
+      <div class="who" id="bz-champ" style="color:var(--fire)">-</div>
+      <div class="reveal-card" id="bz-rank"></div>
+      <button class="btn" id="bz-again">다시 하기</button>
+    </div>
+  </div>
+
   <!-- ============ 룰렛 ============ -->
   <div class="screen" id="scr-roulette">
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎯 복불복 룰렛</h2></div>
@@ -1832,6 +1889,7 @@ function resetGame(name){
   if (name === "bomb"){ bombReset(); }
   if (name === "tele"){ teReset(); }
   if (name === "lv"){ lvReset(); }
+  if (name === "bz"){ bzReset(); }
 }
 
 /* ================= 일행 등록 ================= */
@@ -4124,6 +4182,282 @@ function lvEnd(){
 }
 $("lv-again").addEventListener("click", lvReset);
 
+/* ================= 버저 퀴즈쇼 ================= */
+const BZ_OX = [
+  { q: "몽골의 수도는 울란바토르다", a: true },
+  { q: "낙타 혹에는 물이 가득 들어있다", a: false },
+  { q: "몽골은 바다와 접해 있다", a: false },
+  { q: "칭기즈칸은 몽골 제국을 세웠다", a: true },
+  { q: "고비 사막은 몽골에 있다", a: true },
+  { q: "몽골의 전통 이동식 집을 게르라고 한다", a: true },
+  { q: "아이락은 말젖을 발효시킨 술이다", a: true },
+  { q: "한국과 울란바토르는 시차가 없다", a: false },
+  { q: "세계에서 가장 큰 대륙은 아시아다", a: true },
+  { q: "몽골의 화폐 단위는 투그릭이다", a: true },
+  { q: "성인의 뼈는 약 206개다", a: true },
+  { q: "빛은 소리보다 빠르다", a: true },
+  { q: "세계에서 가장 높은 산은 K2다", a: false },
+  { q: "몽골 인구는 한국 인구보다 많다", a: false },
+  { q: "바나나는 나무에서 자란다", a: false },
+  { q: "꿀은 상온에서도 잘 상하지 않는다", a: true },
+  { q: "펭귄은 북극에 산다", a: false },
+  { q: "몽골 전통 씨름을 부흐라고 한다", a: true },
+  { q: "세계에서 면적이 가장 넓은 나라는 러시아다", a: true },
+  { q: "소리는 진공에서도 전달된다", a: false },
+  { q: "무지개는 흔히 7가지 색으로 표현된다", a: true },
+  { q: "양은 초식동물이다", a: true },
+  { q: "박쥐는 새다", a: false },
+  { q: "몽골 제국은 한때 유럽까지 진출했다", a: true },
+  { q: "지구는 태양을 약 365일에 한 바퀴 돈다", a: true },
+  { q: "사막은 밤에도 낮처럼 덥다", a: false },
+  { q: "말은 서서 잘 수 있다", a: true },
+  { q: "몽골은 중국과 러시아 사이에 있다", a: true },
+  { q: "은하수는 우리 은하를 안에서 본 모습이다", a: true },
+  { q: "몽골 면적은 대한민국보다 작다", a: false },
+  { q: "낙타는 속눈썹이 길어 모래바람을 막아준다", a: true },
+  { q: "북극성은 북쪽 하늘에서 볼 수 있다", a: true },
+  { q: "치타는 가장 빠른 육상동물이다", a: true },
+  { q: "고래는 어류다", a: false },
+  { q: "문어의 다리는 8개다", a: true },
+  { q: "세종대왕이 한글을 만들었다", a: true },
+  { q: "에디슨이 전화기를 발명했다", a: false },
+  { q: "몽골 국기에는 파란색이 들어있다", a: true },
+  { q: "개미는 곤충이다", a: true },
+  { q: "독수리는 야행성이다", a: false }
+];
+let bz = { sel: [], types: ["ox"], goal: 7, scores: [], cur: null, locked: [], phase: "idle", taps: [], winner: -1, oxUsed: [], tid: null, tapTid: null };
+
+function bzReset(){
+  clearInterval(bz.tid); bz.tid = null;
+  clearTimeout(bz.tapTid); bz.tapTid = null;
+  bz.phase = "idle";
+  ["bz-setup","bz-play","bz-end"].forEach(id => $(id).style.display = "none");
+  $("bz-setup").style.display = "";
+  const box = $("bz-players");
+  box.innerHTML = "";
+  bz.sel = roster.slice(0, 4);
+  roster.forEach(n => {
+    const b = document.createElement("button");
+    b.textContent = n;
+    if (bz.sel.includes(n)) b.classList.add("sel");
+    b.addEventListener("click", () => {
+      if (bz.sel.includes(n)) bz.sel = bz.sel.filter(x => x !== n);
+      else if (bz.sel.length < 4) bz.sel.push(n);
+      else return alert("버저는 4개까지! 5명 이상은 2인 1팀으로 뭉쳐 ㅋㅋ");
+      b.classList.toggle("sel", bz.sel.includes(n));
+    });
+    box.appendChild(b);
+  });
+}
+$("bz-types").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  const t = b.dataset.t;
+  if (bz.types.includes(t)){
+    if (bz.types.length === 1) return alert("최소 1개는 골라야지!");
+    bz.types = bz.types.filter(x => x !== t);
+  } else bz.types.push(t);
+  b.classList.toggle("sel", bz.types.includes(t));
+}));
+$("bz-goal").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  $("bz-goal").querySelectorAll("button").forEach(x => x.classList.remove("sel"));
+  b.classList.add("sel");
+  bz.goal = +b.dataset.g;
+}));
+$("bz-start").addEventListener("click", () => {
+  if (bz.sel.length < 2) return alert("2명 이상 선택!");
+  bz.scores = bz.sel.map(() => 0);
+  bz.oxUsed = [];
+  ["bz-setup","bz-end"].forEach(id => $(id).style.display = "none");
+  $("bz-play").style.display = "";
+  bzNextQ();
+});
+/* 아랫줄 = 앞쪽 절반, 윗줄 = 나머지(180° 회전 배치) */
+function bzIsTop(i){ return i >= Math.ceil(bz.sel.length / 2); }
+function bzRenderZones(){
+  const top = $("bz-top"), bottom = $("bz-bottom");
+  top.innerHTML = ""; bottom.innerHTML = "";
+  bz.sel.forEach((n, i) => {
+    const z = document.createElement("button");
+    z.className = "bz-zone"
+      + (bz.phase === "buzz" && !bz.locked.includes(i) ? " live" : "")
+      + (i === bz.winner ? " win" : "")
+      + (bz.locked.includes(i) ? " lock" : "");
+    z.innerHTML = "<b>" + escHtml(n) + "</b><span class=\"sc\">⭐ " + bz.scores[i] + "</span>";
+    z.addEventListener("pointerdown", (e) => bzTap(i, e.timeStamp));
+    z.addEventListener("contextmenu", (e) => e.preventDefault());
+    /* 윗줄은 맞은편에서 보므로 역순으로 끼워 각자 정면에 오게 */
+    if (bzIsTop(i)) top.insertBefore(z, top.firstChild);
+    else bottom.appendChild(z);
+  });
+}
+/* 문제 생성 */
+function bzPickType(types){ return types[Math.floor(Math.random() * types.length)]; }
+function bzMakeCalc(){
+  const op = ["+","−","×"][Math.floor(Math.random() * 3)];
+  let a, b;
+  if (op === "×"){ a = 2 + Math.floor(Math.random() * 8); b = 2 + Math.floor(Math.random() * 8); }
+  else { a = 2 + Math.floor(Math.random() * 29); b = 2 + Math.floor(Math.random() * 29); }
+  if (op === "−" && b > a){ const t = a; a = b; b = t; }
+  const ans = op === "+" ? a + b : op === "−" ? a - b : a * b;
+  return { type: "calc", q: a + " " + op + " " + b + " = ?", a: ans };
+}
+function bzMakeQ(){
+  const t = bzPickType(bz.types);
+  if (t === "ox"){
+    if (bz.oxUsed.length >= BZ_OX.length) bz.oxUsed = [];
+    let k;
+    do { k = Math.floor(Math.random() * BZ_OX.length); } while (bz.oxUsed.includes(k));
+    bz.oxUsed.push(k);
+    return { type: "ox", q: BZ_OX[k].q, a: BZ_OX[k].a };
+  }
+  if (t === "cho"){
+    const cats = Object.keys(CHO_BANK);
+    const c = cats[Math.floor(Math.random() * cats.length)];
+    const w = CHO_BANK[c][Math.floor(Math.random() * CHO_BANK[c].length)];
+    return { type: "cho", q: toCho(w), sub: c + " · " + w.length + "글자", a: w };
+  }
+  return bzMakeCalc();
+}
+function bzNextQ(){
+  bz.cur = bzMakeQ();
+  bz.locked = [];
+  bz.taps = [];
+  bz.winner = -1;
+  bz.phase = "count";
+  $("bz-mid").classList.remove("flip");
+  $("bz-mid").innerHTML = "";
+  bzRenderZones();
+  let cd = 3;
+  bzSetQ('<b style="font-size:32px">' + cd + "</b>");
+  clearInterval(bz.tid);
+  bz.tid = setInterval(() => {
+    cd--;
+    if (cd > 0){ bzSetQ('<b style="font-size:32px">' + cd + "</b>"); haptic(10); return; }
+    clearInterval(bz.tid); bz.tid = null;
+    bzShowQ();
+  }, 800);
+}
+function bzSetQ(html, sub){
+  const h = html + (sub ? '<span class="bz-sub">' + sub + "</span>" : "");
+  $("bz-q").innerHTML = h;
+  $("bz-q-flip").innerHTML = h;
+}
+function bzShowQ(){
+  bz.phase = "buzz";
+  bz.taps = [];
+  bz.winner = -1;
+  const c = bz.cur;
+  if (c.type === "ox") bzSetQ(c.q + "?", "⭕냐 ❌냐");
+  else if (c.type === "cho") bzSetQ('<b style="letter-spacing:4px">' + c.q + "</b>", c.sub);
+  else bzSetQ(c.q, "빠른 계산");
+  $("bz-mid").classList.remove("flip");
+  $("bz-mid").innerHTML = '<span class="tag">🔔 버저!</span>';
+  bzRenderZones();
+  haptic(20);
+}
+function bzTap(i, ts){
+  if (bz.phase !== "buzz" || bz.locked.includes(i)) return;
+  bz.taps.push({ i, ts });
+  /* 50ms 수집창 — 동시 탭이면 pointerdown 타임스탬프 빠른 쪽이 승자 */
+  if (!bz.tapTid) bz.tapTid = setTimeout(bzResolveTap, 50);
+}
+/* 순수 판정: 잠긴 사람 제외, 타임스탬프 최소가 승자. 없으면 -1 */
+function bzPickWinner(taps, locked){
+  let best = -1, bt = Infinity;
+  for (const t of taps){
+    if (locked.includes(t.i)) continue;
+    if (t.ts < bt){ bt = t.ts; best = t.i; }
+  }
+  return best;
+}
+function bzResolveTap(){
+  bz.tapTid = null;
+  if (bz.phase !== "buzz") return;
+  const w = bzPickWinner(bz.taps, bz.locked);
+  bz.taps = [];
+  if (w < 0) return;
+  bz.winner = w;
+  bz.phase = "answer";
+  haptic([30, 40, 30]);
+  bzRenderZones();
+  bzAnswerUI();
+}
+function bzAnswerUI(){
+  const c = bz.cur;
+  const mid = $("bz-mid");
+  mid.classList.toggle("flip", bzIsTop(bz.winner));
+  let h = '<div class="bz-timer" id="bz-timer">5</div><div class="hint" style="margin:0">' + escHtml(bz.sel[bz.winner]) + ", 5초 안에 대답!</div>";
+  if (c.type === "ox"){
+    h += '<div class="bz-btns"><button id="bz-o">⭕</button><button id="bz-x">❌</button></div>';
+  } else {
+    h += '<div class="bz-btns"><button class="bz-sm" id="bz-reveal">' + (c.type === "cho" ? "정답 확인 (꾹)" : "정답 공개") + "</button></div>"
+      + '<div class="bz-ans" id="bz-ans" style="visibility:hidden">' + c.a + "</div>"
+      + '<div class="bz-btns"><button class="bz-sm" id="bz-ok">✅ 맞음</button><button class="bz-sm" id="bz-no">❌ 틀림</button></div>';
+  }
+  mid.innerHTML = h;
+  if (c.type === "ox"){
+    $("bz-o").addEventListener("click", () => bzJudge(c.a === true));
+    $("bz-x").addEventListener("click", () => bzJudge(c.a === false));
+  } else {
+    if (c.type === "cho") holdReveal($("bz-reveal"), () => { $("bz-ans").style.visibility = ""; }, () => { $("bz-ans").style.visibility = "hidden"; });
+    else $("bz-reveal").addEventListener("click", () => { $("bz-ans").style.visibility = ""; });
+    $("bz-ok").addEventListener("click", () => bzJudge(true));
+    $("bz-no").addEventListener("click", () => bzJudge(false));
+  }
+  let t = 5;
+  clearInterval(bz.tid);
+  bz.tid = setInterval(() => {
+    t--;
+    const el = $("bz-timer");
+    if (el) el.textContent = t;
+    if (t <= 0){ clearInterval(bz.tid); bz.tid = null; bzJudge(false); }
+  }, 1000);
+}
+function bzAnsText(){ const c = bz.cur; return c.type === "ox" ? (c.a ? "⭕" : "❌") : String(c.a); }
+function bzJudge(correct){
+  if (bz.phase !== "answer") return;
+  clearInterval(bz.tid); bz.tid = null;
+  const w = bz.winner;
+  bz.winner = -1;
+  if (correct){
+    bz.scores[w]++;
+    haptic(60);
+    if (bz.scores[w] >= bz.goal) return bzEnd(w);
+    bz.phase = "gap";
+    $("bz-mid").innerHTML = '<div class="bz-ans" style="color:var(--steppe)">⭕ 정답! +1</div>';
+    bzRenderZones();
+    bz.tid = setTimeout(bzNextQ, 1000);
+  } else {
+    bz.scores[w] = Math.max(0, bz.scores[w] - 1);
+    bz.locked.push(w);
+    haptic([40, 60, 40]);
+    if (bz.locked.length >= bz.sel.length){
+      bz.phase = "reveal";
+      bzRenderZones();
+      $("bz-mid").classList.remove("flip");
+      $("bz-mid").innerHTML = '<div class="hint" style="margin:0">전원 오답 ㅋㅋ 정답은</div><div class="bz-ans">' + bzAnsText() + '</div><button class="btn bz-next" id="bz-nq">다음 문제 →</button>';
+      $("bz-nq").addEventListener("click", bzNextQ);
+    } else {
+      bz.phase = "gap";
+      $("bz-mid").innerHTML = '<div class="bz-ans" style="color:var(--danger)">❌ 땡! −1</div><div class="hint" style="margin:0">같은 문제, 남은 사람 재버저!</div>';
+      bzRenderZones();
+      bz.tid = setTimeout(bzShowQ, 1000);
+    }
+  }
+}
+function bzEnd(w){
+  clearInterval(bz.tid); bz.tid = null;
+  clearTimeout(bz.tapTid); bz.tapTid = null;
+  bz.phase = "end";
+  ["bz-setup","bz-play"].forEach(id => $(id).style.display = "none");
+  $("bz-end").style.display = "flex";
+  $("bz-champ").textContent = "🏆 " + bz.sel[w];
+  const rank = bz.sel.map((n, i) => ({ n, s: bz.scores[i] })).sort((a, b) => b.s - a.s);
+  const medals = ["🥇","🥈","🥉"];
+  $("bz-rank").innerHTML = '<div class="lbl">최종 스코어</div><div class="val" style="font-size:18px;line-height:2">' +
+    rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — " + r.s + "점").join("<br>") + "</div>";
+}
+$("bz-again").addEventListener("click", bzReset);
+
 /* ================================================================
    v2 PWA: 서비스워커 등록 + 오프라인 배지 + 설치 유도 + 업데이트 토스트
    ================================================================ */
@@ -4346,7 +4680,7 @@ const SN_CATS = [
   { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
     { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"같은 과일 5개면 종 쳐",         p:[2,6],  t:10 },
     { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
-    { id:"buzzer",   go:null,        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
+    { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
     { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
     { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 } ] },
   { id:"draw", emoji:"🎨", name:"그림", spr:"rabbit", games:[
