@@ -132,6 +132,18 @@ function drBuildColorBar(){
     });
     bar.appendChild(b);
   });
+  drAddPicker(bar, v => { dr.color = v; dr.erasing = false; drToolSel(dr.size > 6 ? "dr-thick" : "dr-pen"); });
+}
+/* 네이티브 컬러 피커 스와치 — 캐치마인드·그림 릴레이 공용 */
+function drAddPicker(bar, onPick){
+  const inp = document.createElement("input");
+  inp.type = "color"; inp.className = "dr-color pick"; inp.value = "#8B5A2B";
+  inp.addEventListener("input", () => {
+    onPick(inp.value);
+    bar.querySelectorAll(".dr-color").forEach(x => x.classList.remove("sel"));
+    inp.classList.add("sel");
+  });
+  bar.appendChild(inp);
 }
 function drToolSel(id){
   ["dr-pen","dr-thick","dr-eraser"].forEach(x => $(x).classList.toggle("sel", x === id));

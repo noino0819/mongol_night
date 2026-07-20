@@ -172,6 +172,7 @@ function cmPadInit(){
     });
     bar.appendChild(b);
   });
+  drAddPicker(bar, v => { cm.color = v; cm.erasing = false; cmToolSel(cm.size > 6 ? "cm-thick" : "cm-pen"); });
   cmToolSel("cm-pen");
 }
 function cmToolSel(id){
