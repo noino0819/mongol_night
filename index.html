@@ -544,10 +544,8 @@
   .pwa-badge{
     font-family:var(--font-px);font-size:12px;font-weight:700;color:var(--dim);
     background:var(--night2);border:1px solid var(--line);padding:7px 11px;
-    transition:opacity .6s;
   }
   .pwa-badge.ok{color:var(--steppe);border-color:var(--steppe)}
-  .pwa-badge.bye{opacity:0}
   .pwa-badge.err{color:var(--danger);border-color:var(--danger)}
   .pwa-install{
     font-family:var(--font-px);font-size:12px;font-weight:800;cursor:pointer;
@@ -736,7 +734,7 @@
   <!-- ============ 홈 ============ -->
   <div class="screen on" id="scr-home">
     <div class="pwa-row">
-      <span class="pwa-badge" id="pwa-badge">⏳ 오프라인 저장 중... 인터넷 켠 채로 잠깐만!</span>
+      <span class="pwa-badge" id="pwa-badge">⏳ 오프라인 준비 중...</span>
       <span style="flex:1"></span>
       <button class="pwa-install" id="pwa-install" style="display:none">📲 설치</button>
       <button class="pwa-install navy" data-go="settings">⚙️</button>
@@ -1191,6 +1189,45 @@
       </div>
     </div>
     <div id="wf-result" style="display:none"></div>
+  </div>
+
+  <!-- ============ 인디언 포커 ============ -->
+  <div class="screen" id="scr-indian">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🃏 인디언 포커</h2></div>
+    <div id="in-setup">
+      <p class="hint">1~10 카드(각 2장)를 한 장씩 받아요. <b>남의 카드는 보이고 내 카드만 안 보임!</b> 폰을 이마에 대면 다른 사람들이 내 숫자를 보게 됩니다. 표정을 읽고 콜(양 2)이냐 다이냐! 참가비 양 1, 최고 숫자가 판돈 싹쓸이. <b style="color:var(--danger)">다이했는데 알고 보니 최고 카드였다면 벌칙!</b></p>
+      <div class="field"><label>참여자 선택 (2~8명, 시작 양 10마리)</label><div class="seg" id="in-players"></div></div>
+      <button class="btn" id="in-start">카드 돌리기!</button>
+    </div>
+    <div id="in-view" style="display:none" class="pass-stage">
+      <div class="who-label" id="in-view-step">카드 공개</div>
+      <div class="who" id="in-view-name">-</div>
+      <div class="hint" id="in-view-hint" style="margin:0">폰 화면을 바깥으로 해서 이마에 대세요!<br>본인은 천장 보기 or 눈 감기 🙈</div>
+      <div id="in-view-card" style="font-size:110px;font-weight:900;line-height:1.2;display:none"></div>
+      <button class="btn pass-next" id="in-view-go">이마에 댔어요, 공개! →</button>
+    </div>
+    <div id="in-bet" style="display:none">
+      <div class="mb-strip" id="in-strip"></div>
+      <div class="stage-center" style="flex:0;gap:6px;margin:18px 0">
+        <span class="tag">💰 판돈: <b id="in-pot">0</b>양</span>
+        <div class="who" id="in-bet-name" style="font-size:34px">-</div>
+        <div class="hint" style="margin:0">다른 사람 카드와 표정을 보고 결정하세요!</div>
+      </div>
+      <button class="btn" id="in-call">✅ 콜! (양 2 배팅)</button>
+      <button class="btn ghost mt" id="in-die">🏳️ 다이 (포기)</button>
+    </div>
+    <div id="in-showdown" style="display:none">
+      <div class="stage-center" style="flex:0;gap:8px;margin-bottom:10px"><span class="tag">쇼다운!</span></div>
+      <div id="in-cards"></div>
+      <div class="reveal-card" id="in-round-result" style="margin-top:12px"></div>
+      <button class="btn mt" id="in-next">다음 라운드 →</button>
+      <button class="btn ghost mt" id="in-finish">그만하고 결과 보기</button>
+    </div>
+    <div id="in-end" style="display:none" class="stage-center">
+      <span class="tag">최종 결과</span>
+      <div class="reveal-card" id="in-rank"></div>
+      <button class="btn" id="in-again">다시 하기</button>
+    </div>
   </div>
 
   <!-- ============ 폭탄 돌리기 ============ -->
@@ -3992,14 +4029,13 @@ function wfSecret(){
     }));
   }
   el.querySelector("#wf-secret-done").addEventListener("click", () => {
-    if (role === "주정뱅이" && !wf.drunk) return alert("가운데 카드 1장을 골라야 잘 수 있어요");
     wf.i++;
     if (wf.i >= wf.order.length) return wfNightResolve();
     snPassCover(wf.order[wf.i], wfShowPass);
   });
 }
 function wfNightResolve(){
-  /* 공식 순서: 강도 교환 → 말썽꾸러기 교환 → 주정뱅이 교환 */
+  /* 공식 순서: 강도 교환 → 말썽꾸러기 교환 */
   wf.final = wf.cards.slice();
   if (wf.robber){
     const t = wf.final[wf.robber.from];
@@ -4011,16 +4047,10 @@ function wfNightResolve(){
     wf.final[wf.tmSwap[0]] = wf.final[wf.tmSwap[1]];
     wf.final[wf.tmSwap[1]] = t;
   }
-  if (wf.drunk){
-    const c = wf.order.length + wf.drunk.k;
-    const t = wf.final[wf.drunk.from];
-    wf.final[wf.drunk.from] = wf.final[c];
-    wf.final[c] = t;
-  }
   wfShow("wf-day");
-  const swappers = [wf.on.robber ? "강도" : "", wf.on.trouble ? "말썽꾸러기" : "", wf.on.drunk ? "주정뱅이" : ""].filter(Boolean);
+  const swappers = [wf.on.robber ? "강도" : "", wf.on.trouble ? "말썽꾸러기" : ""].filter(Boolean);
   $("wf-day-hint").innerHTML = "밤 사이 무슨 일이? 늑대를 찾아내세요!" +
-    (swappers.length ? " " + swappers.join("·") + " 때문에 <b>지금 내 역할이 바뀌었을 수도</b> 있습니다..." : "");
+    (swappers.length ? " " + swappers.join("와 ") + " 때문에 <b>지금 내 역할이 바뀌었을 수도</b> 있습니다..." : "");
   let left = wf.time;
   $("wf-day-timer").textContent = fmt(left);
   clearInterval(wf.dayTid);
@@ -4061,64 +4091,30 @@ function wfCastVote(target){
   if (wf.i >= wf.order.length) return wfResult();
   wfVotePass();
 }
-function wfJudge(finals, votes){
-  /* 원작(ONUW) 승리 조건: 무두장이 처형 → 무두장이 단독승 · 늑대 있으면 늑대 1명 이상 처형 시 마을승 ·
-     늑대 없음: 평화 투표 = 마을승, 하수인만 있으면 하수인 외 처형 시 하수인승, 하수인 처형 시 승자 없음 */
-  const n = finals.length;
-  const count = Array(n).fill(0);
-  let peace = 0;
-  votes.forEach(v => { if (v === -1) peace++; else count[v]++; });
-  const maxV = Math.max(peace, ...count);
-  const executed = (peace >= maxV) ? [] : count.map((c, j) => c === maxV ? j : -1).filter(j => j >= 0);
-  const hunterKills = [];
-  for (let guard = 0; guard < n; guard++){
-    const add = executed.filter(j => finals[j] === "사냥꾼" && votes[j] >= 0 && !executed.includes(votes[j])).map(j => votes[j]);
-    if (!add.length) break;
-    add.forEach(t => { if (!executed.includes(t)){ executed.push(t); hunterKills.push(t); } });
-  }
-  const deadWolf = executed.some(j => finals[j] === "늑대인간");
-  const deadTanner = executed.some(j => finals[j] === "무두장이");
-  const hasWolf = finals.includes("늑대인간");
-  const hasMinion = finals.includes("하수인");
-  let win;
-  if (deadTanner) win = "tanner";
-  else if (hasWolf) win = deadWolf ? "village" : "wolf";
-  else if (!executed.length) win = "village";
-  else if (hasMinion && executed.some(j => finals[j] !== "하수인")) win = "minion";
-  else if (hasMinion) win = "nobody";
-  else win = "lose";
-  return { count, peace, executed, hunterKills, win, deadWolf };
-}
 function wfResult(){
   const n = wf.order.length;
-  const finals = wf.final.slice(0, n);
-  const jd = wfJudge(finals, wf.votes);
-  const V = {
-    tanner:  { em:"🪓", txt:"무두장이 승리!", color:"var(--fire)",   sub:"처형이 소원이었던 무두장이의 큰 그림 ㅋㅋ 늑대팀은 무조건 패배!" + (jd.deadWolf ? " 늑대도 잡혔으니 마을팀도 같이 승리!" : "") },
-    village: { em:"🌞", txt:"마을 승리!",     color:"var(--steppe)", sub: jd.executed.length ? "늑대를 잡아냈다!" : "늑대는 없었다. 평화 투표 정답! 👏" },
-    wolf:    { em:"🌕", txt:"늑대팀 승리!",   color:"var(--danger)", sub: finals.includes("하수인") ? "하수인도 같이 승리!" : "늑대는 유유히 사라졌다..." },
-    minion:  { em:"😈", txt:"하수인 승리!",   color:"var(--danger)", sub:"늑대 한 마리 없이 혼자 마을을 속여넘겼다..." },
-    nobody:  { em:"💀", txt:"모두 패배...",   color:"var(--danger)", sub:"늑대는 없었고 하수인만 잡혔다. 승자 없는 밤 ㅋㅋ" },
-    lose:    { em:"💀", txt:"마을 패배...",   color:"var(--danger)", sub:"늑대는 없었는데 무고한 사람을 처형해버렸다..." }
-  }[jd.win];
+  const count = Array(n).fill(0);
+  let peace = 0;
+  wf.votes.forEach(v => { if (v === -1) peace++; else count[v]++; });
+  const maxV = Math.max(peace, ...count);
+  const executed = (peace >= maxV) ? [] : count.map((c, j) => c === maxV ? j : -1).filter(j => j >= 0);
+  const wolves = wf.final.map((r, j) => j < n && r === "늑대인간" ? j : -1).filter(j => j >= 0);
+  let villageWin;
+  if (executed.length === 0) villageWin = wolves.length === 0;
+  else villageWin = executed.some(j => wf.final[j] === "늑대인간");
   wfShow("wf-result");
-  const voteLines = wf.order.map((nm, j) => nm + " " + jd.count[j] + "표").join(" · ") + (jd.peace ? " · 🕊️평화 " + jd.peace + "표" : "");
-  const execLine = (jd.executed.length ? "⚰️ 처형: " + jd.executed.map(j => wf.order[j]).join(", ") : "🕊️ 아무도 처형되지 않음") +
-    (jd.hunterKills.length ? "<br>🏹 사냥꾼의 마지막 화살: " + jd.hunterKills.map(j => wf.order[j]).join(", ") + " 동반 처형!" : "");
+  const voteLines = wf.order.map((nm, j) => nm + " " + count[j] + "표").join(" · ") + (peace ? " · 🕊️평화 " + peace + "표" : "");
+  const execLine = executed.length ? "⚰️ 처형: " + executed.map(j => wf.order[j]).join(", ") : "🕊️ 아무도 처형되지 않음";
   const table = wf.order.map((nm, j) => {
     const orig = wf.cards[j], fin = wf.final[j];
-    return '<div class="mb-teamcard"><b>' + nm + (jd.executed.includes(j) ? " ⚰️" : "") + '</b><span>' +
+    return '<div class="mb-teamcard"><b>' + nm + (executed.includes(j) ? " ⚰️" : "") + '</b><span>' +
       WF_ROLE_INFO[fin].em + " " + fin + (orig !== fin ? ' <s style="opacity:.55">(밤 시작: ' + orig + ')</s>' : "") + '</span></div>';
   }).join("");
-  const center = wf.final.slice(n).map((r, k) => {
-    const orig = wf.cards[n + k];
-    return WF_ROLE_INFO[r].em + r + (orig !== r ? ' <s style="opacity:.55">(' + orig + ')</s>' : "");
-  }).join(" · ");
+  const center = wf.cards.slice(n).map(r => WF_ROLE_INFO[r].em + r).join(" · ");
   $("wf-result").innerHTML =
     '<div class="stage-center" style="flex:0;gap:8px;margin-bottom:12px">' +
-    '<div style="font-size:70px">' + V.em + '</div>' +
-    '<div class="who" style="font-size:32px;color:' + V.color + '">' + V.txt + '</div>' +
-    '<p class="hint" style="margin:0">' + V.sub + '</p>' +
+    '<div style="font-size:70px">' + (villageWin ? "🌞" : "🌕") + '</div>' +
+    '<div class="who" style="font-size:32px;color:' + (villageWin ? "var(--steppe)" : "var(--danger)") + '">' + (villageWin ? "마을 승리!" : "늑대 승리!") + '</div>' +
     '<p class="hint" style="margin:0">' + execLine + '<br>' + voteLines + '</p></div>' +
     table +
     '<div class="reveal-card" style="margin-top:8px"><div class="lbl">가운데 3장</div><div class="val" style="font-size:15px">' + center + '</div></div>' +
@@ -5700,17 +5696,9 @@ window.alert = function(msg){
     /* file:// 등: SW 불가 환경. 배지 숨김 (기능엔 지장 없음) */
     badge.style.display = "none";
   } else {
-    /* 성공 배지는 잠깐 확인시킨 뒤 스르륵 퇴장 — ⏳/⚠️는 계속 표시 */
-    const badgeOk = (msg) => {
-      badge.textContent = msg;
-      badge.classList.add("ok");
-      setTimeout(() => {
-        badge.classList.add("bye");
-        setTimeout(() => { badge.style.display = "none"; }, 700);
-      }, 3000);
-    };
     if (navigator.serviceWorker.controller){
-      badgeOk("✅ 오프라인 준비 완료");
+      badge.textContent = "✅ 오프라인 준비 완료";
+      badge.classList.add("ok");
     }
     const promptUpdate = (w) => {
       pwaToast("🌙 새 버전 도착!", "새로고침", () => {
@@ -5729,7 +5717,8 @@ window.alert = function(msg){
           if (navigator.serviceWorker.controller){
             promptUpdate(w);
           } else {
-            badgeOk("✅ 오프라인 저장 끝! 이제 비행기 모드에서도 돼");
+            badge.textContent = "✅ 오프라인 준비 완료 — 비행기 모드에서도 됩니다";
+            badge.classList.add("ok");
           }
         });
       });
@@ -5740,10 +5729,7 @@ window.alert = function(msg){
       window.addEventListener("online", checkUpdate);
       setInterval(checkUpdate, 60 * 60 * 1000);
     }).catch(() => {
-      /* 성공 배지가 이미 퇴장했더라도 실패는 다시 보여준다 */
-      badge.style.display = "";
-      badge.classList.remove("ok", "bye");
-      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해줘";
+      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해주세요";
       badge.classList.add("err");
     });
     /* 첫 설치 때 clients.claim()도 controllerchange를 발화시키므로,
