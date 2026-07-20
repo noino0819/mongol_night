@@ -8,9 +8,9 @@ const CM_BANK = {
   "어려움 (추상/합성)": ["월요병","여행 첫날 설렘","단체사진 각 잡기","와이파이 없는 삶","새벽 감성","길치","반전 매력","선택장애","N행시 짓는 중","귀차니즘","금강산도 식후경","꿈에서 깬 직후","환승 대기","짐 싸기 고수","알람 5분만 더"]
 };
 let cm = {
-  cat: "쉬움 (사물/동물)", time: 90, rounds: 1,
+  cat: "쉬움 (사물/동물)", time: 30, rounds: 1,
   players: [], scores: [], turn: 0, totalTurns: 0, word: "", deck: [],
-  timerId: null, left: 90,
+  timerId: null, left: 30,
   strokes: [], cur: null, color: DR_COLORS[0], size: 4, erasing: false, drawing: false, cv: null, ctx: null
 };
 (function initCm(){

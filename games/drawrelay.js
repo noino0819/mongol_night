@@ -1,11 +1,11 @@
 "use strict";
 /* ================= 그림 릴레이 (갈틱폰 스타일) ================= */
-const DR_COLORS = ["#1A1A1A","#E8434A","#2E7DD1","#2E9E5B","#F0A030","#8B5CC9"];
+const DR_COLORS = ["#1A1A1A","#E8434A","#2E7DD1","#2E9E5B","#F0A030","#8B5CC9","#E86AA6"];
 const DR_WORDS = [].concat(WORDS["몽골 스페셜"], WORDS["동물"], WORDS["음식"], WORDS["장소"], FH_BANK["동작"],
   ["말 타는 칭기즈칸","별똥별 보는 양","라면 끓이는 낙타","셀카 찍는 독수리","게르에서 노래방","사막에서 눈사람","늑대의 생일파티","염소 미용실"]);
 let dr = {
   order: [], startIdx: 0, step: 0, chain: [], phase: null,
-  drawTimerId: null, drawLeft: 90,
+  drawTimerId: null, drawLeft: 30,
   cv: null, ctx: null, strokes: [], curStroke: null, color: DR_COLORS[0], size: 4, erasing: false, drawing: false
 };
 function drReset(){
@@ -190,7 +190,7 @@ $("dr-undo").addEventListener("click", () => { dr.strokes.pop(); drRepaint(); })
 $("dr-clear").addEventListener("click", () => { if (confirm("전체 삭제할까요?")){ dr.strokes = []; drRepaint(); } });
 function drStartDrawTimer(){
   clearInterval(dr.drawTimerId);
-  dr.drawLeft = 90;
+  dr.drawLeft = 30;
   $("dr-timer").textContent = dr.drawLeft;
   dr.drawTimerId = setInterval(() => {
     dr.drawLeft--;
