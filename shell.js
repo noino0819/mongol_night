@@ -299,7 +299,7 @@ const SN_CATS = [
     { id:"tele",     go:"tele",      need:3, name:"텔레파시",      spr:"owl2",     desc:"같은 생각이면 승리",            p:[3,10], t:10 },
     { id:"urimal",   go:"um",        need:2, name:"우리말 겨루기", spr:"crane",    desc:"맞춤법으로 서열 정리",     p:[2,10], t:15 },
     { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려",            p:[2,10], t:5 },
-    { id:"quiz",     go:null,        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
+    { id:"quiz",     go:"gq",        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
   { id:"story", emoji:"📜", name:"스토리", spr:"tengri", games:[
     { id:"gobi",     go:"ta",        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 } ] }
 ];

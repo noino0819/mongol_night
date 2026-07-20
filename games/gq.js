@@ -530,3 +530,165 @@ const GQ_BANK = [
   {"q":"성인 심폐소생술에서 권장되는 가슴 압박 속도는 분당 몇 회 정도일까?","o":["100~120회","40~60회","150~180회","20~30회"],"a":0,"c":"생활·음식·건강","d":3},
   {"q":"빈혈 예방에 특히 도움이 되는 영양소는?","o":["철분","포화지방","나트륨","콜레스테롤"],"a":0,"c":"생활·음식·건강","d":3},
 ];
+
+/* --- 게임 로직: um 스피드전과 동일한 패스앤플레이, 4지선다 상식 버전 --- */
+/* 13개 세부 카테고리를 5개 분야로 묶어 선택 (setup 버튼 5개) */
+const GQ_GROUPS = {
+  hist: { label: "역사",      cats: ["한국사", "세계사"] },
+  geo:  { label: "지리",      cats: ["세계지리", "한국지리"] },
+  sci:  { label: "과학",      cats: ["과학(물리·화학)", "생물·인체·동물", "지구·우주과학"] },
+  cult: { label: "문화·예술", cats: ["문학·언어", "예술·음악·미술", "영화·대중문화"] },
+  soc:  { label: "사회·생활", cats: ["스포츠", "경제·사회·시사", "생활·음식·건강"] },
+};
+const GQ_DLABEL = { 1: "쉬움", 2: "보통", 3: "도전" };
+let gq = { sel: [], groups: ["hist","geo","sci","cult","soc"], limit: 45,
+           p: [], turn: 0, queue: [], qi: 0, cur: null, end: 0, tid: null, qtid: null, phase: "setup" };
+
+function gqShow(id){
+  ["gq-setup","gq-pass","gq-play","gq-between","gq-end"].forEach(x => $(x).style.display = "none");
+  $(id).style.display = (id === "gq-setup" || id === "gq-play") ? "" : "flex";
+}
+function gqReset(){
+  clearInterval(gq.tid); gq.tid = null;
+  clearTimeout(gq.qtid); gq.qtid = null;
+  gq.phase = "setup";
+  gqShow("gq-setup");
+  const box = $("gq-players");
+  box.innerHTML = "";
+  gq.sel = roster.slice();
+  roster.forEach(n => {
+    const b = document.createElement("button");
+    b.textContent = n;
+    if (gq.sel.includes(n)) b.classList.add("sel");
+    b.addEventListener("click", () => {
+      if (gq.sel.includes(n)) gq.sel = gq.sel.filter(x => x !== n);
+      else gq.sel.push(n);
+      b.classList.toggle("sel", gq.sel.includes(n));
+    });
+    box.appendChild(b);
+  });
+}
+$("gq-groups").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  const g = b.dataset.g;
+  if (gq.groups.includes(g)){
+    if (gq.groups.length === 1) return alert("최소 1개 분야는 있어야지");
+    gq.groups = gq.groups.filter(x => x !== g);
+  } else gq.groups.push(g);
+  b.classList.toggle("sel", gq.groups.includes(g));
+}));
+$("gq-time").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  $("gq-time").querySelectorAll("button").forEach(x => x.classList.remove("sel"));
+  b.classList.add("sel");
+  gq.limit = +b.dataset.s;
+}));
+$("gq-start").addEventListener("click", () => {
+  if (gq.sel.length < 2) return alert("2명 이상 선택!");
+  const cats = new Set();
+  gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
+  gq.queue = shuffle(GQ_BANK.filter(q => cats.has(q.c)));
+  gq.qi = 0;
+  /* 로스터 순서가 아니라 랜덤 순서로 도전 (뒷사람이 유리하지 않게) */
+  gq.p = shuffle(gq.sel).map(n => ({ name: n, score: 0 }));
+  gq.turn = 0;
+  gqPassStage();
+});
+function gqPassStage(){
+  gq.phase = "pass";
+  gqShow("gq-pass");
+  $("gq-pass-name").textContent = gq.p[gq.turn].name;
+}
+$("gq-go").addEventListener("click", () => {
+  if (gq.phase !== "pass") return;
+  gq.phase = "play";
+  gqShow("gq-play");
+  const x = gq.p[gq.turn];
+  $("gq-play-name").textContent = x.name;
+  $("gq-play-score").textContent = "0점";
+  $("gq-clock").textContent = gq.limit;
+  $("gq-timebar").classList.remove("hot");
+  $("gq-timefill").style.width = "100%";
+  gq.end = Date.now() + gq.limit * 1000;
+  gq.tid = setInterval(gqTick, 100);
+  gqNextQ();
+});
+function gqTick(){
+  const rem = gq.end - Date.now();
+  if (rem <= 0) return gqTimeUp();
+  $("gq-clock").textContent = Math.ceil(rem / 1000);
+  $("gq-timefill").style.width = (rem / (gq.limit * 1000) * 100) + "%";
+  $("gq-timebar").classList.toggle("hot", rem <= 10000);
+}
+function gqNextQ(){
+  if (gq.phase !== "play") return;
+  if (gq.qi >= gq.queue.length){ gq.queue = shuffle(gq.queue); gq.qi = 0; } /* 다 쓰면 리셔플 */
+  const src = gq.queue[gq.qi++];
+  const order = shuffle([0, 1, 2, 3]); /* 보기 순서 섞기 — 사람마다 정답 위치 달라지게 */
+  gq.cur = { q: src.q, opts: order.map(i => src.o[i]), ci: order.indexOf(src.a),
+             ans: src.o[src.a], c: src.c, d: src.d, done: false };
+  $("gq-qtype").textContent = gq.cur.c + " · " + GQ_DLABEL[gq.cur.d];
+  $("gq-qtext").textContent = gq.cur.q;
+  [0, 1, 2, 3].forEach(i => {
+    const b = $("gq-c" + i);
+    b.textContent = gq.cur.opts[i];
+    b.classList.remove("ok", "no");
+  });
+  const fl = $("gq-flash");
+  fl.textContent = "";
+  fl.className = "um-flash";
+}
+function gqPick(i){
+  if (gq.phase !== "play" || !gq.cur || gq.cur.done) return;
+  gq.cur.done = true;
+  const hit = i === gq.cur.ci;
+  const fl = $("gq-flash");
+  $("gq-c" + gq.cur.ci).classList.add("ok");
+  if (hit){
+    gq.p[gq.turn].score++;
+    $("gq-play-score").textContent = gq.p[gq.turn].score + "점";
+    fl.textContent = "정답! 😎";
+    fl.className = "um-flash ok";
+    haptic(15);
+  } else {
+    $("gq-c" + i).classList.add("no");
+    fl.textContent = "땡! 정답은 「" + gq.cur.ans + "」";
+    fl.className = "um-flash no";
+    haptic([30, 40, 30]);
+  }
+  gq.qtid = setTimeout(gqNextQ, hit ? 600 : 1300); /* 상식은 정답 곱씹을 시간 살짝 더 */
+}
+$("gq-c0").addEventListener("click", () => gqPick(0));
+$("gq-c1").addEventListener("click", () => gqPick(1));
+$("gq-c2").addEventListener("click", () => gqPick(2));
+$("gq-c3").addEventListener("click", () => gqPick(3));
+function gqTimeUp(){
+  clearInterval(gq.tid); gq.tid = null;
+  clearTimeout(gq.qtid); gq.qtid = null;
+  gq.phase = "between";
+  haptic([60, 40, 60]);
+  gqShow("gq-between");
+  const x = gq.p[gq.turn];
+  const per15 = x.score / (gq.limit / 15); /* 시간 옵션 달라도 공평한 코멘트 (4지선다라 um보다 문턱 낮춤) */
+  const cmt = per15 >= 3.5 ? "걸어다니는 백과사전이야?" : per15 >= 2.2 ? "오~ 상식 좀 있는데?" : per15 >= 1.2 ? "무난무난, 중간은 간다" : "몽골 가서 별이나 세자…";
+  $("gq-bt-name").textContent = x.name;
+  $("gq-bt-msg").textContent = x.score + "점! " + cmt;
+  $("gq-next-player").textContent = gq.turn >= gq.p.length - 1 ? "결과 보기 →" : "다음 사람 →";
+}
+$("gq-next-player").addEventListener("click", () => {
+  if (gq.phase !== "between") return;
+  if (gq.turn >= gq.p.length - 1) return gqEnd();
+  gq.turn++;
+  gqPassStage();
+});
+function gqEnd(){
+  gq.phase = "end";
+  gqShow("gq-end");
+  const rank = gq.p.slice().sort((a, b) => b.score - a.score);
+  const medals = ["🥇","🥈","🥉"];
+  let mi = 0;
+  const rows = rank.map((r, i) => {
+    if (i > 0 && r.score < rank[i - 1].score) mi = i; /* 동점이면 메달 공유 */
+    return (medals[mi] || "·") + " " + escHtml(r.name) + " — " + r.score + "점";
+  });
+  $("gq-rank").innerHTML = '<div class="lbl">최종 스코어</div><div class="val" style="font-size:18px;line-height:2">' + rows.join("<br>") + "</div>";
+}
+$("gq-again").addEventListener("click", gqReset);
