@@ -396,6 +396,14 @@
   .lv-faces button .cnt{position:absolute;top:-7px;right:-4px;background:var(--fire);color:#231303;border-radius:999px;font-size:11px;font-weight:800;padding:1px 6px}
   .lv-faces button .fl{font-size:11px;color:var(--dim);font-weight:700;margin-top:2px}
   .lv-junk{color:var(--danger);font-weight:800}
+  .lv-tray{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;min-height:46px;margin:8px 0 2px}
+  .lv-die{font-size:34px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
+  .lv-die.tumbling{animation:lvTumble .14s linear infinite}
+  .lv-die.land{animation:lvLand .34s cubic-bezier(.2,1.7,.4,1)}
+  .lv-die.gone{opacity:.28;animation:lvBurn .45s forwards}
+  @keyframes lvTumble{0%{transform:rotate(-16deg) scale(.82)}50%{transform:rotate(16deg) scale(1.12)}100%{transform:rotate(-16deg) scale(.82)}}
+  @keyframes lvLand{0%{transform:scale(1.55)}60%{transform:scale(.84)}100%{transform:scale(1)}}
+  @keyframes lvBurn{0%{opacity:1;transform:scale(1)}40%{transform:translateY(-4px) scale(1.15)}100%{opacity:.28;transform:translateY(-14px) scale(.6) rotate(18deg)}}
 
   /* ---------- 버저 퀴즈쇼 ---------- */
   .bz-stage{display:flex;flex-direction:column;height:calc(100dvh - 150px);min-height:440px;gap:8px}
@@ -1344,6 +1352,7 @@
         <div class="hint" id="lv-roll-msg" style="margin:0">남은 주사위를 전부 굴려요!</div>
       </div>
       <button class="btn" id="lv-roll">🎲 굴리기!</button>
+      <div class="lv-tray" id="lv-tray"></div>
       <div class="lv-faces" id="lv-faces" style="display:none"></div>
       <button class="btn ghost mt" id="lv-junk-next" style="display:none">아쉽다… 다음 사람 →</button>
     </div>

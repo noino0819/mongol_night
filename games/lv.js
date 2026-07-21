@@ -2,6 +2,7 @@
 /* ================= 주사위 배팅 ================= */
 const LV_COLORS = ["var(--fire)","var(--steppe)","var(--ember)","var(--danger)","var(--milk)"];
 const LV_FACE_EM = { 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅" };
+const LV_DICE = ["⚀","⚁","⚂","⚃","⚄","⚅"];
 let lv = { sel: [], rounds: 3, round: 1, slots: [], p: [], turn: 0, lastRoll: null };
 
 function lvReset(){
@@ -82,24 +83,51 @@ function lvTurn(){
   $("lv-turn-name").textContent = x.name;
   $("lv-roll-msg").textContent = "남은 주사위 " + x.dice + "개를 전부 굴려요!";
   $("lv-roll").style.display = "";
+  $("lv-tray").innerHTML = "";
   $("lv-faces").style.display = "none";
   $("lv-junk-next").style.display = "none";
 }
 $("lv-roll").addEventListener("click", () => {
   const x = lv.p[lv.turn];
+  const rolls = Array.from({ length: x.dice }, () => 1 + Math.floor(Math.random() * 6));
+  const tray = $("lv-tray");
+  tray.innerHTML = rolls.map(() => '<span class="lv-die tumbling">⚅</span>').join("");
+  const dice = [...tray.children];
+  $("lv-roll").style.display = "none";
+  $("lv-roll-msg").textContent = "굴리는 중…";
+  haptic(20);
+  /* 1) 전부 텀블 */
+  let ticks = 0;
+  const anim = setInterval(() => {
+    dice.forEach(d => { if (d.classList.contains("tumbling")) d.textContent = LV_DICE[Math.floor(Math.random() * 6)]; });
+    if (++ticks % 3 === 0) haptic(8);
+    if (ticks >= 9){ clearInterval(anim); lvSettleDice(); }
+  }, 70);
+  /* 2) 하나씩 착지 — 꽝(1·2)은 💨 연소 */
+  function lvSettleDice(){
+    let i = 0;
+    (function step(){
+      if (i >= dice.length) return lvRevealRoll(x, rolls);
+      const d = dice[i], v = rolls[i];
+      d.classList.remove("tumbling");
+      d.textContent = LV_DICE[v - 1];
+      if (v <= 2){ d.classList.add("land"); setTimeout(() => { d.textContent = "💨"; d.classList.add("gone"); }, 240); haptic(6); }
+      else { d.classList.add("land"); haptic(14); }
+      i++;
+      setTimeout(step, 95);
+    })();
+  }
+});
+function lvRevealRoll(x, rolls){
   const counts = { 3: 0, 4: 0, 5: 0, 6: 0 };
   let junk = 0;
-  for (let i = 0; i < x.dice; i++){
-    const d = 1 + Math.floor(Math.random() * 6);
-    if (d <= 2) junk++; else counts[d]++;
-  }
+  rolls.forEach(v => { if (v <= 2) junk++; else counts[v]++; });
   lv.lastRoll = { counts, junk };
   x.dice -= junk; /* 꽝 자동 소각 */
   haptic(25);
   lvRenderStrip();
   let html = [3,4,5,6].filter(f => counts[f]).map(f => "<b>" + LV_FACE_EM[f] + f + "</b>×" + counts[f]).join(" · ");
   if (junk) html += (html ? " · " : "") + '<span class="lv-junk">꽝×' + junk + ' 소각 💨</span>';
-  $("lv-roll").style.display = "none";
   if ([3,4,5,6].some(f => counts[f])){
     $("lv-roll-msg").innerHTML = html + "<br>한 눈만 골라 <b>전부</b> 배치!";
     const box = $("lv-faces");
@@ -116,7 +144,7 @@ $("lv-roll").addEventListener("click", () => {
     $("lv-roll-msg").innerHTML = html + "<br>전부 꽝… 배치할 게 없다 😇";
     $("lv-junk-next").style.display = "";
   }
-});
+}
 function lvPlace(face){
   const c = lv.lastRoll && lv.lastRoll.counts[face];
   if (!c) return;
