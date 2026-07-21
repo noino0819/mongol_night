@@ -124,6 +124,16 @@
     color:var(--milk);padding:9px 15px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;
   }
   .seg button.sel{background:var(--fire);color:#231303;border-color:var(--fire);font-weight:800}
+  /* 폰 하나 / 여러 폰 모드 토글 (net.js snModeBar) */
+  .sn-modebar{display:flex;gap:8px;margin-bottom:14px}
+  .sn-modebar button{flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:var(--night2);color:var(--dim);font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer}
+  .sn-modebar button.sel{background:var(--fire);color:#231303;border-color:var(--fire)}
+  /* 여러 폰 라이어 — 각자 폰에 뜨는 역할 카드 */
+  .liar-role{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:24px 18px;font-size:16px;font-weight:700;text-align:center;line-height:1.5}
+  .liar-role b{font-size:30px;display:block;margin:8px 0 6px}
+  .liar-role small{display:block;font-size:13px;color:var(--dim);font-weight:600}
+  .liar-role.liar{border-color:var(--danger);color:var(--danger)}
+  .liar-role.liar small{color:var(--danger);opacity:.85}
   .stepper{display:flex;align-items:center;gap:14px}
   .stepper button{
     width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
@@ -2191,5 +2201,6 @@ window.SN_SPRITES={PAL,SPR,draw};
 <script src="lib/qrcode-gen.js"></script>
 <script src="lib/jsqr.js"></script>
 <script src="games/mp.js"></script>
+<script src="games/net.js"></script>
 </body>
 </html>

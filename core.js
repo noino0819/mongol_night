@@ -92,19 +92,21 @@ function go(name){
 document.querySelectorAll("[data-go]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.go;
+    const connected = typeof mpLive === "function" && mpLive();
     if (target !== "home"){
       const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, bomb: 3, tele: 3, ta: 2 }[target] || 0;
-      if (roster.length < need){
-        alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
+      if (roster.length < need && !connected){ /* 여러 폰 연결 중이면 등록 일행 대신 연결된 폰이 참가자 → 게이트 통과 */
+        alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록하거나, 📡 폰 연결로 붙여주세요 🙌");
         return;
       }
     }
+    if (target === "home" && typeof mpAmHost === "function" && mpAmHost() && connected){ mp.game = null; mpNav("home"); } /* 호스트가 나가면 게스트도 연결방으로 */
     resetGame(target);
     go(target);
   });
 });
 function resetGame(name){
-  if (name === "liar"){ $("liar-setup").style.display = ""; $("liar-pass").style.display = "none"; $("liar-play").style.display = "none"; }
+  if (name === "liar") liarReset();
   if (name === "mafia"){ $("mafia-setup").style.display = ""; $("mafia-pass").style.display = "none"; $("mafia-play").style.display = "none"; }
   if (name === "choseong"){ $("cho-setup").style.display = ""; $("cho-play").style.display = "none"; }
   if (name === "balance"){ balNext(); }

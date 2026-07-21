@@ -192,6 +192,7 @@ function mpWireHostPeer(peer){
     if (msg.t === "ping") mpSend(peer.chan, { t: "pong", ts: msg.ts });
     if (msg.t === "pong"){ peer.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
     if (msg.t === "poke"){ mpPoke(peer.name); mp.peers.forEach((p) => { if (p !== peer) mpSend(p.chan, { t: "poke", from: peer.name }); }); }
+    if (typeof mpGameRecv === "function") mpGameRecv(peer.name || "게스트", msg); /* 게임 메시지 라우팅 (net.js) */
   };
 }
 function mpRoster(){
@@ -199,6 +200,7 @@ function mpRoster(){
   const names = [mp.name].concat(on.map((p) => p.name || "게스트"));
   const sprs = [mp.spr].concat(on.map((p) => p.spr || MP_DEF_SPR));
   mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
+  if (typeof mpGamePeers === "function") mpGamePeers(); /* 여러 폰 게임에 참가자 변동 통지 (net.js) */
 }
 async function mpInvite(){
   try {
@@ -264,6 +266,7 @@ async function mpJoin(){
           if (msg.t === "pong"){ mp.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
           if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8));
           if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mp.rosterSprs = (msg.sprs || []).map(mpSprOk); mpRoom(); }
+          if (typeof mpGameRecv === "function") mpGameRecv(mp.hostName || "호스트", msg); /* nav·게임 메시지 라우팅 (net.js) */
         };
       };
       await pc.setRemoteDescription({ type: "offer", sdp: o.sdp });
