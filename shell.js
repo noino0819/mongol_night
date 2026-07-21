@@ -152,6 +152,12 @@ window.alert = function(msg){
     } else if (isIOS){
       lifeModal("📲", "홈 화면에 설치하기",
         "1. Safari 하단 <b>공유 버튼(⬆️)</b>을 눌러요<br>2. <b>홈 화면에 추가</b>를 선택해요<br>3. 끝! 이제 비행기 모드에서도 열려요<br><br><span style='color:var(--dim)'>Safari에서만 가능해요. 크롬이라면 Safari로 열어주세요</span>", null);
+    } else if (/Chrome|CriOS|Edg|SamsungBrowser/.test(navigator.userAgent)){
+      /* 크로미움인데 설치 프롬프트가 없음 = 대개 이미 설치돼 있음(설치된 앱엔 beforeinstallprompt를 안 쏨).
+         ponytail: UA 휴리스틱 — 확실한 판정은 manifest related_applications+getInstalledRelatedApps 필요하나
+         배포 절대경로를 몰라 생략. 아래 폴백 문구로 '조건 미충족'인 드문 케이스도 커버 */
+      lifeModal("🎉", "이미 설치돼 있어",
+        "새로 설치 안 해도 돼! <b>홈 화면(또는 앱 목록)</b>의 <b>초원의 밤</b> 아이콘을 눌러서 열면 끝.<br><br><span style='color:var(--dim)'>아이콘이 안 보이면 브라우저를 껐다 켠 뒤 다시 눌러줘.</span>", null);
     } else {
       pwaToast("이 브라우저에선 설치 안내가 없어 — 폰의 크롬/사파리로 열어봐");
     }
