@@ -32,9 +32,11 @@ window.alert = function(msg){
 };
 
 (function pwaInit(){
-  /* CI가 __BUILD__를 커밋 SHA로 치환 — 로컬(미치환)에선 표시 안 함 */
+  /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
+  const VER = "v2.0.0";
   const BUILD = "__BUILD__";
-  if (!BUILD.includes("_")) $("build-tag").textContent = " · " + BUILD;
+  const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
+  document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
   const badge = $("pwa-badge");
   const installBtn = $("pwa-install");
   /* 설정 화면 '앱으로 설치하기'는 항상 눌리므로, 실제 유도 로직이 세팅되기 전 기본 동작을 미리 깔아둠 */
