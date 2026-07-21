@@ -1888,10 +1888,14 @@ function erRenderPanel(){
 
   if (!solved && !gated && o.lock){
     if (o.lock.ans){
-      html += '<div class="field mt"><input id="er-code" type="text" inputmode="' + (/^\d+$/.test(o.lock.ans[0]) ? "numeric" : "text") +
-        '" placeholder="' + (o.lock.digits ? o.lock.digits + "자리 암호" : "암호 입력") + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div>' +
-        '<button class="btn" id="er-open">🔓 열기</button>' +
+      /* 키보드는 요청 시에만: 설명 먼저 읽고 '암호 입력' 눌러야 입력칸+키보드 등장 */
+      html += '<button class="btn" id="er-reveal">🔢 암호 입력</button>' +
         '<button class="btn ghost" id="er-hint">💡 힌트</button>' +
+        '<div id="er-codewrap" style="display:none">' +
+          '<div class="field mt"><input id="er-code" type="text" inputmode="' + (/^\d+$/.test(o.lock.ans[0]) ? "numeric" : "text") +
+          '" placeholder="' + (o.lock.digits ? o.lock.digits + "자리 암호" : "암호 입력") + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div>' +
+          '<button class="btn" id="er-open">🔓 열기</button>' +
+        '</div>' +
         '<div class="hint" id="er-hintout" style="display:none"></div>';
     } else if (o.lock.item){
       const has = er.st.inv.includes(o.lock.item);
@@ -1906,11 +1910,16 @@ function erRenderPanel(){
   p.innerHTML = html;
   p.style.display = "";
 
-  const inp = $("er-code");
-  if (inp){
-    inp.focus();
-    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") erTryCode(); });
-    $("er-open").addEventListener("click", erTryCode);
+  const rev = $("er-reveal");
+  if (rev){
+    rev.addEventListener("click", () => {
+      rev.style.display = "none";
+      $("er-codewrap").style.display = "";
+      const inp = $("er-code");
+      inp.focus();
+      inp.addEventListener("keydown", (e) => { if (e.key === "Enter") erTryCode(); });
+      $("er-open").addEventListener("click", erTryCode);
+    });
     $("er-hint").addEventListener("click", erHint);
   }
   if ($("er-use")) $("er-use").addEventListener("click", erUseItem);
