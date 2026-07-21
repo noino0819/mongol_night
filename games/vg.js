@@ -10,7 +10,8 @@
 const VG_COLORS = ["var(--fire)", "var(--steppe)", "var(--danger)", "var(--dim)", "var(--milk)", "var(--ember)"];
 const VG_FACE = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
 let vgMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
-let vg = { phase: "setup", players: [], casinos: [], rounds: 4, round: 1, turn: 0, starter: 0, roll: null, settleInfo: null, net: null, sel: [] };
+let vg = { phase: "setup", players: [], casinos: [], rounds: 4, round: 1, turn: 0, starter: 0, roll: null, rollSeq: 0, settleInfo: null, net: null, sel: [] };
+let vgAnim = { seq: 0, iv: 0, timers: [] }; /* 주사위 굴림 연출 — seq는 이미 재생한 굴림 번호(상태 재동기화 때 재재생 방지), 로컬 전용 */
 
 /* ---------- 순수 로직 (node 테스트 대상) ---------- */
 /* placed {playerIdx:diceCount} → 배당 순서 idx 배열. 매 라운드 최다 1명씩 뽑되, 최다가 동률이면 그 그룹 전원 제외(상쇄) 후 다음 최다로. */
@@ -51,6 +52,7 @@ function vgRoll(){
   const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
   for (let i = 0; i < p.dice; i++) counts[1 + Math.floor(Math.random() * 6)]++;
   vg.roll = { counts };
+  vg.rollSeq++; /* 새 굴림 표식 — 모든 폰이 이 번호로 연출 1회만 재생 */
 }
 function vgPlace(face){
   if (!vg.roll || !vg.roll.counts[face]) return;
@@ -106,7 +108,7 @@ function vgStartMulti(){
   if (names.length < 2){ alert("여러 폰 라스베가스는 2명 이상 연결돼야 해 (지금 " + names.length + "명)"); return; }
   if (names.length > 6){ alert("최대 6명까지야 — 지금 " + names.length + "명 연결됨"); return; }
   vg.players = names.map((n, i) => ({ name: String(n).slice(0, 8), color: VG_COLORS[i % 6], dice: 8, money: 0 }));
-  vg.round = 1; vg.starter = 0; vg.net = { me: 0 };
+  vg.round = 1; vg.starter = 0; vg.rollSeq = 0; vg.net = { me: 0 }; vgAnim.seq = 0;
   mpNav("vg");                                 /* 게스트들 라스베가스 화면으로 (게스트: __guest_vg 실행 → 대기) */
   mp.game = { onMsg: vgHostMsg, onPeers(){} };
   vgNewRound();
@@ -117,6 +119,7 @@ function vgStartMulti(){
 if (typeof window !== "undefined") window.__guest_vg = function(){
   vgMode = "multi";
   vg.net = { me: -1 }; /* init 오기 전까진 내 차례 아님 */
+  vgClearDiceAnim(); vgAnim.seq = 0;
   vgShow("vg-turn");
   $("vg-strip").innerHTML = ""; $("vg-casinos").innerHTML = "";
   $("vg-turn-name").textContent = "대기 중…";
@@ -153,6 +156,41 @@ function vgDiceHtml(counts){
   for (let f = 1; f <= 6; f++) for (let k = 0; k < counts[f]; k++) h += '<span class="lv-die land">' + VG_FACE[f - 1] + "</span>";
   return h;
 }
+function vgClearDiceAnim(){ clearInterval(vgAnim.iv); vgAnim.iv = 0; vgAnim.timers.forEach(clearTimeout); vgAnim.timers = []; }
+/* 굴림 연출: 전부 텀블 → 하나씩 착지(햅틱) → 끝나면 배치 UI. counts는 이미 방송된 결과라 모든 폰이 동일하게 재생. */
+function vgPlayRoll(counts, mine, actor){
+  vgClearDiceAnim();
+  const vals = shuffle([].concat(...[1, 2, 3, 4, 5, 6].map((f) => Array(counts[f]).fill(f)))); /* 눈별 개수 → 섞은 주사위 배열 */
+  const tray = $("vg-tray");
+  tray.innerHTML = vals.map(() => '<span class="lv-die tumbling">⚅</span>').join("");
+  const dice = [...tray.children];
+  $("vg-faces").style.display = "none"; $("vg-wait").style.display = "none";
+  $("vg-roll-msg").textContent = actor.name + " 굴리는 중…";
+  haptic(20);
+  let ticks = 0;
+  vgAnim.iv = setInterval(() => {
+    dice.forEach((d) => { if (d.classList.contains("tumbling")) d.textContent = VG_FACE[Math.floor(Math.random() * 6)]; });
+    if (++ticks % 3 === 0) haptic(8);
+    if (ticks >= 9){ clearInterval(vgAnim.iv); vgAnim.iv = 0; land(0); }
+  }, 70);
+  function land(i){
+    if (i >= dice.length){ done(); return; }
+    const d = dice[i];
+    d.classList.remove("tumbling"); d.classList.add("land");
+    d.textContent = VG_FACE[vals[i] - 1];
+    haptic(14);
+    vgAnim.timers.push(setTimeout(() => land(i + 1), 90));
+  }
+  function done(){
+    if (mine){
+      $("vg-roll-msg").innerHTML = "한 눈만 골라 <b>전부</b> 그 카지노에 배치!";
+      vgRenderFaces(); $("vg-faces").style.display = "";
+    } else {
+      $("vg-wait").style.display = ""; $("vg-wait").textContent = actor.name + "가 배치 중…";
+      $("vg-roll-msg").textContent = "";
+    }
+  }
+}
 function vgRenderFaces(){
   const box = $("vg-faces"); box.innerHTML = "";
   for (let f = 1; f <= 6; f++){
@@ -177,6 +215,7 @@ function vgRender(){
   $("vg-turn-name").textContent = actor.name + (vgMode === "multi" && mine ? " (나)" : "");
   const roll = $("vg-roll"), tray = $("vg-tray"), faces = $("vg-faces"), wait = $("vg-wait");
   if (!vg.roll){
+    vgClearDiceAnim();
     tray.innerHTML = ""; faces.style.display = "none";
     if (mine){
       roll.style.display = ""; wait.style.display = "none";
@@ -187,14 +226,21 @@ function vgRender(){
       wait.textContent = actor.name + "가 굴리는 중…"; $("vg-roll-msg").textContent = "";
     }
   } else {
-    roll.style.display = "none"; tray.innerHTML = vgDiceHtml(vg.roll.counts);
-    if (mine){
-      wait.style.display = "none";
-      $("vg-roll-msg").innerHTML = "한 눈만 골라 <b>전부</b> 그 카지노에 배치!";
-      vgRenderFaces(); faces.style.display = "";
-    } else {
-      faces.style.display = "none"; wait.style.display = "";
-      wait.textContent = actor.name + "가 배치 중…"; $("vg-roll-msg").textContent = "";
+    roll.style.display = "none";
+    if (vg.rollSeq !== vgAnim.seq){
+      vgAnim.seq = vg.rollSeq;              /* 이 굴림 첫 렌더 → 연출 재생 */
+      vgPlayRoll(vg.roll.counts, mine, actor);
+    } else {                                /* 재동기화 등 재렌더 → 최종 상태 정적 표시 */
+      vgClearDiceAnim();
+      tray.innerHTML = vgDiceHtml(vg.roll.counts);
+      if (mine){
+        wait.style.display = "none";
+        $("vg-roll-msg").innerHTML = "한 눈만 골라 <b>전부</b> 그 카지노에 배치!";
+        vgRenderFaces(); faces.style.display = "";
+      } else {
+        faces.style.display = "none"; wait.style.display = "";
+        wait.textContent = actor.name + "가 배치 중…"; $("vg-roll-msg").textContent = "";
+      }
     }
   }
 }
@@ -227,6 +273,7 @@ function vgEnd(){
 /* ---------- 셋업 · core.js resetGame("vg") 진입점 ---------- */
 function vgReset(){
   if (vgMode === "multi" && !mpLive()) vgMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  vgClearDiceAnim(); vgAnim.seq = 0;
   vg.net = null; vg.phase = "setup";
   vgShow("vg-setup");
   snModeBar($("vg-setup"), vgMode, (m) => { vgMode = m; vgReset(); });
@@ -256,7 +303,7 @@ function vgReset(){
 function vgStartSolo(){
   if (vg.sel.length < 2) return alert("2명 이상 선택!");
   vg.players = vg.sel.map((n, i) => ({ name: n, color: VG_COLORS[i % 6], dice: 8, money: 0 }));
-  vg.round = 1; vg.starter = 0; vg.net = null;
+  vg.round = 1; vg.starter = 0; vg.rollSeq = 0; vg.net = null; vgAnim.seq = 0;
   vgNewRound(); vgRender();
 }
 
