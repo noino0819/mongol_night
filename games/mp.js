@@ -5,11 +5,13 @@
    호스트가 별(스타) 중심이 되어 게스트별 1:1 연결을 들고 중계한다.
    ponytail: 자동 재연결 없음(끊기면 재초대) — 게임 붙일 때 필요해지면 추가. */
 
-let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0, wake: null, ka: 0 };
 
 /* 아바타로 쓸 캐릭터 스프라이트 (오브젝트 제외, 동물·텡그리 20종) */
 const MP_AVATARS = ["bor", "fox", "wolf", "crow", "hawk", "hedgehog", "mole", "rooster", "goat", "squirrel", "rabbit", "otter", "turtle", "badger", "crane", "camel", "owl2", "marmot", "owlprof", "tengri"];
 const MP_DEF_SPR = "bor";
+/* 대기방에서 날릴 수 있는 이모지 — 원격에서 온 값은 이 목록 밖이면 👋 (신뢰경계) */
+const MP_EMOJIS = ["👋", "❤️", "😂", "😱", "🎉", "🐴"];
 /* 원격에서 온 캐릭터 값은 허용목록 밖이면 기본값으로 (px-sprite name 속성 신뢰경계) */
 function mpSprOk(s){ return MP_AVATARS.includes(s) ? s : MP_DEF_SPR; }
 /* 캐릭터 선택 UI — mp-role 진입 시 그림 */
@@ -181,7 +183,28 @@ function mpFlash(txt){
   const t = setTimeout(() => d.remove(), 1100);
   mp.timers.push(t);
 }
-function mpPoke(from){ mpFlash("👋 " + from); }
+function mpPoke(from, emo){ mpFlash((MP_EMOJIS.includes(emo) ? emo : "👋") + " " + from); }
+
+/* ---------- 연결 붙잡아두기 ---------- */
+/* 화면 꺼짐이 연결 사망의 주범 — 연결 중엔 화면을 깨워둔다 (미지원 브라우저는 조용히 무시) */
+async function mpWake(on){
+  try {
+    if (on && !mp.wake && "wakeLock" in navigator && document.visibilityState === "visible")
+      mp.wake = await navigator.wakeLock.request("screen");
+    else if (!on && mp.wake){ mp.wake.release(); mp.wake = null; }
+  } catch (e) { /* 무시 */ }
+}
+document.addEventListener("visibilitychange", () => {
+  /* 숨김 때 OS가 웨이크락을 자동 해제하므로, 복귀하면 버리고 재획득 */
+  if (document.visibilityState === "visible" && mpLive()){ mp.wake = null; mpWake(true); }
+});
+/* ponytail: 5초 keepalive — 와이파이 절전으로 채널이 조용히 죽는 걸 막고 RTT도 갱신 */
+function mpKeepalive(){
+  if (mp.ka) return;
+  mp.ka = setInterval(() => {
+    if (mp.role === "host") mp.peers.forEach((p) => { if (p.on) mpSend(p.chan, { t: "ping", ts: performance.now() }); });
+  }, 5000);
+}
 function mpFail(e){
   alert("연결 준비에 실패했어" + (e && e.name === "NotAllowedError" ? " — 카메라 허용이 필요해" : ""));
   mpStopScan();
@@ -195,6 +218,8 @@ function mpWireHostPeer(peer){
     if (mp.pendingPc === peer.pc) mp.pendingPc = null;
     mp.peers.push(peer);
     localStorage.setItem("snMpWas", "host:" + Date.now()); /* 앱이 죽었다 켜지면 "연결 끊김" 안내용 */
+    mpWake(true);
+    mpKeepalive();
     mpFlash("🔗 폰 연결됨!");
     mpRoom();
     mpRoster();
@@ -204,8 +229,8 @@ function mpWireHostPeer(peer){
     let msg; try { msg = JSON.parse(e.data); } catch (err) { return; }
     if (msg.t === "hi"){ peer.name = String(msg.name || "게스트").slice(0, 8); peer.spr = mpSprOk(msg.spr); mpRoom(); mpRoster(); }
     if (msg.t === "ping") mpSend(peer.chan, { t: "pong", ts: msg.ts });
-    if (msg.t === "pong"){ peer.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
-    if (msg.t === "poke"){ mpPoke(peer.name); mp.peers.forEach((p) => { if (p !== peer) mpSend(p.chan, { t: "poke", from: peer.name }); }); }
+    if (msg.t === "pong"){ peer.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); if ($("mp-flow").style.display === "none") mpRoom(); } /* 초대 플로우 중엔 화면 안 뺏음 (keepalive pong이 5초마다 옴) */
+    if (msg.t === "poke"){ mpPoke(peer.name, msg.emo); mp.peers.forEach((p) => { if (p !== peer) mpSend(p.chan, { t: "poke", from: peer.name, emo: msg.emo }); }); }
     if (typeof mpGameRecv === "function") mpGameRecv(peer.name || "게스트", msg); /* 게임 메시지 라우팅 (net.js) */
   };
 }
@@ -281,13 +306,13 @@ async function mpJoin(){
       };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
+        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
           if (msg.t === "ping") mpSend(mp.hostChan, { t: "pong", ts: msg.ts });
           if (msg.t === "pong"){ mp.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
-          if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8));
+          if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8), msg.emo);
           if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mp.rosterSprs = (msg.sprs || []).map(mpSprOk); mpRoom(); }
           if (typeof mpGameRecv === "function") mpGameRecv(mp.hostName || "호스트", msg); /* nav·게임 메시지 라우팅 (net.js) */
         };
@@ -347,22 +372,26 @@ function mpRoom(){
     mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt, p.spr)));
     $("mp-invite-more").style.display = "";
     $("mp-roster-field").style.display = "none"; /* 호스트는 위 연결 행이 이미 전원(실상태) */
-    $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼";
+    $("mp-leave").textContent = "🚪 방 닫기 (전원 연결 해제)";
+    $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼. 게임은 ← 홈에서 골라 시작하면 전원이 따라와";
   } else {
-    $("mp-room-label").textContent = "내 연결";
+    $("mp-room-label").textContent = "대기방 · 내 연결";
     box.append(mpPeerRow((mp.hostName || "호스트") + " (호스트)", !!(mp.hostChan && mp.hostChan.readyState === "open"), mp.rtt, mp.hostSpr));
     $("mp-invite-more").style.display = "none";
     /* 방 전원 캐릭터 칩 — 다른 게스트는 직접 연결이 아니라 roster로만 아니까 상태 없이 표시 */
     const rbox = $("mp-roster"); rbox.innerHTML = "";
     (mp.rosterNames || []).forEach((n, i) => rbox.append(mpChip(n, (mp.rosterSprs || [])[i])));
     $("mp-roster-field").style.display = mp.rosterNames && mp.rosterNames.length ? "" : "none";
-    $("mp-room-hint").textContent = "";
+    $("mp-leave").textContent = "🚪 방 나가기";
+    $("mp-room-hint").textContent = "호스트가 게임을 고르면 이 폰도 자동으로 따라가 — 화면 켜둔 채 기다려줘";
   }
 }
 
 /* ---------- 진입·리셋 ---------- */
 function mpReset(){
   mp.timers.forEach(clearTimeout);
+  clearInterval(mp.ka);
+  mpWake(false);
   mpStopScan();
   mp.peers.forEach((p) => { try { p.pc.close(); } catch (e) { /* 무시 */ } });
   if (mp.hostPc){ try { mp.hostPc.close(); } catch (e) { /* 무시 */ } }
@@ -415,10 +444,20 @@ $("mp-ping").addEventListener("click", () => {
 $("mp-install-btn").addEventListener("click", () => {
   if (typeof pwa !== "undefined" && pwa.installAction) pwa.installAction(); /* shell.js 설치 플로우 재사용 (인앱 탈출·iOS 안내 포함) */
 });
-$("mp-poke-btn").addEventListener("click", () => {
-  mpPoke(mp.name);
-  if (mp.role === "host") mp.peers.forEach((p) => mpSend(p.chan, { t: "poke", from: mp.name }));
-  else mpSend(mp.hostChan, { t: "poke" });
+/* 이모지 날리기 — 내 화면에 뿅 + 전원에게 전송 (호스트가 중계) */
+MP_EMOJIS.forEach((emo) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.textContent = emo;
+  b.addEventListener("click", () => {
+    mpPoke(mp.name, emo);
+    if (mp.role === "host") mp.peers.forEach((p) => mpSend(p.chan, { t: "poke", from: mp.name, emo }));
+    else mpSend(mp.hostChan, { t: "poke", emo });
+  });
+  $("mp-emo").append(b);
+});
+$("mp-leave").addEventListener("click", () => {
+  if (confirm(mp.role === "host" ? "방을 닫을까? 전원 연결이 끊겨" : "방에서 나갈까? 다시 들어오려면 호스트 초대 QR이 필요해")) mpReset();
 });
 
 /* ---------- 앱 재시작 감지 ---------- */

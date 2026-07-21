@@ -93,6 +93,13 @@ document.querySelectorAll("[data-go]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.go;
     const connected = typeof mpLive === "function" && mpLive();
+    /* 게스트는 방에 묶임 — 홈(게임 리스트) 대신 항상 대기방. 게임 선택·이동은 호스트가 mpNav로 끌고 감 */
+    if (connected && typeof mpAmHost === "function" && !mpAmHost() && target !== "mp"){
+      mpFlash("게임은 호스트가 골라줄 거야");
+      mp.game = null;
+      resetGame("mp"); go("mp");
+      return;
+    }
     if (target !== "home"){
       const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, bomb: 3, tele: 3, ta: 2 }[target] || 0;
       if (roster.length < need && !connected){ /* 여러 폰 연결 중이면 등록 일행 대신 연결된 폰이 참가자 → 게이트 통과 */

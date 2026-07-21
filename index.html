@@ -810,6 +810,8 @@
   .mp-roster{display:flex;flex-wrap:wrap;gap:8px}
   .mp-chip{display:flex;align-items:center;gap:6px;background:var(--night2);border:1px solid var(--line);border-radius:20px;padding:4px 12px 4px 6px;font-size:13px;font-weight:700;color:var(--milk)}
   .mp-chip .av{line-height:0}
+  .mp-emo{display:flex;flex-wrap:wrap;gap:8px;padding:6px 2px}
+  .mp-emo button{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:6px 12px;font-size:24px;line-height:1.2;cursor:pointer}
   .mp-poke{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:min(64px,12vw);font-weight:800;color:var(--milk);z-index:80;pointer-events:none;animation:mpPokePop .3s steps(3) both}
   @keyframes mpPokePop{from{transform:scale(.4)}to{transform:scale(1)}}
 </style>
@@ -990,7 +992,8 @@
       <div class="field" id="mp-roster-field" style="display:none"><label>이 방의 캐릭터</label><div id="mp-roster" class="mp-roster"></div></div>
       <button class="btn" id="mp-invite-more">➕ 게스트 초대</button>
       <button class="btn ghost" id="mp-ping">📶 핑 테스트</button>
-      <button class="btn ghost" id="mp-poke-btn">👋 전체 찌르기</button>
+      <div class="field"><label>이모지 날리기 (전원 화면에 뿅)</label><div class="mp-emo" id="mp-emo"></div></div>
+      <button class="btn ghost" id="mp-leave">🚪 방 나가기</button>
       <p class="hint" id="mp-room-hint"></p>
     </div>
   </div>
