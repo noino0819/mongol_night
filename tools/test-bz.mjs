@@ -78,5 +78,22 @@ ok("초반(진행 0)엔 어려움 안 나옴", early[3] === 0 && early[1] > 0 &&
 ok("중반(0.5)엔 세 난이도 모두 등장", mid[1] > 0 && mid[2] > 0 && mid[3] > 0);
 ok("후반(0.9)엔 어려움이 최다", late[3] > late[2] && late[2] > late[1]);
 
+console.log("bzHostMsg (여러 폰: 원격 버저·원격 OX 답 게이트)");
+const bzHostMsgSrc = extract("bzHostMsg");
+function runHostMsg(state, from, m){
+  const calls = [];
+  const fn = new Function("bz", "bzTap", "bzJudge", "performance", "return (" + bzHostMsgSrc + ")")(
+    state, (i) => calls.push(["tap", i]), (c) => calls.push(["judge", c]), { now: () => 1 });
+  fn(from, m);
+  return calls;
+}
+const st = { sel: ["나", "형"], phase: "answer", winner: 1, cur: { type: "ox", a: true } };
+ok("버저 딴 게스트의 정답 → judge(true)", JSON.stringify(runHostMsg(st, "형", { t: "ans", o: true })) === '[["judge",true]]');
+ok("오답이면 judge(false)", JSON.stringify(runHostMsg(st, "형", { t: "ans", o: false })) === '[["judge",false]]');
+ok("버저 안 딴 사람 답은 무시", runHostMsg(st, "나", { t: "ans", o: true }).length === 0);
+ok("answer 페이즈 아니면 무시", runHostMsg(Object.assign({}, st, { phase: "buzz" }), "형", { t: "ans", o: true }).length === 0);
+ok("OX 아닌 문제(초성)면 무시", runHostMsg(Object.assign({}, st, { cur: { type: "cho", a: "곰" } }), "형", { t: "ans", o: true }).length === 0);
+ok("buzz 메시지는 그 인덱스로 탭 처리", JSON.stringify(runHostMsg(st, "형", { t: "buzz" })) === '[["tap",1]]');
+
 console.log(fail ? "❌ " + fail + "개 실패" : "✅ 전부 통과 (" + pass + "케이스)");
 process.exit(fail ? 1 : 0);
