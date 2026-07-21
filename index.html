@@ -944,50 +944,50 @@
 
   <!-- ============ 설정 ============ -->
   <div class="screen" id="scr-settings">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚙️ 설정</h2></div>
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>설정</h2></div>
     <div class="roster-box">
-      <label>👥 일행 관리 (한 번만 등록하면 모든 게임에서 사용)</label>
+      <label>일행 관리 (한 번만 등록하면 모든 게임에서 사용)</label>
       <div class="roster-row">
         <input id="name-input" type="text" placeholder="이름 입력 후 추가" maxlength="8" enterkeyhint="done">
         <button class="btn" style="width:auto;padding:0 18px" id="add-name">추가</button>
       </div>
       <div class="chips" id="chips"></div>
     </div>
-    <div class="toggle-row"><span>🔊 사운드</span><button class="tg" id="set-sound"></button></div>
-    <div class="toggle-row"><span>📳 진동</span><button class="tg" id="set-vibe"></button></div>
+    <div class="toggle-row"><span>사운드</span><button class="tg" id="set-sound"></button></div>
+    <div class="toggle-row"><span>진동</span><button class="tg" id="set-vibe"></button></div>
     <div class="field" style="margin-top:4px">
-      <label>🙈 폰 전달 가림막 (비밀 넘길 때 화면 가림)</label>
+      <label>폰 전달 가림막 (비밀 넘길 때 화면 가림)</label>
       <div class="seg" id="set-cover">
         <button data-c="0">끄기</button><button data-c="3">3초</button><button data-c="5">5초</button><button data-c="10">10초</button><button data-c="tap">받아서 탭</button>
       </div>
       <div class="hint" style="margin:6px 0 0">초 = 시간 지나면 자동 공개 · 받아서 탭 = 받은 사람이 눌러야 공개</div>
     </div>
     <div class="field" style="margin-top:4px">
-      <label>💬 텍스트 속도 (텍스트 어드벤처)</label>
+      <label>텍스트 속도 (텍스트 어드벤처)</label>
       <div class="seg" id="set-speed">
         <button data-s="보통">보통</button><button data-s="빠름">빠름</button><button data-s="즉시">즉시</button>
       </div>
     </div>
-    <button class="btn ghost mt" data-go="mp">📡 폰 연결 테스트 (베타)</button>
-    <button class="btn mt" id="set-install">📲 앱으로 설치하기</button>
-    <button class="btn ghost mt" id="set-reset" style="color:var(--danger);text-align:left">🗑️ 데이터 초기화</button>
+    <button class="btn ghost mt" data-go="mp">폰 연결 테스트 (베타)</button>
+    <button class="btn mt" id="set-install">앱으로 설치하기</button>
+    <button class="btn ghost mt" id="set-reset" style="color:var(--danger);text-align:left">데이터 초기화</button>
     <div class="footer-note">초원의 밤 <span class="app-version"></span><br>픽셀 폰트: Galmuri — SIL Open Font License 1.1<br>QR: jsQR — Apache License 2.0 · qrcode-generator — MIT License<br>© 2026 steppe-night</div>
   </div>
 
   <!-- ============ 폰 연결(mp) ============ -->
   <div class="screen" id="scr-mp">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📡 폰 연결 (베타)</h2></div>
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>폰 연결 (베타)</h2></div>
     <div id="mp-role">
       <div class="mp-warn" id="mp-reload-warn" style="display:none"></div>
       <div class="mp-warn" id="mp-install-warn" style="display:none">
-        <b>⚠️ 지금 브라우저로 열고 있어</b><br>이대로면 인터넷 없는 초원에서 앱이 안 열려. 여행 전에 이 폰에도 꼭 설치부터!
-        <button class="btn" id="mp-install-btn" style="margin-top:10px">📲 앱으로 설치하기</button>
+        <b>지금 브라우저로 열고 있어</b><br>이대로면 인터넷 없는 초원에서 앱이 안 열려. 여행 전에 이 폰에도 꼭 설치부터!
+        <button class="btn" id="mp-install-btn" style="margin-top:10px">앱으로 설치하기</button>
       </div>
       <p class="hint">여러 폰을 <b>인터넷 없이</b> 직접 연결하는 테스트야. 먼저 한 명이 핫스팟을 켜고(인터넷 안 돼도 돼 · 안드로이드는 유심 없이도 켜져) 전원이 그 Wi-Fi에 붙은 뒤, 한 명이 호스트를 맡아. 카메라는 QR 맞스캔에만 쓰여.</p>
       <div class="field"><label>내 이름</label><input id="mp-name" class="mp-input" type="text" maxlength="8" placeholder="이름 (다른 폰에 보여요)" enterkeyhint="done"></div>
       <div class="field"><label>내 캐릭터 (다른 폰에 대표로 보여요)</label><div id="mp-avatars" class="mp-avatars"></div></div>
-      <button class="btn mt" id="mp-host-btn">📡 호스트 하기 — 방 만들기</button>
-      <button class="btn ghost" id="mp-join-btn">📷 참가하기 — 초대 QR 스캔</button>
+      <button class="btn mt" id="mp-host-btn">호스트 하기 — 방 만들기</button>
+      <button class="btn ghost" id="mp-join-btn">참가하기 — 초대 QR 스캔</button>
     </div>
     <div id="mp-flow" style="display:none" class="stage-center">
       <span class="tag" id="mp-step-tag"></span>
@@ -999,10 +999,10 @@
     <div id="mp-room" style="display:none">
       <div class="field"><label id="mp-room-label">연결된 폰</label><div id="mp-peers"></div></div>
       <div class="field" id="mp-roster-field" style="display:none"><label>이 방의 캐릭터</label><div id="mp-roster" class="mp-roster"></div></div>
-      <button class="btn" id="mp-invite-more">➕ 게스트 초대</button>
-      <button class="btn ghost" id="mp-ping">📶 핑 테스트</button>
+      <button class="btn" id="mp-invite-more">게스트 초대</button>
+      <button class="btn ghost" id="mp-ping">핑 테스트</button>
       <div class="field"><label>마음 날리기 (전원 화면에 뿅)</label><div class="mp-emo" id="mp-emo"></div></div>
-      <button class="btn ghost" id="mp-leave">🚪 방 나가기</button>
+      <button class="btn ghost" id="mp-leave">방 나가기</button>
       <p class="hint" id="mp-room-hint"></p>
     </div>
   </div>
