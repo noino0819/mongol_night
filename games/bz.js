@@ -638,7 +638,8 @@ const BZ_OX = [
 let bz = { sel: [], types: ["ox"], goal: 7, scores: [], cur: null, locked: [], phase: "idle", taps: [], winner: -1, oxUsed: [], tid: null, tapTid: null, multi: false };
 let bzMode = "solo"; /* "solo"=폰 하나(기존) · "multi"=여러 폰(각자 폰이 자기 버저) */
 /* ponytail: 원격 버저는 호스트 도착순(performance.now)으로 판정 — 지연 보정 안 함(파티겜엔 충분).
-   답/채점은 호스트 화면에서 기존 로직 그대로. 게스트 폰은 버저+상태 표시 전용. */
+   채점 권한은 호스트. 단 OX는 버저 딴 게스트가 자기 폰에서 ⭕/❌ 입력(ans) → 호스트가 채점.
+   초성/계산은 말로 외치고 호스트가 맞음/틀림 판정. 점수판·타이머·최종순위도 게스트 폰에 표시. */
 
 function bzReset(){
   clearInterval(bz.tid); bz.tid = null;
@@ -711,21 +712,25 @@ function bzStartMulti(){
 }
 /* 게스트 버저 수신 → 그 사람 인덱스로 로컬 탭 처리(도착시각 = 순위). 기존 판정 재사용. */
 function bzHostMsg(from, m){
-  if (m && m.t === "buzz"){
+  if (!m) return;
+  if (m.t === "buzz"){
     const i = bz.sel.indexOf(from);
     if (i >= 0) bzTap(i, performance.now());
+  } else if (m.t === "ans" && typeof m.o === "boolean"
+      && bz.phase === "answer" && bz.cur.type === "ox" && bz.sel[bz.winner] === from){
+    bzJudge(m.o === bz.cur.a);            /* 버저 딴 게스트가 자기 폰에서 낸 OX 답 채점 */
   }
 }
-/* 여러 폰일 때만 게스트 폰에 상태 브로드캐스트 */
-function bzBeam(m){ if (bz.multi) mpBroadcast(m); }
+/* 여러 폰일 때만 게스트 폰에 상태 브로드캐스트 — 점수판 상시 동봉 */
+function bzBeam(m){ if (bz.multi) mpBroadcast(Object.assign({ names: bz.sel, scores: bz.scores.slice() }, m)); }
 /* 문제 표시 텍스트(호스트/게스트 공용) */
 function bzQFace(c){
   if (c.type === "ox") return { main: c.q + "?", sub: c.d === 3 ? "🔥 어려움 — 맞히면 +2" : c.d === 1 ? "몸풀기 OX" : "⭕냐 ❌냐" };
   if (c.type === "cho") return { main: c.q, sub: c.sub, spaced: true };
   return { main: c.q, sub: "빠른 계산" };
 }
-/* 아랫줄 = 앞쪽 절반, 윗줄 = 나머지(180° 회전 배치) */
-function bzIsTop(i){ return i >= Math.ceil(bz.sel.length / 2); }
+/* 아랫줄 = 앞쪽 절반, 윗줄 = 나머지(180° 회전 배치). 여러 폰이면 각자 폰이라 회전 없음(호스트=전광판) */
+function bzIsTop(i){ return !bz.multi && i >= Math.ceil(bz.sel.length / 2); }
 function bzRenderZones(){
   const top = $("bz-top"), bottom = $("bz-bottom");
   top.innerHTML = ""; bottom.innerHTML = "";
@@ -845,7 +850,7 @@ function bzResolveTap(){
   haptic([30, 40, 30]);
   bzRenderZones();
   bzAnswerUI();
-  bzBeam({ t: "st", phase: "won", win: bz.sel[w] });
+  bzBeam({ t: "st", phase: "won", win: bz.sel[w], qtype: bz.cur.type });
 }
 function bzAnswerUI(){
   const c = bz.cur;
