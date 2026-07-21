@@ -727,6 +727,18 @@
 .ta-text{font-size:16px;line-height:1.65;word-break:keep-all;white-space:pre-line}
 .er-shake{animation:erShake .32s}
 @keyframes erShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.er-scene{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.er-tile{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 4px 8px;color:var(--milk);font-family:inherit;font-size:11px;position:relative;cursor:pointer}
+.er-tile:active{transform:scale(.96)}
+.er-tile.done{opacity:.55;border-color:var(--steppe)}
+.er-tile-nm{line-height:1.2;word-break:keep-all;text-align:center}
+.er-tile-b{position:absolute;top:4px;right:6px;font-size:12px}
+.er-invbox{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0;font-size:13px;color:var(--dim)}
+.er-inv-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.er-item.sel{outline:2px solid var(--px-sky);outline-offset:1px}
+.er-combine{width:100%;margin-top:2px}
+.er-panel{margin-top:10px}
+.er-msg{text-align:center;color:var(--fire);min-height:20px;margin-top:8px}
 .ta-turnbar{margin:12px 0 2px;font-size:13px;color:var(--dim);text-align:center}
 .ta-turnbar b{color:var(--steppe)}
 #ta-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
@@ -1628,24 +1640,30 @@
   <div class="screen" id="scr-er">
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔒 게르 탈출</h2></div>
     <div id="er-setup">
-      <p class="hint">밤의 게르에 갇혔다. <b>단서를 읽고 자물쇠 암호를 풀어</b> 문을 열자. 다 같이 화면을 보며 푸는 협동 방탈출 — 힌트는 3단계, 시간은 재지만 죽지 않아. 목표 시간 안에 나가면 별 3개!</p>
-      <p class="ta-text" id="er-intro" style="margin:10px 0 16px"></p>
-      <button class="btn" id="er-start">🔦 들어가기</button>
+      <p class="hint">밤의 게르에 갇혔다. 오브젝트를 눌러 <b>조사</b>하고, 단서로 <b>암호를 풀고</b>, 얻은 것들을 <b>조합해</b> 탈출하라. 다 같이 화면 보며 머리를 모으는 협동 방탈출 — 전 2막.</p>
+      <div class="field mt"><label>모드</label></div>
+      <button class="btn" id="er-mode-soft">🌙 소프트 — 실패 없음, 느긋하게</button>
+      <button class="btn ghost" id="er-mode-hard">🔥 하드코어 — ❤️5 · 막당 제한시간 · 오답/힌트 시간 차감</button>
+      <button class="btn ghost mt" id="er-continue" style="display:none">⏳ 이어하기</button>
+    </div>
+    <div id="er-act" style="display:none" class="stage-center">
+      <span class="tag" id="er-act-name"></span>
+      <p class="ta-text" id="er-act-intro" style="margin:14px 0"></p>
+      <button class="btn" id="er-act-go">🔦 시작</button>
     </div>
     <div id="er-play" style="display:none">
       <div class="ta-hud" id="er-hud"></div>
-      <div class="ta-box">
-        <div class="ta-port"><px-sprite name="owlprof" scale="4"></px-sprite></div>
-        <div class="ta-body">
-          <div class="ta-nm" id="er-lock-nm"></div>
-          <div class="ta-text" id="er-clue"></div>
-        </div>
+      <div class="er-scene" id="er-scene"></div>
+      <div class="er-invbox" id="er-inv"></div>
+      <div class="er-panel" id="er-panel" style="display:none"></div>
+    </div>
+    <div id="er-fail" style="display:none" class="stage-center">
+      <div class="reveal-card">
+        <h3 id="er-fail-msg" style="margin:0 0 8px"></h3>
+        <p class="hint" id="er-fail-sub" style="margin:0"></p>
       </div>
-      <div class="field mt"><input id="er-input" type="text" placeholder="암호 입력" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
-      <button class="btn" id="er-submit">🔓 열기</button>
-      <button class="btn ghost" id="er-hint-btn">💡 힌트</button>
-      <div class="hint" id="er-hint-out" style="display:none"></div>
-      <div class="er-msg" id="er-msg" style="text-align:center;color:var(--fire);min-height:20px;margin-top:8px"></div>
+      <button class="btn" id="er-fail-continue">🔁 이 막 다시 도전</button>
+      <button class="btn ghost" id="er-fail-restart">처음으로</button>
     </div>
     <div id="er-done" style="display:none" class="stage-center">
       <div class="reveal-card" id="er-result"></div>
@@ -2239,6 +2257,227 @@ bormoon:[
 "................",
 "................",
 "................"],
+letter:[
+"................",
+"................",
+"................",
+"..666666666666..",
+"..676666666676..",
+"..667666666766..",
+"..666766667666..",
+"..666676676666..",
+"..666665566666..",
+"..666665566666..",
+"..666666666666..",
+"..666666666666..",
+"..666666666666..",
+"................",
+"................",
+"................"],
+lamp:[
+"................",
+".......55.......",
+"......5225......",
+"......5225......",
+".......55.......",
+".......77.......",
+".....777777.....",
+"....22777777....",
+"....77777777....",
+"....77777777....",
+".....777777.....",
+"......7777......",
+"......7777......",
+"....77777777....",
+"...7777777777...",
+"................"],
+morin:[
+"................",
+"......22........",
+".....2222.......",
+"......22........",
+"......77........",
+"......77........",
+"......77........",
+"......77........",
+".....7777.......",
+"....777777......",
+"...77222277.....",
+"..7720220277....",
+"..7720220277....",
+"..7720220277....",
+"...77222277.....",
+"....777777......"],
+rug:[
+"................",
+".22222222222222.",
+".25555555555552.",
+".25555555555552.",
+".25555555655562.",
+".25555555555552.",
+".25555555555552.",
+".25555555655562.",
+".25555555555552.",
+".25555565555552.",
+".25556555555552.",
+".25655555555552.",
+".25555555555552.",
+".22222222222222.",
+"................",
+"................"],
+toono:[
+"................",
+"....77777777....",
+"..777117711777..",
+".77111177111177.",
+".71611177111117.",
+".71111177111617.",
+".77777777777777.",
+".77777777777777.",
+".71111177111117.",
+".71161177111117.",
+".77111177111177.",
+"..777117711777..",
+"....77777777....",
+"................",
+"................",
+"................"],
+chest:[
+"................",
+"................",
+"................",
+"...2222222222...",
+"..222222222222..",
+"..777777777777..",
+"..777777777777..",
+"..777776677777..",
+"..770006600077..",
+"..777777777777..",
+"..777777777777..",
+"..777777777777..",
+"...7777777777...",
+"................",
+"................",
+"................"],
+door:[
+"................",
+"..777777777777..",
+"..755555555557..",
+"..752222222257..",
+"..755555555557..",
+"..755555555557..",
+"..755555555557..",
+"..755555522557..",
+"..755555522557..",
+"..755555555557..",
+"..755555555557..",
+"..755555555557..",
+"..755555555557..",
+"..777777777777..",
+"................",
+"................"],
+well:[
+"................",
+"................",
+"................",
+"................",
+"...7777777777...",
+"..777777777777..",
+"..770000000077..",
+"..770000000077..",
+"..777777777777..",
+"..772277772277..",
+"..777777227777..",
+"..777777777777..",
+"...7777777777...",
+"................",
+"................",
+"................"],
+ovoo:[
+"................",
+".......44.......",
+"......7744......",
+"......77........",
+".....77777......",
+"....7772777.....",
+"...777727777....",
+"..77727777277...",
+".7777777777777..",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................"],
+flarebox:[
+"................",
+".......55.......",
+"......5555......",
+"......5225......",
+"......5555......",
+".......77.......",
+".......77.......",
+"..777777777777..",
+"..722222222227..",
+"..722222222227..",
+"..722222222227..",
+"..777777777777..",
+"................",
+"................",
+"................",
+"................"],
+horse:[
+"................",
+"................",
+"..........77....",
+"........667777..",
+"........667707..",
+"..777777777777..",
+".667777777777...",
+"..7777777777....",
+"..7777777777....",
+"..77......77....",
+"..77......77....",
+"..77......77....",
+"................",
+"................",
+"................",
+"................"],
+stable:[
+"................",
+"..777777777777..",
+"..722222222227..",
+"..727222222727..",
+"..722722227227..",
+"..722272272227..",
+"..722227722227..",
+"..722272272227..",
+"..722722227227..",
+"..727222222727..",
+"..777777777777..",
+"................",
+"................",
+"................",
+"................",
+"................"],
+bigdipper:[
+"1111111111111111",
+"1111111111111111",
+"1141111111111111",
+"1111111111111111",
+"1111111116111611",
+"1111111111111111",
+"1111111111111111",
+"1111111116111611",
+"1111111111111111",
+"1111111611111111",
+"1111161111111111",
+"1116111111111111",
+"1111111111111111",
+"1111111111111411",
+"1111111111111111",
+"1111111111111111"],
 };
 function draw(cv,key,scale){const m=SPR[key];if(!m||!cv)return;scale=scale||3;cv.width=16*scale;cv.height=16*scale;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.clearRect(0,0,cv.width,cv.height);for(let y=0;y<m.length;y++){const row=m[y];for(let x=0;x<row.length&&x<16;x++){const c=row[x];if(c==='.')continue;g.fillStyle=PAL[+c];g.fillRect(x*scale,y*scale,scale,scale);}}}
 class PxSprite extends HTMLElement{
