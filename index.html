@@ -722,6 +722,8 @@
 .ta-body{flex:1;min-width:0}
 .ta-nm{font-size:13px;font-weight:800;color:var(--fire);margin-bottom:6px}
 .ta-text{font-size:16px;line-height:1.65;word-break:keep-all;white-space:pre-line}
+.er-shake{animation:erShake .32s}
+@keyframes erShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 .ta-turnbar{margin:12px 0 2px;font-size:13px;color:var(--dim);text-align:center}
 .ta-turnbar b{color:var(--steppe)}
 #ta-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
@@ -1581,6 +1583,35 @@
     </div>
   </div>
 
+  <!-- ============ 게르 탈출 (방탈출) ============ -->
+  <div class="screen" id="scr-er">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔒 게르 탈출</h2></div>
+    <div id="er-setup">
+      <p class="hint">밤의 게르에 갇혔다. <b>단서를 읽고 자물쇠 암호를 풀어</b> 문을 열자. 다 같이 화면을 보며 푸는 협동 방탈출 — 힌트는 3단계, 시간은 재지만 죽지 않아. 목표 시간 안에 나가면 별 3개!</p>
+      <p class="ta-text" id="er-intro" style="margin:10px 0 16px"></p>
+      <button class="btn" id="er-start">🔦 들어가기</button>
+    </div>
+    <div id="er-play" style="display:none">
+      <div class="ta-hud" id="er-hud"></div>
+      <div class="ta-box">
+        <div class="ta-port"><px-sprite name="owlprof" scale="4"></px-sprite></div>
+        <div class="ta-body">
+          <div class="ta-nm" id="er-lock-nm"></div>
+          <div class="ta-text" id="er-clue"></div>
+        </div>
+      </div>
+      <div class="field mt"><input id="er-input" type="text" placeholder="암호 입력" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <button class="btn" id="er-submit">🔓 열기</button>
+      <button class="btn ghost" id="er-hint-btn">💡 힌트</button>
+      <div class="hint" id="er-hint-out" style="display:none"></div>
+      <div class="er-msg" id="er-msg" style="text-align:center;color:var(--fire);min-height:20px;margin-top:8px"></div>
+    </div>
+    <div id="er-done" style="display:none" class="stage-center">
+      <div class="reveal-card" id="er-result"></div>
+      <button class="btn" id="er-again">다시 탈출하기</button>
+    </div>
+  </div>
+
   <!-- ============ 숫자야구 ============ -->
   <div class="screen" id="scr-nb">
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚾ 숫자야구</h2></div>
@@ -2198,6 +2229,7 @@ window.SN_SPRITES={PAL,SPR,draw};
 <script src="games/ta.js"></script>
 <script src="games/nb.js"></script>
 <script src="games/gm.js"></script>
+<script src="games/er.js"></script>
 <script src="lib/qrcode-gen.js"></script>
 <script src="lib/jsqr.js"></script>
 <script src="games/mp.js"></script>
