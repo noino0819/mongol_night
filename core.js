@@ -90,8 +90,11 @@ function go(name){
   window.scrollTo(0, 0);
   if (typeof mpSyncBack === "function") mpSyncBack(); /* 연결 상태에 맞춰 뒤로가기 라벨 정리 (net.js) */
 }
-document.querySelectorAll("[data-go]").forEach(b => {
-  b.addEventListener("click", () => {
+/* 문서 위임: snAddScreen으로 나중에 주입된 화면의 [data-go] 버튼도 작동 */
+document.addEventListener("click", (e) => {
+  const b = e.target.closest ? e.target.closest("[data-go]") : null;
+  if (!b) return;
+  {
     const target = b.dataset.go;
     const connected = typeof mpLive === "function" && mpLive();
     /* 게스트는 방에 묶임 — 게임 선택·이동은 호스트가 mpNav로 끌고 감.
@@ -115,7 +118,7 @@ document.querySelectorAll("[data-go]").forEach(b => {
     if (target === "home" && typeof mpAmHost === "function" && mpAmHost() && connected){ mp.game = null; mpNav("home"); } /* 호스트가 나가면 게스트도 연결방으로 */
     resetGame(target);
     go(target);
-  });
+  }
 });
 function resetGame(name){
   if (name === "liar") liarReset();
@@ -138,11 +141,23 @@ function resetGame(name){
   if (name === "um"){ umReset(); }
   if (name === "gq"){ gqReset(); }
   if (name === "ta"){ taReset(); }
-  if (name === "er"){ erReset(); }
   if (name === "nb"){ nbReset(); }
   if (name === "gm"){ gmReset(); }
   if (name === "cf"){ cfReset(); }
   if (name === "mp"){ mpEnter(); } /* 연결 유지 중이면 방 화면 복귀, 아니면 초기화 */
+  if (SN_RESETS[name]) SN_RESETS[name]();   /* 신규 게임: snRegisterGame 레지스트리 (위 스위치 수정 불필요) */
+}
+
+/* ---- 게임 자체 등록 인프라: 새 게임은 index.html 무수정 (games/*.js에서 화면·CSS·리셋 등록) ---- */
+const SN_RESETS = {};
+function snRegisterGame(name, reset){ SN_RESETS[name] = reset; }
+function snAddCss(css){ const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); }
+function snAddScreen(name, html){
+  const d = document.createElement("div");
+  d.className = "screen";
+  d.id = "scr-" + name;
+  d.innerHTML = html;
+  $("scr-home").parentElement.appendChild(d);
 }
 
 /* ================= 일행 등록 ================= */

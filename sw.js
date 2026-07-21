@@ -2,38 +2,13 @@
 "use strict";
 const V = "v2.1.3+__BUILD__"; /* __BUILD__는 CI 배포 시 커밋 SHA로 치환됨 (pages.yml) — 배포마다 SW가 자동 갱신됨 */
 const CACHE = "steppe-night-" + V;
+importScripts("./games/manifest.js"); /* SN_SCRIPTS — 게임 스크립트 목록의 단일 소스 (새 게임 추가 시 sw.js 무수정) */
 const ASSETS = [
   "./",
   "./index.html",
   "./core.js",
-  "./shell.js",
-  "./games/liar.js",
-  "./games/mafia.js",
-  "./games/choseong.js",
-  "./games/balance.js",
-  "./games/roulette.js",
-  "./games/fruit.js",
-  "./games/omok.js",
-  "./games/forehead.js",
-  "./games/life.js",
-  "./games/drawrelay.js",
-  "./games/catchmind.js",
-  "./games/wolf.js",
-  "./games/bomb.js",
-  "./games/tele.js",
-  "./games/lv.js",
-  "./games/vg.js",
-  "./games/bz.js",
-  "./games/um.js",
-  "./games/gq.js",
-  "./games/ta.js",
-  "./games/nb.js",
-  "./games/gm.js",
-  "./games/mp.js",
-  "./games/er.js",
-  "./games/net.js",
-  "./lib/qrcode-gen.js",
-  "./lib/jsqr.js",
+  "./games/manifest.js"
+].concat(SN_SCRIPTS.map((p) => "./" + p)).concat([
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -42,7 +17,7 @@ const ASSETS = [
   "./icons/favicon-48.png",
   "./icons/favicon-32.png",
   "./icons/favicon-16.png"
-];
+]);
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));

@@ -878,6 +878,61 @@ endgate:[
 });
 /*SPR_END*/
 
+/* ---- er 화면 마크업 + 전용 CSS — index.html 무수정 원칙 (core.js snAddScreen/snAddCss) ---- */
+snAddScreen("er", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔒 게르 탈출</h2></div>
+    <div id="er-setup">
+      <p class="hint">오브젝트를 눌러 <b>조사</b>하고, 단서로 <b>암호를 풀고</b>, 얻은 것들을 <b>조합해</b> 탈출하라. 다 같이 화면 보며 머리를 모으는 협동 방탈출 — 시나리오당 2막.</p>
+      <div class="field mt"><label>시나리오</label><div id="er-scens"></div></div>
+      <div class="field mt"><label>모드</label></div>
+      <button class="btn" id="er-mode-soft">🌙 소프트 — 실패 없음, 느긋하게</button>
+      <button class="btn ghost" id="er-mode-hard">🔥 하드코어 — ❤️5 · 막당 제한시간 · 오답/힌트 시간 차감</button>
+      <button class="btn ghost mt" id="er-continue" style="display:none">⏳ 이어하기</button>
+    </div>
+    <div id="er-act" style="display:none" class="stage-center">
+      <span class="tag" id="er-act-name"></span>
+      <p class="ta-text" id="er-act-intro" style="margin:14px 0"></p>
+      <button class="btn" id="er-act-go">🔦 시작</button>
+    </div>
+    <div id="er-play" style="display:none">
+      <div class="ta-hud" id="er-hud"></div>
+      <div class="er-scene" id="er-scene"></div>
+      <div class="er-invbox" id="er-inv"></div>
+      <div class="er-panel" id="er-panel" style="display:none"></div>
+    </div>
+    <div id="er-fail" style="display:none" class="stage-center">
+      <div class="reveal-card">
+        <h3 id="er-fail-msg" style="margin:0 0 8px"></h3>
+        <p class="hint" id="er-fail-sub" style="margin:0"></p>
+      </div>
+      <button class="btn" id="er-fail-continue">🔁 이 막 다시 도전</button>
+      <button class="btn ghost" id="er-fail-restart">처음으로</button>
+    </div>
+    <div id="er-done" style="display:none" class="stage-center">
+      <div class="reveal-card" id="er-result"></div>
+      <button class="btn" id="er-again">다시 탈출하기</button>
+    </div>
+`);
+snAddCss(`.er-shake{animation:erShake .32s}
+@keyframes erShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.er-scene{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.er-tile{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 4px 8px;color:var(--milk);font-family:inherit;font-size:11px;position:relative;cursor:pointer}
+.er-tile:active{transform:scale(.96)}
+.er-tile.done{opacity:.55;border-color:var(--steppe)}
+.er-tile-nm{line-height:1.2;word-break:keep-all;text-align:center}
+.er-tile-b{position:absolute;top:4px;right:6px;font-size:12px}
+.er-invbox{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0;font-size:13px;color:var(--dim)}
+.er-inv-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.er-item.sel{outline:2px solid var(--px-sky);outline-offset:1px}
+.er-combine{width:100%;margin-top:2px}
+.er-panel{margin-top:10px}
+.er-msg{text-align:center;color:var(--fire);min-height:20px;margin-top:8px}
+.er-scen{display:flex;align-items:center;gap:10px;width:100%;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:8px;color:var(--milk);font-family:inherit;text-align:left;cursor:pointer}
+.er-scen.sel{border-color:var(--px-sky)}
+.er-scen b{font-size:15px}
+.er-scen small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
+.er-scen .es-e{font-size:22px}`);
+
 /*ER_DATA_BEGIN*/
 /* 오브젝트: { id, nm, spr, txt(조사문), need?(플래그 게이트), lockedTxt?, sets?(조사 시 플래그),
    give?(조사 시 아이템 — lock 없을 때만), lock?{ ans[](코드) | item(아이템요구), digits?, hints?[3], open, give?, sets? },
@@ -2040,3 +2095,5 @@ $("er-fail-continue").addEventListener("click", () => {
   erEnterPlay();
 });
 $("er-fail-restart").addEventListener("click", () => { erClearSave(); erReset(); });
+
+snRegisterGame("er", erReset);
