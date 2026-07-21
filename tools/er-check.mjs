@@ -12,8 +12,8 @@ const grab = (name) => {
   if (!m) throw new Error(name + " 블록 없음");
   return m[1];
 };
-const { ER_SC, erNorm, erMatch, erStars } =
-  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SC, erNorm, erMatch, erStars };")();
+const { ER_SCENARIOS, erNorm, erMatch, erStars } =
+  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars };")();
 
 /* ---------- 1. 로직 단위 테스트 ---------- */
 assert.equal(erNorm("  낙 타 "), "낙타");
@@ -26,9 +26,12 @@ assert.equal(erStars(2, 5, 0), 2);   /* 하트 절반 미만 */
 assert.equal(erStars(5, 5, 3), 2);   /* 힌트 과다 */
 assert.equal(erStars(1, 5, 9), 1);   /* 탈출만 */
 
-/* ---------- 2~4. 막별 검사 ---------- */
-for (const act of ER_SC.acts){
-  const P = (msg) => `[${act.id}] ${msg}`;
+/* ---------- 2~4. 시나리오·막별 검사 ---------- */
+for (const sc of ER_SCENARIOS){
+  assert.ok(sc.id && sc.title && sc.emoji && sc.tagline && sc.outro, `시나리오 메타 필드 누락: ${sc.id || sc.title}`);
+  assert.equal(sc.acts.length, 2, `[${sc.id}] 2막이어야`);
+for (const act of sc.acts){
+  const P = (msg) => `[${sc.id}/${act.id}] ${msg}`;
   const finals = act.objects.filter((o) => o.final);
   assert.equal(finals.length, 1, P("final 오브젝트는 정확히 1개"));
 
@@ -106,7 +109,7 @@ for (const act of ER_SC.acts){
   });
   for (const f of setFlags) assert.ok(needFlags.has(f), P("레드헤링 플래그: " + f));
   for (const f of needFlags) assert.ok(setFlags.has(f), P("어디서도 세워지지 않는 플래그: " + f));
-}
+}}
 
-console.log("er-check OK ·", ER_SC.acts.length, "막 —",
-  ER_SC.acts.map((a) => a.id + "(" + a.objects.length + "오브젝트, 풀이 증명됨)").join(" · "));
+console.log("er-check OK ·", ER_SCENARIOS.length, "시나리오 —",
+  ER_SCENARIOS.map((sc) => sc.title + "[" + sc.acts.map((a) => a.objects.length).join("+") + "오브젝트]").join(" · "), "· 전 막 풀이 증명됨");

@@ -10,8 +10,10 @@
    give?(조사 시 아이템 — lock 없을 때만), lock?{ ans[](코드) | item(아이템요구), digits?, hints?[3], open, give?, sets? },
    final?(막의 마지막 문) }
    아이템은 act.items 맵에 선언. combos: 인벤토리 아이템 조합 → 새 아이템. */
-const ER_SC = {
-  title: "게르 탈출",
+const ER_SCENARIOS = [];
+ER_SCENARIOS.push({
+  id: "ger", title: "게르 탈출", emoji: "🔒", tagline: "한밤의 게르, 어둠 속 다섯 자물쇠",
+  outro: "모래폭풍을 등지고 초원으로 사라졌다. 다음 밤, 또 어딘가에 갇히겠지.",
   acts: [
     {
       id: "ger",
@@ -97,7 +99,7 @@ const ER_SC = {
       ]
     }
   ]
-};
+});
 /*ER_DATA_END*/
 
 /*ER_LOGIC_BEGIN*/
@@ -115,21 +117,22 @@ function erStars(heartsLeft, heartsMax, hintsUsed){
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v2";
-const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null };
+const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0 };
 
 /* ---------- 상태/세이브 ---------- */
-function erAct(){ return ER_SC.acts[er.st.act]; }
+function erScen(){ return ER_SCENARIOS[er.st.sc]; }
+function erAct(){ return erScen().acts[er.st.act]; }
 function erObj(id){ return erAct().objects.find((o) => o.id === id); }
 function erSnap(){ return JSON.parse(JSON.stringify(er.st)); }
 function erSave(){ try { localStorage.setItem(ER_SAVE_KEY, JSON.stringify(er.st)); } catch (e) { /* 무시 */ } }
-function erLoad(){ try { const s = JSON.parse(localStorage.getItem(ER_SAVE_KEY) || "null"); return (s && ER_SC.acts[s.act]) ? s : null; } catch (e) { return null; } }
+function erLoad(){ try { const s = JSON.parse(localStorage.getItem(ER_SAVE_KEY) || "null"); return (s && ER_SCENARIOS[s.sc] && ER_SCENARIOS[s.sc].acts[s.act]) ? s : null; } catch (e) { return null; } }
 function erClearSave(){ try { localStorage.removeItem(ER_SAVE_KEY); } catch (e) { /* 무시 */ } }
 
 function erTimersOff(){ if (er.timer){ clearInterval(er.timer); er.timer = null; } }
 
 /* ---------- 막 시작 / 체크포인트 ---------- */
 function erBeginAct(idx){
-  const a = ER_SC.acts[idx];
+  const a = erScen().acts[idx];
   er.st.act = idx;
   er.st.solved = {};
   er.st.seen = {};
@@ -167,7 +170,7 @@ function erEnterPlay(){
 
 /* ---------- 새 게임 / 이어하기 ---------- */
 function erNew(mode){
-  er.st = { mode: mode, act: 0, hintsTotal: 0 };
+  er.st = { sc: er.selScen, mode: mode, act: 0, hintsTotal: 0 };
   erBeginAct(0);
 }
 function erContinue(){
@@ -230,7 +233,7 @@ function erRenderInv(){
   const inv = $("er-inv");
   const items = er.st.inv;
   if (!items.length){ inv.innerHTML = '<span class="er-inv-empty">🎒 인벤토리 — 아직 비었어</span>'; return; }
-  const names = Object.assign({}, ...ER_SC.acts.map((a) => a.items));
+  const names = Object.assign({}, ...erScen().acts.map((a) => a.items));
   inv.innerHTML = '<div class="er-inv-row">' +
     items.map((id) => '<button class="chip er-item' + (er.sel.includes(id) ? " sel" : "") +
       '" data-it="' + id + '">' + escHtml(names[id] || id) + "</button>").join("") +
@@ -266,7 +269,7 @@ function erRenderPanel(){
         '<div class="hint" id="er-hintout" style="display:none"></div>';
     } else if (o.lock.item){
       const has = er.st.inv.includes(o.lock.item);
-      const nm = Object.assign({}, ...ER_SC.acts.map((a) => a.items))[o.lock.item];
+      const nm = Object.assign({}, ...erScen().acts.map((a) => a.items))[o.lock.item];
       html += has
         ? '<button class="btn" id="er-use">' + (o.final ? "🚪 " : "▶ ") + "사용: " + escHtml(nm) + "</button>"
         : '<div class="hint">아직 필요한 게 없어 — 뭔가를 얻거나 조합해야 해. (필요: ' + escHtml(nm) + ")</div>";
@@ -393,7 +396,7 @@ function erCombine(){
 /* ---------- 막 클리어 / 실패 / 승리 ---------- */
 function erActClear(){
   erTimersOff();
-  if (er.st.act + 1 < ER_SC.acts.length){
+  if (er.st.act + 1 < erScen().acts.length){
     pwaToast("🎉 " + erAct().name + " 클리어! 저장됐어");
     erBeginAct(er.st.act + 1);    /* 다음 막 인트로 (자동 저장) */
   } else {
@@ -418,8 +421,8 @@ function erWin(){
   $("er-done").style.display = "";
   $("er-result").innerHTML =
     '<div style="font-size:34px;letter-spacing:4px">' + "⭐".repeat(stars) + "☆".repeat(3 - stars) + "</div>" +
-    '<h3 style="margin:10px 0 6px">🎉 게르 탈출 성공!</h3>' +
-    '<p class="hint" style="margin:0 0 12px">모래폭풍을 등지고 초원으로 사라졌다. 다음 밤, 또 어딘가에 갇히겠지.</p>' +
+    '<h3 style="margin:10px 0 6px">🎉 ' + escHtml(erScen().title) + ' — 탈출 성공!</h3>' +
+    '<p class="hint" style="margin:0 0 12px">' + escHtml(erScen().outro || "무사히 빠져나왔다.") + "</p>" +
     '<div class="ta-hud" style="justify-content:center">' +
       '<span class="st">🎮 모드 <b>' + (er.st.mode === "hard" ? "하드코어" : "소프트") + "</b></span>" +
       '<span class="st">💡 힌트 <b>' + (er.st.hintsTotal || 0) + "</b></span>" +
@@ -428,8 +431,19 @@ function erWin(){
 }
 
 /* ---------- 셋업 / 리셋 ---------- */
+function erRenderScens(){
+  const box = $("er-scens");
+  box.innerHTML = "";
+  ER_SCENARIOS.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.className = "er-scen" + (i === er.selScen ? " sel" : "");
+    b.innerHTML = '<span class="es-e">' + s.emoji + '</span><span><b>' + escHtml(s.title) + "</b><small>" + escHtml(s.tagline) + "</small></span>";
+    b.addEventListener("click", () => { er.selScen = i; erRenderScens(); });
+    box.appendChild(b);
+  });
+}
 function erReset(){
-  /* 진입 시: 진행 중 세이브 있으면 이어하기 노출, 아니면 모드 선택 */
+  /* 진입 시: 진행 중 세이브 있으면 이어하기 노출, 아니면 시나리오·모드 선택 */
   erTimersOff();
   er.panel = null; er.sel = [];
   $("er-act").style.display = "none";
@@ -437,9 +451,10 @@ function erReset(){
   $("er-fail").style.display = "none";
   $("er-done").style.display = "none";
   $("er-setup").style.display = "";
+  erRenderScens();
   const save = erLoad();
   $("er-continue").style.display = save ? "" : "none";
-  if (save) $("er-continue").textContent = "⏳ 이어하기 (" + ER_SC.acts[save.act].name + ")";
+  if (save) $("er-continue").textContent = "⏳ 이어하기 — " + ER_SCENARIOS[save.sc].title + " · " + ER_SCENARIOS[save.sc].acts[save.act].name;
 }
 
 $("er-mode-soft").addEventListener("click", () => erNew("soft"));
