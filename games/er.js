@@ -931,7 +931,11 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-scen.sel{border-color:var(--px-sky)}
 .er-scen b{font-size:15px}
 .er-scen small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
-.er-scen .es-e{font-size:22px}`);
+.er-scen .es-e{font-size:22px}
+.er-find{display:grid;gap:6px;margin:8px 0}
+.er-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;cursor:pointer;line-height:1}
+.er-cell:active{transform:scale(.94)}
+.er-cell.flip{background:var(--card);border-color:var(--steppe);font-size:22px;font-weight:bold}`);
 
 /*ER_DATA_BEGIN*/
 /* 오브젝트: { id, nm, spr, txt(조사문), need?(플래그 게이트), lockedTxt?, sets?(조사 시 플래그),
@@ -961,7 +965,9 @@ ER_SCENARIOS.push({
           sets: "lit" },
         { id: "fire", nm: "화로", spr: "fire",
           need: "lit", lockedTxt: "재를 헤쳐도 너무 어두워 아무것도 안 보인다. 빛부터 밝혀야겠다.",
-          txt: "재 속에 표식 새긴 돌 넷이 드러난다: 2 · 8 · 1 · 4. 화로 밑엔 작은 자물쇠.",
+          txt: "재 속에 표식 새긴 돌들이 묻혀 있다. 화로 밑엔 네 자리 자물쇠 — 돌을 헤쳐 숫자를 찾자.",
+          find: { prompt: "돌을 눌러 헤쳐 봐. 표식(숫자) 새긴 돌을 찾아, 왼쪽 위부터 순서대로 읽으면 암호.", cols: 4,
+            cells: [ {}, { c: "2" }, {}, { c: "8" }, {}, {}, { c: "1" }, {}, {}, { c: "4" }, {}, {} ] },
           lock: { ans: ["2814"], digits: 4,
             hints: ["재에 드러난 돌의 숫자를 왼쪽부터 그대로.", "네 자리. 2로 시작해.", "2814."],
             open: "화로 밑 칸이 열렸다. 열쇠조각 ㄱ과 메모: '별을 짜 넣은 바닥, 하늘과 맞춰라.'",
@@ -1875,6 +1881,15 @@ function erRenderInv(){
   if (cb) cb.addEventListener("click", erCombine);
 }
 
+/* 관찰(표식 찾기) 미니 씬 — 돌 타일을 탭해 뒤집으면 표식(숫자/·)이 드러남. 순수 단서라 별도 검증 없음(자물쇠가 검증) */
+function erFindHtml(f){
+  const cols = f.cols || 4;
+  return '<div class="hint" style="margin-top:8px">🔦 ' + escHtml(f.prompt || "") + "</div>" +
+    '<div class="er-find" style="grid-template-columns:repeat(' + cols + ',1fr)">' +
+    f.cells.map((c) => '<button class="er-cell" data-c="' + escHtml(c.c || "·") + '">🪨</button>').join("") +
+    "</div>";
+}
+
 function erRenderPanel(){
   const p = $("er-panel");
   if (!er.panel){ p.style.display = "none"; p.innerHTML = ""; return; }
@@ -1885,6 +1900,9 @@ function erRenderPanel(){
   let html = '<div class="ta-box"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
     '<div class="ta-body"><div class="ta-nm">' + escHtml(o.nm) + "</div>" +
     '<div class="ta-text">' + escHtml(body) + "</div></div></div>";
+
+  /* 관찰 퍼즐: 프로즈로 숫자를 떠먹여주는 대신, 도트 타일을 손으로 헤쳐(탭) 표식을 직접 찾게 함 */
+  if (!solved && !gated && o.find){ html += erFindHtml(o.find); }
 
   if (!solved && !gated && o.lock){
     if (o.lock.ans){
@@ -1909,6 +1927,12 @@ function erRenderPanel(){
     '<div class="er-msg" id="er-msg"></div>';
   p.innerHTML = html;
   p.style.display = "";
+
+  p.querySelectorAll(".er-cell").forEach((b) => b.addEventListener("click", () => {
+    const flipped = b.classList.toggle("flip");
+    b.textContent = flipped ? b.dataset.c : "🪨";
+    haptic(10);
+  }));
 
   const rev = $("er-reveal");
   if (rev){
