@@ -32,7 +32,10 @@ const WF_TOGGLES = [
   { id:"tanner",  role:"무두장이",  n:1, desc:"처형당하면 단독 승리" },
   { id:"hunter",  role:"사냥꾼",    n:1, desc:"처형되면 지목자 동반" }
 ];
-let wf = { sel: [], time: 180, on: { seer: true, robber: true, trouble: true }, cards: [], final: [], order: [], i: 0, robber: null, tmSwap: null, drunk: null, votes: [], dayTid: null };
+let wf = { sel: [], time: 180, on: { seer: true, robber: true, trouble: true }, cards: [], final: [], order: [], i: 0, robber: null, tmSwap: null, drunk: null, votes: [], dayTid: null, multi: false };
+let wfMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
+/* ponytail: 원격 이름의 HTML특수문자 제거 — 재사용하는 기존 렌더(wfSecret/wfResult 등)에 일일이 escHtml 넣는 대신 경계 1곳에서 정화 */
+const wfSafeName = (s) => String(s).replace(/[<>&"']/g, "");
 function wfSpecialCount(){
   return 2 + WF_TOGGLES.reduce((s, t) => s + (wf.on[t.id] ? t.n : 0), 0);
 }
@@ -75,8 +78,11 @@ $("wf-help-btn").addEventListener("click", () => {
 });
 function wfReset(){
   clearInterval(wf.dayTid); wf.dayTid = null;
+  if (wfMode === "multi" && !mpLive()) wfMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  wf.multi = false;
   ["wf-setup","wf-pass","wf-secret","wf-day","wf-vote","wf-result"].forEach(id => $(id).style.display = "none");
   $("wf-setup").style.display = "";
+  snModeBar($("wf-setup"), wfMode, (m) => { wfMode = m; wfReset(); });
   const box = $("wf-players");
   box.innerHTML = "";
   wf.sel = roster.slice();
@@ -113,6 +119,7 @@ function wfPreview(){
   }));
 })();
 $("wf-start").addEventListener("click", () => {
+  if (wfMode === "multi") return wfStartMulti();
   if (wf.sel.length < 4) return alert("4명 이상 필요해요!");
   if (wfSpecialCount() > wf.sel.length + 3) return alert("특수 역할이 카드 수(인원+3장)보다 많아요! 역할을 몇 개 꺼주세요");
   wf.order = shuffle(wf.sel);
@@ -377,6 +384,80 @@ function wfResult(){
     table +
     '<div class="reveal-card" style="margin-top:8px"><div class="lbl">가운데 3장</div><div class="val" style="font-size:15px">' + center + '</div></div>' +
     '<button class="btn mt" id="wf-again">한 판 더!</button>';
+  if (wf.multi) mpBroadcast({ t: "reveal", em: V.em, txt: V.txt, sub: V.sub,
+    table: wf.order.map((nm, j) => ({ nm, role: wf.final[j], orig: wf.cards[j], dead: jd.executed.includes(j) })) });
   $("wf-again").addEventListener("click", wfReset);
 }
+
+/* ================= 여러 폰 (net.js 브릿지) =================
+   1차: 호스트가 역할 배분 → 각자 폰에 자기 역할·팀·능력 카드 개인 배달(마피아 패턴).
+   밤 능력·투표·공개는 호스트 폰에서 기존 흐름 그대로(pass-and-play). 결과만 각 폰에 미러링.
+   컷: 밤 액션/투표를 각 폰에서 하는 2차는 미구현(호스트 폰 돌려가며 진행). */
+function wfRolePayload(i){
+  const role = wf.cards[i], info = WF_ROLE_INFO[role];
+  let team = "";
+  if (role === "늑대인간"){
+    const mates = wf.order.filter((n, j) => j !== i && wf.cards[j] === "늑대인간");
+    team = mates.length ? "동료 늑대 — " + mates.join(", ") : "혼자인 늑대! 동료가 전부 가운데 카드에 있어";
+  } else if (role === "하수인"){
+    const wolves = wf.order.filter((n, j) => wf.cards[j] === "늑대인간");
+    team = wolves.length ? "늑대 — " + wolves.join(", ") + " (늑대는 널 몰라)" : "판에 늑대가 없어! 너 아닌 누가 처형되면 단독 승리";
+  } else if (role === "비밀결사"){
+    const mates = wf.order.filter((n, j) => j !== i && wf.cards[j] === "비밀결사");
+    team = mates.length ? "동료 비밀결사 — " + mates.join(", ") : "혼자인 비밀결사! 동료는 가운데 카드에 숨어 있어";
+  }
+  return { t: "role", role, em: info.em, tip: info.tip, help: info.help, team, danger: info.team === "늑대팀" };
+}
+/* 각 폰에 뜨는 역할 카드 (liar-role 재사용). 원격/상수 모두 escHtml. */
+function wfRoleHtml(m){
+  return '<div class="liar-role' + (m.danger ? ' liar' : '') + '">' +
+    '<b>' + m.em + ' ' + escHtml(m.role) + '</b>' +
+    '<small style="opacity:.9;font-weight:600;line-height:1.6">' + escHtml(m.tip) + '</small>' +
+    (m.team ? '<small style="margin-top:12px;color:var(--fire);font-weight:800;line-height:1.5">🔒 ' + escHtml(m.team) + '</small>' : '') +
+    '<small style="margin-top:12px;opacity:.7;font-weight:600;line-height:1.6">' + escHtml(m.help) + '</small>' +
+  '</div>';
+}
+/* ---------- 여러 폰 (호스트) ---------- */
+function wfStartMulti(){
+  const names = mpNames().map(wfSafeName);
+  if (names.length < 4){ alert("여러 폰 늑대인간은 4명 이상 연결돼야 해 (지금 " + names.length + "명)"); return; }
+  if (wfSpecialCount() > names.length + 3){ alert("특수 역할이 카드 수(인원+3장)보다 많아요! 역할을 몇 개 꺼주세요"); return; }
+  wf.order = names;
+  wf.cards = shuffle(wfRoleList(names.length)); /* 앞 N = 플레이어, 뒤 3 = 가운데 */
+  wf.final = wf.cards.slice();
+  wf.i = 0; wf.robber = null; wf.tmSwap = null; wf.drunk = null; wf.votes = [];
+  wf.multi = true;
+  mpNav("wolf");                        /* 게스트들 늑대 화면으로 → __guest_wolf 대기 */
+  mp.game = { onMsg(){}, onPeers(){} }; /* 호스트 활성 (역할 배달·결과 공개용) */
+  /* party 순서 = mpNames 순서 = wf.order → 인덱스로 매칭. 호스트 자기 역할은 밤 pass-around에서 확인 */
+  mpParty().forEach((pl, i) => { if (!pl.self) pl.send(wfRolePayload(i)); });
+  wfShowPass();                         /* 밤 능력·투표·공개는 호스트 폰에서 기존 흐름대로 */
+}
+/* ---------- 여러 폰 (게스트) ---------- */
+window.__guest_wolf = function(){
+  wfShow("wf-secret");
+  $("wf-secret").innerHTML =
+    '<div class="stage-center" style="flex:0;gap:10px;margin-top:40px">' +
+    '<div class="who-label">여러 폰 늑대인간</div>' +
+    '<div class="who">대기 중…</div>' +
+    '<p class="hint" style="margin:0">호스트가 역할을 나누면 네 역할이 여기 떠</p></div>';
+  mp.game = { onMsg(from, m){
+    if (m.t === "role"){
+      wfShow("wf-secret");
+      $("wf-secret").innerHTML = wfRoleHtml(m) +
+        '<p class="hint" style="margin-top:16px;text-align:center">네 폰에서 역할·팀 확인!<br>밤 능력·투표·공개는 호스트 폰을 돌려가며 진행해</p>';
+    }
+    if (m.t === "reveal"){
+      wfShow("wf-secret");
+      const rows = m.table.map(r => '<div class="mb-teamcard"><b>' + escHtml(r.nm) + (r.dead ? " ⚰️" : "") + '</b><span>' +
+        (WF_ROLE_INFO[r.role] ? WF_ROLE_INFO[r.role].em : "") + " " + escHtml(r.role) +
+        (r.orig !== r.role ? ' <s style="opacity:.55">(밤 시작: ' + escHtml(r.orig) + ')</s>' : "") + '</span></div>').join("");
+      $("wf-secret").innerHTML =
+        '<div class="stage-center" style="flex:0;gap:8px;margin:20px 0 12px">' +
+        '<div style="font-size:64px">' + m.em + '</div>' +
+        '<div class="who" style="font-size:28px">' + escHtml(m.txt) + '</div>' +
+        '<p class="hint" style="margin:0">' + escHtml(m.sub) + '</p></div>' + rows;
+    }
+  }};
+};
 
