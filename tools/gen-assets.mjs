@@ -68,11 +68,12 @@ function renderIcon(size, scale, spriteKey = "bor", { stars = true } = {}) {
     const s = Math.max(1, Math.round(scale / 5));
     for (const [gx, gy] of STARS) rect(Math.round((gx / 16) * size), Math.round((gy / 16) * size), s, s, PALRGB[6]);
   }
-  /* 스프라이트 콘텐츠 바운딩박스 기준 정중앙 배치 (bor는 아래 2행이 비어있음) */
+  /* 광학적 중앙 배치: 색 0(#1A1423)은 밤 배경에 묻혀 안 보이므로 바운딩박스에서 제외
+     (bor 다리가 색 0 — 포함하면 흰 몸통이 위로 쏠려 보임). 그리기는 전체 픽셀 유지 */
   const rows = SPR[spriteKey];
   let minR = 16, maxR = -1, minC = 16, maxC = -1;
   rows.forEach((r, y) => [...r].forEach((ch, x) => {
-    if (ch === ".") return;
+    if (ch === "." || ch === "0") return;
     minR = Math.min(minR, y); maxR = Math.max(maxR, y);
     minC = Math.min(minC, x); maxC = Math.max(maxC, x);
   }));
