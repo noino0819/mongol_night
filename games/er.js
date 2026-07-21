@@ -8,6 +8,23 @@
 /* ---- er 전용 스프라이트 (51종) — 병렬 세션 충돌 방지를 위해 index.html SPR이 아닌 여기서 등록 ---- */
 /*SPR_BEGIN*/
 snAddSprites({
+stone:[
+"................",
+"................",
+"................",
+"................",
+".......22.......",
+".....222277.....",
+"....22777777....",
+"...2277777770...",
+"...2277777770...",
+"...2277777770...",
+"...2777777700...",
+"....77777700....",
+"......7000......",
+"................",
+"................",
+"................"],
 letter:[
 "................",
 "................",
@@ -1882,11 +1899,12 @@ function erRenderInv(){
 }
 
 /* 관찰(표식 찾기) 미니 씬 — 돌 타일을 탭해 뒤집으면 표식(숫자/·)이 드러남. 순수 단서라 별도 검증 없음(자물쇠가 검증) */
+const ER_STONE = '<px-sprite name="stone" scale="3"></px-sprite>';
 function erFindHtml(f){
   const cols = f.cols || 4;
-  return '<div class="hint" style="margin-top:8px">🔦 ' + escHtml(f.prompt || "") + "</div>" +
+  return '<div class="hint" style="margin-top:8px">' + escHtml(f.prompt || "") + "</div>" +
     '<div class="er-find" style="grid-template-columns:repeat(' + cols + ',1fr)">' +
-    f.cells.map((c) => '<button class="er-cell" data-c="' + escHtml(c.c || "·") + '">🪨</button>').join("") +
+    f.cells.map((c) => '<button class="er-cell" data-c="' + escHtml(c.c || "·") + '">' + ER_STONE + "</button>").join("") +
     "</div>";
 }
 
@@ -1907,12 +1925,12 @@ function erRenderPanel(){
   if (!solved && !gated && o.lock){
     if (o.lock.ans){
       /* 키보드는 요청 시에만: 설명 먼저 읽고 '암호 입력' 눌러야 입력칸+키보드 등장 */
-      html += '<button class="btn" id="er-reveal">🔢 암호 입력</button>' +
-        '<button class="btn ghost" id="er-hint">💡 힌트</button>' +
+      html += '<button class="btn" id="er-reveal">암호 입력</button>' +
+        '<button class="btn ghost" id="er-hint">힌트</button>' +
         '<div id="er-codewrap" style="display:none">' +
           '<div class="field mt"><input id="er-code" type="text" inputmode="' + (/^\d+$/.test(o.lock.ans[0]) ? "numeric" : "text") +
           '" placeholder="' + (o.lock.digits ? o.lock.digits + "자리 암호" : "암호 입력") + '" autocomplete="off" autocapitalize="off" spellcheck="false"></div>' +
-          '<button class="btn" id="er-open">🔓 열기</button>' +
+          '<button class="btn" id="er-open">열기</button>' +
         '</div>' +
         '<div class="hint" id="er-hintout" style="display:none"></div>';
     } else if (o.lock.item){
@@ -1930,7 +1948,7 @@ function erRenderPanel(){
 
   p.querySelectorAll(".er-cell").forEach((b) => b.addEventListener("click", () => {
     const flipped = b.classList.toggle("flip");
-    b.textContent = flipped ? b.dataset.c : "🪨";
+    b.innerHTML = flipped ? escHtml(b.dataset.c) : ER_STONE;
     haptic(10);
   }));
 
