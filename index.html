@@ -763,6 +763,7 @@
   .mp-cam video{width:100%;height:100%;object-fit:cover}
   .mp-cam-frame{position:absolute;inset:12%;border:2px dashed var(--fire);border-radius:8px;pointer-events:none}
   .mp-input{width:100%;background:var(--night2);border:1.5px solid var(--line);border-radius:10px;color:var(--milk);padding:12px;font-size:16px;font-family:inherit}
+  .mp-warn{background:var(--card);border:1.5px solid var(--ember);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.55;color:var(--milk);margin-bottom:12px}
   .mp-peer{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-weight:700}
   .mp-peer .dot{width:10px;height:10px;border-radius:2px;background:var(--steppe);flex-shrink:0}
   .mp-peer.off .dot{background:var(--danger)}
@@ -924,7 +925,11 @@
   <div class="screen" id="scr-mp">
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📡 폰 연결 (베타)</h2></div>
     <div id="mp-role">
-      <p class="hint">여러 폰을 <b>인터넷 없이</b> 직접 연결하는 테스트야. 먼저 전원이 같은 Wi-Fi(아무 폰 핫스팟이면 돼)에 붙고, 한 명이 호스트를 맡아. 카메라는 QR 맞스캔에만 쓰여.</p>
+      <div class="mp-warn" id="mp-install-warn" style="display:none">
+        <b>⚠️ 지금 브라우저로 열고 있어</b><br>이대로면 인터넷 없는 초원에서 앱이 안 열려. 여행 전에 이 폰에도 꼭 설치부터!
+        <button class="btn" id="mp-install-btn" style="margin-top:10px">📲 앱으로 설치하기</button>
+      </div>
+      <p class="hint">여러 폰을 <b>인터넷 없이</b> 직접 연결하는 테스트야. 먼저 한 명이 핫스팟을 켜고(인터넷 안 돼도 돼 · 안드로이드는 유심 없이도 켜져) 전원이 그 Wi-Fi에 붙은 뒤, 한 명이 호스트를 맡아. 카메라는 QR 맞스캔에만 쓰여.</p>
       <div class="field"><label>내 이름</label><input id="mp-name" class="mp-input" type="text" maxlength="8" placeholder="이름 (다른 폰에 보여요)" enterkeyhint="done"></div>
       <button class="btn mt" id="mp-host-btn">📡 호스트 하기 — 방 만들기</button>
       <button class="btn ghost" id="mp-join-btn">📷 참가하기 — 초대 QR 스캔</button>

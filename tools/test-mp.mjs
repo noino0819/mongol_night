@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 const src = fs.readFileSync(new URL("../games/mp.js", import.meta.url), "utf8");
 const m = src.match(/\/\* MP-PURE:START[\s\S]*?\*\/([\s\S]*?)\/\* MP-PURE:END \*\//);
 if (!m) throw new Error("MP-PURE 블록 추출 실패");
-const pure = new Function(m[1] + "; return { mpSlimSdp, mpB64, mpUnb64, mpPack, mpUnpack };")();
+const pure = new Function(m[1] + "; return { mpSlimSdp, mpB64, mpUnb64, mpPack, mpUnpack, mpHasLan };")();
 
 const require = createRequire(import.meta.url);
 const qrcode = require("../lib/qrcode-gen.js");
@@ -46,6 +46,12 @@ ok("tcp 후보 제거", !slim.includes("a=candidate:2 "));
 ok("srflx 후보 제거", !slim.includes("a=candidate:3 "));
 ok("일반 라인(ufrag·fingerprint) 보존", slim.includes("a=ice-ufrag:abcd") && slim.includes("a=fingerprint:sha-256"));
 ok("CRLF 종결 유지", slim.endsWith("\r\n"));
+
+console.log("mpHasLan (Wi-Fi 미접속 감지)");
+ok("host 후보 있음 → true", pure.mpHasLan(SDP) === true);
+const noLan = SDP.split("\r\n").filter((l) => !l.startsWith("a=candidate:")).join("\r\n") + "\r\n";
+ok("후보 0개 → false", pure.mpHasLan(noLan) === false);
+ok("tcp·srflx만 있어도 false", pure.mpHasLan(noLan.replace("a=ice-ufrag:abcd", "a=candidate:2 1 tcp 1 10.0.0.1 9 typ host tcptype active\r\na=ice-ufrag:abcd")) === false);
 
 console.log("mpB64 (base64url 왕복)");
 const bytes = new Uint8Array(70000).map((_, i) => i % 256); // 청크 경계(0x8000) 교차 확인

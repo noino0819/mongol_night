@@ -18,6 +18,8 @@ function mpSlimSdp(sdp){
     return /^udp$/i.test(f[2]) && f[7] === "host";
   }).join("\r\n") + "\r\n";
 }
+/* LAN 접속 감지: 수집된 host 후보가 0개면 이 폰은 어떤 Wi-Fi에도 안 붙은 상태 */
+function mpHasLan(sdp){ return /a=candidate:/.test(mpSlimSdp(sdp)); }
 function mpB64(bytes){
   let s = "";
   for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
@@ -191,6 +193,13 @@ async function mpInvite(){
     mpWireHostPeer(peer);
     await pc.setLocalDescription(await pc.createOffer());
     await mpGather(pc);
+    if (!mpHasLan(pc.localDescription.sdp)){
+      try { pc.close(); } catch (e) { /* 무시 */ }
+      mp.pendingPc = null;
+      alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있는 것 같아 — 핫스팟부터 켜고 전원이 붙은 뒤 다시 해줘");
+      mp.peers.length ? mpRoom() : mpView("mp-role");
+      return;
+    }
     const code = await mpPack("O", pc.localDescription.sdp);
     mpShowQr(code, "① 초대 QR", "게스트 폰: [참가하기]로 이 QR을 스캔 → 게스트 화면에 답장 QR이 뜨면 아래 버튼");
     mpNext("② 게스트 답장 스캔 →", () => {
@@ -240,6 +249,13 @@ async function mpJoin(){
       await pc.setRemoteDescription({ type: "offer", sdp: o.sdp });
       await pc.setLocalDescription(await pc.createAnswer());
       await mpGather(pc);
+      if (!mpHasLan(pc.localDescription.sdp)){
+        try { pc.close(); } catch (e) { /* 무시 */ }
+        mp.hostPc = null; mp.hostChan = null;
+        alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있는 것 같아 — 호스트와 같은 Wi-Fi에 붙은 뒤 다시 해줘");
+        mpView("mp-role");
+        return;
+      }
       const code = await mpPack("A", pc.localDescription.sdp);
       mpShowQr(code, "② 답장 QR", "이제 호스트가 이 QR을 스캔하면 자동으로 연결돼. 이 화면 그대로 기다려줘");
     });
@@ -288,6 +304,9 @@ function mpReset(){
   if (mp.hostPc){ try { mp.hostPc.close(); } catch (e) { /* 무시 */ } }
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } }
   mp = { role: null, name: "", peers: [], hostChan: null, hostPc: null, hostName: "", rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+  /* 브라우저(미설치)로 열었으면 설치 유도 — 오프라인 현장에선 설치된 앱만 열리니까 */
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  $("mp-install-warn").style.display = standalone ? "none" : "";
   mpView("mp-role");
 }
 /* 홈에 다녀와도 연결 유지 — 활성 연결이 없을 때만 초기화 */
@@ -321,6 +340,9 @@ $("mp-ping").addEventListener("click", () => {
     if (!mp.peers.some((p) => p.on)) return alert("아직 연결된 폰이 없어");
     mp.peers.forEach((p) => mpSend(p.chan, { t: "ping", ts }));
   } else mpSend(mp.hostChan, { t: "ping", ts });
+});
+$("mp-install-btn").addEventListener("click", () => {
+  if (typeof pwa !== "undefined" && pwa.installAction) pwa.installAction(); /* shell.js 설치 플로우 재사용 (인앱 탈출·iOS 안내 포함) */
 });
 $("mp-poke-btn").addEventListener("click", () => {
   mpPoke(mp.name);
