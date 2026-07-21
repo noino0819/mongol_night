@@ -107,7 +107,7 @@ document.querySelectorAll("[data-go]").forEach(b => {
 });
 function resetGame(name){
   if (name === "liar") liarReset();
-  if (name === "mafia"){ $("mafia-setup").style.display = ""; $("mafia-pass").style.display = "none"; $("mafia-play").style.display = "none"; }
+  if (name === "mafia") mafiaReset();
   if (name === "choseong"){ $("cho-setup").style.display = ""; $("cho-play").style.display = "none"; }
   if (name === "balance"){ balNext(); }
   if (name === "roulette"){ $("rou-name").textContent = "···"; $("rou-name").className = "roulette-name"; $("rou-penalty").textContent = ""; $("rou-tag").textContent = "오늘의 주인공은?"; }

@@ -39,6 +39,7 @@ const MAF_BASE = [
   { icon: "👤", name: "시민", team: "시민팀", help: "특별한 능력은 없지만 추리와 투표가 무기! 마피아를 전부 찾아내면 시민팀 승리." }
 ];
 let maf = { count: 1, on: {}, list: [] };
+let mafMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
 $("maf-minus").addEventListener("click", () => { if (maf.count > 1) maf.count--; $("maf-count").textContent = maf.count; });
 $("maf-plus").addEventListener("click", () => { if (maf.count < 3) maf.count++; $("maf-count").textContent = maf.count; });
 (function initMafRoles(){
@@ -87,7 +88,66 @@ function mafGuide(on){
   return { lines: lines.map((t, i) => (i + 1) + ". " + t), rules: picked.filter(r => r.rule).map(r => r.icon + " " + r.rule) };
 }
 
+/* 한 플레이어의 비밀 카드 내용 {main,sub,liar}. 원격 이름은 escHtml. 폰하나·여러폰 공용. */
+function mafSecret(p, mafiaNames, loverNames){
+  if (p.role === "마피아"){
+    const peers = mafiaNames.filter(n => n !== p.name);
+    return { main: "🔪 마피아", sub: (peers.length ? "동료 마피아: " + escHtml(peers.join(", ")) : "당신은 단독 마피아입니다") + (maf.on.spy ? "<br>어딘가에 스파이가 숨어 당신을 몰래 도와요 (누군지는 비밀)" : ""), liar: true };
+  }
+  if (p.role === "스파이") return { main: "🕵️ 스파이", sub: "당신은 마피아팀! 마피아는 <b>" + escHtml(mafiaNames.join(", ")) + "</b><br>마피아는 당신을 몰라요. 시민인 척 몰래 도우세요", liar: true };
+  if (p.role === "연인"){
+    const partner = loverNames.find(n => n !== p.name);
+    return { main: "💞 연인", sub: "당신의 연인: <b>" + escHtml(partner) + "</b><br>한 명이 죽으면 다음 날 아침 남은 한 명도 따라가요. 끝까지 둘 다 살아남으세요!" };
+  }
+  const def = MAF_ROLES.find(r => r.name === p.role);
+  if (def) return { main: def.icon + " " + def.name, sub: def.card };
+  return { main: "👤 시민", sub: "추리력으로 마피아를 찾아내세요" };
+}
+/* 비밀 카드 → liar-role 스타일 HTML (여러 폰: 각자 폰 + 호스트 자기 카드). main/sub는 이미 이스케이프됨. */
+function mafRoleHtml(sec){
+  return '<div class="liar-role' + (sec.liar ? " liar" : "") + '"><b>' + sec.main + '</b>' +
+    (sec.sub ? '<small style="opacity:.9;font-weight:600;line-height:1.6">' + sec.sub + '</small>' : '') + '</div>';
+}
+
+/* core.js resetGame("mafia") 진입점 — 셋업 화면 + 모드 토글 */
+function mafiaReset(){
+  if (mafMode === "multi" && !mpLive()) mafMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  $("mafia-setup").style.display = "";
+  $("mafia-pass").style.display = "none";
+  $("mafia-play").style.display = "none";
+  const my = $("maf-myrole"); if (my) my.style.display = "none";
+  snModeBar($("mafia-setup"), mafMode, (m) => { mafMode = m; mafiaReset(); });
+}
+
 function startMafia(){
+  if (mafMode === "multi") return startMafiaMulti();
+  return startMafiaSolo();
+}
+
+/* 밤 진행 가이드 + 특수 규칙을 play 화면에 채움 (폰하나·여러폰 공용, 호스트 화면) */
+function mafShowGuide(){
+  $("mafia-pass").style.display = "none";
+  $("mafia-play").style.display = "";
+  $("mafia-modlist").style.display = "none";
+  const g = mafGuide(maf.on);
+  $("mafia-order").innerHTML = g.lines.join("<br>");
+  $("mafia-rules").style.display = g.rules.length ? "" : "none";
+  $("mafia-rules-val").innerHTML = g.rules.join("<br>");
+}
+/* play 화면 표시. 여러 폰이면 호스트 자기 역할 카드도 맨 위에. */
+function mafShowPlay(multi){
+  $("mafia-setup").style.display = "none";
+  let my = $("maf-myrole");
+  if (multi){
+    if (!my){ my = document.createElement("div"); my.id = "maf-myrole"; my.style.marginBottom = "14px"; $("mafia-play").prepend(my); }
+    my.style.display = "";
+    my.innerHTML = mafRoleHtml(maf.myRole);
+  } else if (my){ my.style.display = "none"; }
+  mafShowGuide();
+}
+
+/* ---------- 폰 하나 (기존: 폰 돌려가며 꾹눌러 확인) ---------- */
+function startMafiaSolo(){
   const list = mafDeal(roster, maf.count, maf.on);
   if (!list){ alert("특수 역할이 너무 많아요! 시민이 최소 1명은 있어야 해요."); return; }
   maf.list = list;
@@ -100,32 +160,47 @@ function startMafia(){
   const pass = $("mafia-pass");
   pass.style.display = "flex";
   runPassPhase(pass, order,
-    (i) => {
-      const p = maf.list[i];
-      if (p.role === "마피아"){
-        const peers = mafiaNames.filter(n => n !== p.name);
-        return { main: "🔪 마피아", sub: (peers.length ? "동료 마피아: " + escHtml(peers.join(", ")) : "당신은 단독 마피아입니다") + (maf.on.spy ? "<br>어딘가에 스파이가 숨어 당신을 몰래 도와요 (누군지는 비밀)" : ""), liar: true };
-      }
-      if (p.role === "스파이") return { main: "🕵️ 스파이", sub: "당신은 마피아팀! 마피아는 <b>" + escHtml(mafiaNames.join(", ")) + "</b><br>마피아는 당신을 몰라요. 시민인 척 몰래 도우세요", liar: true };
-      if (p.role === "연인"){
-        const partner = loverNames.find(n => n !== p.name);
-        return { main: "💞 연인", sub: "당신의 연인: <b>" + escHtml(partner) + "</b><br>한 명이 죽으면 다음 날 아침 남은 한 명도 따라가요. 끝까지 둘 다 살아남으세요!" };
-      }
-      const def = MAF_ROLES.find(r => r.name === p.role);
-      if (def) return { main: def.icon + " " + def.name, sub: def.card };
-      return { main: "👤 시민", sub: "추리력으로 마피아를 찾아내세요" };
-    },
-    () => {
-      pass.style.display = "none";
-      $("mafia-play").style.display = "";
-      $("mafia-modlist").style.display = "none";
-      const g = mafGuide(maf.on);
-      $("mafia-order").innerHTML = g.lines.join("<br>");
-      $("mafia-rules").style.display = g.rules.length ? "" : "none";
-      $("mafia-rules-val").innerHTML = g.rules.join("<br>");
-    }
+    (i) => mafSecret(maf.list[i], mafiaNames, loverNames),
+    () => mafShowPlay(false)
   );
 }
+
+/* ---------- 여러 폰 (호스트) ---------- */
+function startMafiaMulti(){
+  const names = mpNames();
+  if (names.length < 4){ alert("여러 폰 마피아는 4명 이상 연결돼야 해 (지금 " + names.length + "명)"); return; }
+  const list = mafDeal(names, maf.count, maf.on);
+  if (!list){ alert("특수 역할이 너무 많아요! 시민이 최소 1명은 있어야 해요."); return; }
+  maf.list = list;
+  const mafiaNames = list.filter(p => p.role === "마피아").map(p => p.name);
+  const loverNames = list.filter(p => p.role === "연인").map(p => p.name);
+
+  mpNav("mafia");                        /* 게스트들 마피아 화면으로 (__guest_mafia 실행 → 대기) */
+  mp.game = { onMsg(){}, onPeers(){} };  /* 호스트도 게임 활성 */
+  /* 개인 역할 배달 — mafDeal이 이름을 섞으므로 party는 이름으로 매칭(인덱스 아님) */
+  mpParty().forEach((pl) => {
+    const p = list.find(x => x.name === pl.name);
+    const sec = mafSecret(p, mafiaNames, loverNames);
+    const payload = { t: "role", main: sec.main, sub: sec.sub, liar: sec.liar };
+    if (pl.self) maf.myRole = payload; else pl.send(payload);
+  });
+  mafShowPlay(true);
+}
+
+/* ---------- 여러 폰 (게스트) ---------- */
+window.__guest_mafia = function(){
+  $("mafia-setup").style.display = "none";
+  $("mafia-play").style.display = "none";
+  const pass = $("mafia-pass");
+  pass.style.display = "flex";
+  pass.innerHTML = '<div class="who-label">여러 폰 마피아</div><div class="who">대기 중…</div><div class="hint" style="margin:0">호스트가 역할을 나누면 네 역할이 여기 떠</div>';
+  mp.game = { onMsg(from, m){
+    if (m.t === "role"){
+      pass.style.display = "flex";
+      pass.innerHTML = mafRoleHtml(m) + '<div class="hint" style="margin-top:14px">네 폰만 확인해. 밤/낮 진행은 호스트 폰 보고 따라가</div>';
+    }
+  }};
+};
 holdReveal($("mafia-modview"),
   () => {
     const ml = $("mafia-modlist");
