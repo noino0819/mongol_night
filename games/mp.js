@@ -5,7 +5,7 @@
    호스트가 별(스타) 중심이 되어 게스트별 1:1 연결을 들고 중계한다.
    ponytail: 자동 재연결 없음(끊기면 재초대) — 게임 붙일 때 필요해지면 추가. */
 
-let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
 
 /* 아바타로 쓸 캐릭터 스프라이트 (오브젝트 제외, 동물·텡그리 20종) */
 const MP_AVATARS = ["bor", "fox", "wolf", "crow", "hawk", "hedgehog", "mole", "rooster", "goat", "squirrel", "rabbit", "otter", "turtle", "badger", "crane", "camel", "owl2", "marmot", "owlprof", "tengri"];
@@ -263,7 +263,7 @@ async function mpJoin(){
           if (msg.t === "ping") mpSend(mp.hostChan, { t: "pong", ts: msg.ts });
           if (msg.t === "pong"){ mp.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
           if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8));
-          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mpRoom(); }
+          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mp.rosterSprs = (msg.sprs || []).map(mpSprOk); mpRoom(); }
         };
       };
       await pc.setRemoteDescription({ type: "offer", sdp: o.sdp });
@@ -295,6 +295,16 @@ function mpPeerRow(name, on, rtt, spr){
   d.append(dot, av, nm, rt);
   return d;
 }
+/* 방 전원 칩 — 상태 점·핑 없음(직접 연결이 아니라 "방에 있음"만 뜻함) */
+function mpChip(name, spr){
+  const c = document.createElement("div");
+  c.className = "mp-chip";
+  const av = document.createElement("span"); av.className = "av";
+  av.innerHTML = '<px-sprite name="' + mpSprOk(spr) + '" scale="2"></px-sprite>'; /* mpSprOk → 허용목록 값만 */
+  const nm = document.createElement("span"); nm.textContent = name; /* 원격 입력 → textContent */
+  c.append(av, nm);
+  return c;
+}
 function mpRoom(){
   mpView("mp-room");
   const box = $("mp-peers");
@@ -310,13 +320,17 @@ function mpRoom(){
     }
     mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt, p.spr)));
     $("mp-invite-more").style.display = "";
+    $("mp-roster-field").style.display = "none"; /* 호스트는 위 연결 행이 이미 전원(실상태) */
     $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼";
   } else {
     $("mp-room-label").textContent = "내 연결";
-    box.append(mpPeerRow(mp.name + " (나)", true, null, mp.spr));
     box.append(mpPeerRow((mp.hostName || "호스트") + " (호스트)", !!(mp.hostChan && mp.hostChan.readyState === "open"), mp.rtt, mp.hostSpr));
     $("mp-invite-more").style.display = "none";
-    $("mp-room-hint").textContent = mp.rosterNames ? "지금 이 방: " + mp.rosterNames.join(", ") : "";
+    /* 방 전원 캐릭터 칩 — 다른 게스트는 직접 연결이 아니라 roster로만 아니까 상태 없이 표시 */
+    const rbox = $("mp-roster"); rbox.innerHTML = "";
+    (mp.rosterNames || []).forEach((n, i) => rbox.append(mpChip(n, (mp.rosterSprs || [])[i])));
+    $("mp-roster-field").style.display = mp.rosterNames && mp.rosterNames.length ? "" : "none";
+    $("mp-room-hint").textContent = "";
   }
 }
 
@@ -327,7 +341,7 @@ function mpReset(){
   mp.peers.forEach((p) => { try { p.pc.close(); } catch (e) { /* 무시 */ } });
   if (mp.hostPc){ try { mp.hostPc.close(); } catch (e) { /* 무시 */ } }
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } }
-  mp = { role: null, name: "", spr: mpSprOk(prefs.mpSpr), peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: MP_DEF_SPR, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+  mp = { role: null, name: "", spr: mpSprOk(prefs.mpSpr), peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: MP_DEF_SPR, rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
   /* 대표로 저장해둔 이름·캐릭터 미리 채우기 */
   if (prefs.mpName) $("mp-name").value = prefs.mpName;
   mpRenderAvatars();
