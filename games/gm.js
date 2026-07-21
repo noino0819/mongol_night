@@ -13,6 +13,17 @@ snAddScreen("gm", `
           <li>❗꼬임·👤인물로 이야기를 비틀고, 🏁결말로 마무리해.</li>
         </ol>
       </div>
+      <div class="field"><label>한 판은 이렇게 흘러가 (예시)</label>
+        <div class="gm-eg">
+          <p><b>이야기꾼</b> — 🌀로 "길이 두 갈래로 갈린다…"를 뽑고: "안개 낀 언덕 쪽에서 마두금 소리가 나. 어쩔래?"</p>
+          <p><b>모험가</b> — "난 언덕 올라가서 소리 정체를 확인할래!"</p>
+          <p><b>이야기꾼</b> — "안개가 짙어서 쉽진 않겠는데. 🎲 판정, <b>보통</b>으로 굴려."</p>
+          <p class="gm-eg-r">🎲 나온 눈이 <b>4 이상이면 성공</b> · 1은 대실패 · 6은 대성공</p>
+          <p><b>성공</b> → 👤로 인물을 뽑아 "언덕 위, 눈먼 노파가 널 기다린 듯 웃는다"로 이어가기.<br>
+             <b>실패</b> → ❗로 꼬임을 뽑고 이야기꾼이 대가를 정해 "길 잃고 물 반 통을 쏟았다".</p>
+          <p>이야기가 무르익으면 🏁 <b>결말</b>로 끝맺어. 정답은 없어 — 매판 다른 이야기가 나와.</p>
+        </div>
+      </div>
       <button class="btn" id="gm-begin">🔥 이야기 시작 →</button>
     </div>
     <div id="gm-play" style="display:none">
@@ -42,6 +53,10 @@ snAddScreen("gm", `
 snAddCss(`/* ---------- 이야기꾼의 밤 (gm) ---------- */
 .gm-how{margin:0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.7}
 .gm-how li{margin:4px 0}
+.gm-eg{font-size:13px;line-height:1.7;color:var(--dim);border-left:2px solid var(--line);padding-left:12px}
+.gm-eg p{margin:6px 0}
+.gm-eg b{color:var(--milk)}
+.gm-eg-r b{color:var(--steppe)}
 .gm-txt{font-size:17px;line-height:1.6;word-break:keep-all;margin-top:10px;color:var(--milk)}
 .gm-die{font-size:54px;line-height:1;margin-bottom:6px}`);
 /* ================= 이야기꾼의 밤 (gm) — GM 보조 즉흥 모험 =================
