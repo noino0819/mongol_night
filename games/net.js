@@ -67,6 +67,16 @@ function mpGuestNav(game){
   if (typeof init === "function") init();                          /* 게스트 진입 훅 */
 }
 
+/* 게스트에겐 '홈'이 없다 — 연결 상태에 맞춰 상단 뒤로가기를 정리.
+   대기방(scr-mp): 뒤로가기 숨김(아래 방 나가기 버튼만 남김) · 게임 화면: '← 홈' → '🚪 나가기' */
+function mpSyncBack(){
+  const guest = mpLive() && !mpAmHost();
+  document.querySelectorAll('.back[data-go="home"]').forEach((b) => {
+    if (b.closest("#scr-mp")) b.style.visibility = guest ? "hidden" : "";
+    else b.textContent = guest ? "🚪 나가기" : "← 홈";
+  });
+}
+
 /* 모드 결정: saved = 유저가 토글로 고른 값(null=미선택).
    방에 연결돼 있으면 기본 여러 폰, 미연결이면 무조건 폰 하나(선택은 보존 → 재연결 시 복귀). */
 function snMode(saved){ return mpLive() ? (saved || "multi") : "solo"; }
@@ -87,7 +97,7 @@ function snModeBar(mountEl, current, onPick){
     if (mode === current) b.classList.add("sel");
     b.addEventListener("click", () => {
       if (mode === "multi" && !mpLive()){
-        if (confirm("여러 폰 모드는 폰 연결이 먼저야. 연결 화면으로 갈까?")) go("mp");
+        snConfirm("📡", "폰 연결이 먼저야", "여러 폰 모드는 폰끼리 연결부터. 연결 화면으로 갈까?", "연결하러 가기", () => go("mp"));
         return;
       }
       onPick(mode);

@@ -75,9 +75,12 @@ $("dr-word-ok").addEventListener("click", () => {
   drSubmit("word", v);
 });
 $("dr-draw-done").addEventListener("click", () => {
-  if (!dr.strokes.length && !confirm("아무것도 안 그렸는데 제출할까요?")) return;
-  clearInterval(dr.drawTimerId); dr.drawTimerId = null;
-  drSubmit("draw", dr.cv.toDataURL("image/png"));
+  const done = () => {
+    clearInterval(dr.drawTimerId); dr.drawTimerId = null;
+    drSubmit("draw", dr.cv.toDataURL("image/png"));
+  };
+  if (dr.strokes.length) done();
+  else snConfirm("🎨", "백지로 제출할까요?", "아무것도 안 그렸는데 이대로 넘어가요", "제출하기", done);
 });
 $("dr-guess-ok").addEventListener("click", () => {
   const v = $("dr-guess-input").value.trim();
@@ -199,7 +202,10 @@ $("dr-pen").addEventListener("click", () => { dr.erasing = false; dr.size = 4; d
 $("dr-thick").addEventListener("click", () => { dr.erasing = false; dr.size = 10; drToolSel("dr-thick"); });
 $("dr-eraser").addEventListener("click", () => { dr.erasing = true; drToolSel("dr-eraser"); });
 $("dr-undo").addEventListener("click", () => { dr.strokes.pop(); drRepaint(); });
-$("dr-clear").addEventListener("click", () => { if (confirm("전체 삭제할까요?")){ dr.strokes = []; drRepaint(); } });
+$("dr-clear").addEventListener("click", () => {
+  if (!dr.strokes.length) return;
+  snConfirm("🧽", "전체 삭제할까요?", "그린 선이 모두 지워져요", "삭제", () => { dr.strokes = []; drRepaint(); });
+});
 function drStartDrawTimer(){
   clearInterval(dr.drawTimerId);
   dr.drawLeft = 30;

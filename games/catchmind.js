@@ -128,9 +128,11 @@ $("cm-correct").addEventListener("click", () => {
   cmShow("cm-pick");
 });
 $("cm-giveup").addEventListener("click", () => {
-  if (!confirm("포기하고 정답을 공개할까요?")) return;
+  snConfirm("😅", "포기할까요?", "정답을 공개하고 다음 차례로 넘어가요", "포기하기", () => {
+  if (!cm.timerId) return; /* 모달 떠 있는 사이 시간 초과로 이미 넘어간 경우 */
   clearInterval(cm.timerId); cm.timerId = null;
   lifeModal("😅", "포기!", "정답은 \u201C" + cm.word + "\u201D 였습니다", cmNextTurn);
+  });
 });
 function cmNextTurn(){
   cm.turn++;

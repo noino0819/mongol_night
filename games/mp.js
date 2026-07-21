@@ -397,6 +397,7 @@ function mpRoom(){
     $("mp-leave").textContent = "🚪 방 나가기";
     $("mp-room-hint").textContent = "호스트가 게임을 고르면 이 폰도 자동으로 따라가 — 화면 켜둔 채 기다려줘";
   }
+  if (typeof mpSyncBack === "function") mpSyncBack(); /* 게스트: 뒤로가기 숨김·라벨 교체 (net.js) */
 }
 
 /* ---------- 진입·리셋 ---------- */
@@ -418,6 +419,7 @@ function mpReset(){
   localStorage.removeItem("snMpWas");
   $("mp-reload-warn").style.display = "none";
   mpView("mp-role");
+  if (typeof mpSyncBack === "function") mpSyncBack(); /* 연결 해제 → 뒤로가기 원상복구 (net.js) */
 }
 /* 홈에 다녀와도 연결 유지 — 활성 연결이 없을 때만 초기화 */
 function mpEnter(){
@@ -469,7 +471,8 @@ MP_EMOTES.forEach((emo) => {
   $("mp-emo").append(b);
 });
 $("mp-leave").addEventListener("click", () => {
-  if (confirm(mp.role === "host" ? "방을 닫을까? 전원 연결이 끊겨" : "방에서 나갈까? 다시 들어오려면 호스트 초대 QR이 필요해")) mpReset();
+  if (mp.role === "host") snConfirm("🚪", "방을 닫을까?", "전원 연결이 끊기고 진행 중인 게임도 끝나", "방 닫기", mpReset);
+  else snConfirm("🚪", "방에서 나갈까?", "다시 들어오려면 호스트의 초대 QR이 필요해", "나가기", mpReset);
 });
 
 /* ---------- 앱 재시작 감지 ---------- */

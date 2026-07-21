@@ -134,11 +134,12 @@ $("liar-timer-btn").addEventListener("click", () => {
 
 /* ---------- 공개 (호스트/폰하나) ---------- */
 $("liar-reveal-btn").addEventListener("click", () => {
-  if (!confirm("정말 공개할까요? 투표 먼저 하셨죠? 😏")) return;
+  snConfirm("🐺", "정말 공개할까요?", "투표 먼저 하셨죠? 😏", "공개하기", () => {
   if (liarState.timerId){ clearInterval(liarState.timerId); liarState.timerId = null; }
   const r = $("liar-result");
   r.style.display = "";
   r.innerHTML = '<div class="lbl">라이어는...</div><div class="val" style="color:var(--danger)">' + liarEsc(liarState.liarName) + '</div><div class="lbl" style="margin-top:14px">제시어</div><div class="val">' + liarEsc(liarState.word) + '</div>';
   $("liar-again").style.display = "";
   if (liarState.multi) mpBroadcast({ t: "reveal", liarName: liarState.liarName, word: liarState.word });
+  });
 });

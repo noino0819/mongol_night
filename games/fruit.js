@@ -189,7 +189,7 @@ function fruitEnd(){
     mpBroadcast({ t: "st", phase: "end", rank });
   }
 }
-$("fruit-stop").addEventListener("click", () => { if (confirm("게임을 끝낼까요? 카드 많은 사람이 승리!")) fruitEnd(); });
+$("fruit-stop").addEventListener("click", () => snConfirm("🔔", "게임을 끝낼까요?", "카드 많은 사람이 승리!", "끝내기", fruitEnd));
 $("fruit-again").addEventListener("click", () => { fruitReset(); });
 
 /* ================= 여러 폰 — 각자 폰이 자기 패 ================= */
@@ -315,7 +315,7 @@ function fruitMpShow(m){
     const stop = document.createElement("button");
     stop.className = "btn ghost";
     stop.textContent = "게임 끝내기 (카드 많은 순 정산)";
-    stop.addEventListener("click", () => { if (confirm("게임을 끝낼까요? 카드 많은 사람이 승리!")) fruitEnd(); });
+    stop.addEventListener("click", () => snConfirm("🔔", "게임을 끝낼까요?", "카드 많은 사람이 승리!", "끝내기", fruitEnd));
     el.appendChild(stop);
   }
 }

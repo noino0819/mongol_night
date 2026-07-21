@@ -313,6 +313,8 @@
   .life-modal .em{font-size:44px}
   .life-modal .tt{font-size:20px;font-weight:800;margin:12px 0 8px;word-break:keep-all;line-height:1.4}
   .life-modal .ds{font-size:14px;color:var(--dim);line-height:1.6;word-break:keep-all}
+  .life-modal .row{display:flex;gap:10px;margin-top:18px}
+  .life-modal .row .btn{flex:1}
 
   /* ---------- 그림 릴레이 ---------- */
   .dr-prompt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:10px}
@@ -681,7 +683,7 @@
   .victory-ov .cf{position:absolute;top:-20px;width:8px;height:8px;animation:sn-fall linear infinite}
   @keyframes sn-fall{from{transform:translateY(-40px) rotate(0)}to{transform:translateY(110vh) rotate(180deg)}}
   @media (prefers-reduced-motion:reduce){
-    .cd-box.pop,.victory-ov .jump,.victory-ov .cf,.px-skel,.px-toast{animation:none}
+    .cd-box.pop,.victory-ov .jump,.victory-ov .cf,.px-skel,.px-toast,.px-toast.bye{animation:none}
   }
 
   /* --- RPG 에러 대화창 --- */
@@ -694,7 +696,7 @@
 
   /* --- 토스트 (업데이트 안내 + alert 대체) --- */
   .px-toast{
-    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:210;
+    position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:210;
     width:max-content;max-width:min(92vw,420px);
     font-family:var(--font-px);font-size:13px;font-weight:700;color:var(--milk);
     background:var(--card);border:2px solid var(--line);padding:11px 14px;
@@ -708,6 +710,8 @@
   }
   .px-toast.warn{border-color:var(--fire)}
   @keyframes toast-in{from{transform:translate(-50%,14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  .px-toast.bye{animation:toast-out .18s steps(3) both}
+  @keyframes toast-out{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,14px);opacity:0}}
   .px-toast button{
     font-family:var(--font-px);font-weight:800;background:var(--fire);color:#231303;
     border:none;padding:6px 10px;cursor:pointer;font-size:12px;

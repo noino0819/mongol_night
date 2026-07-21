@@ -17,9 +17,12 @@ function pwaToast(msg, btnLabel, onBtn, opts){
     b.addEventListener("click", () => { t.remove(); pwa.toastEl = null; onBtn(); });
     t.appendChild(b);
   } else {
-    /* 긴 메시지는 읽을 시간만큼 더 띄움 (2.4s ~ 5.2s) */
+    /* 긴 메시지는 읽을 시간만큼 더 띄움 (2.4s ~ 5.2s) — 퇴장은 스르륵 */
     const dur = Math.min(5200, Math.max(2400, 1000 + msg.length * 60));
-    pwa.toastTimer = setTimeout(() => { t.remove(); if (pwa.toastEl === t) pwa.toastEl = null; }, dur);
+    pwa.toastTimer = setTimeout(() => {
+      t.classList.add("bye");
+      setTimeout(() => { t.remove(); if (pwa.toastEl === t) pwa.toastEl = null; }, 200);
+    }, dur);
   }
   document.body.appendChild(t);
   pwa.toastEl = t;
@@ -31,9 +34,27 @@ window.alert = function(msg){
   if (navigator.vibrate) navigator.vibrate(60);
 };
 
+/* 네이티브 confirm() 대체: 픽셀 확인 모달 (life-modal 스킨 재사용). onOk는 확인 버튼에서만 실행 */
+function snConfirm(em, tt, ds, okLabel, onOk){
+  const old = document.querySelector(".life-modal.sn-confirm"); if (old) old.remove();
+  const wrap = document.createElement("div");
+  wrap.className = "life-modal sn-confirm";
+  wrap.innerHTML = '<div class="inner"><div class="em"></div><div class="tt"></div><div class="ds"></div>' +
+    '<div class="row"><button class="btn ghost">취소</button><button class="btn"></button></div></div>';
+  wrap.querySelector(".em").textContent = em;
+  wrap.querySelector(".tt").textContent = tt;
+  wrap.querySelector(".ds").textContent = ds;
+  const btns = wrap.querySelectorAll(".row button");
+  btns[0].addEventListener("click", () => wrap.remove());
+  btns[1].textContent = okLabel || "확인";
+  btns[1].addEventListener("click", () => { wrap.remove(); onOk(); });
+  wrap.addEventListener("click", (e) => { if (e.target === wrap) wrap.remove(); }); /* 바깥 탭 = 취소 */
+  document.body.appendChild(wrap);
+}
+
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.8.0";
+  const VER = "v2.8.1";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });

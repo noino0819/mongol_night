@@ -88,16 +88,21 @@ function go(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("on"));
   $("scr-" + name).classList.add("on");
   window.scrollTo(0, 0);
+  if (typeof mpSyncBack === "function") mpSyncBack(); /* 연결 상태에 맞춰 뒤로가기 라벨 정리 (net.js) */
 }
 document.querySelectorAll("[data-go]").forEach(b => {
   b.addEventListener("click", () => {
     const target = b.dataset.go;
     const connected = typeof mpLive === "function" && mpLive();
-    /* 게스트는 방에 묶임 — 홈(게임 리스트) 대신 항상 대기방. 게임 선택·이동은 호스트가 mpNav로 끌고 감 */
+    /* 게스트는 방에 묶임 — 게임 선택·이동은 호스트가 mpNav로 끌고 감.
+       게스트에겐 홈이 없으므로 뒤로가기(mpSyncBack이 '나가기'로 라벨 교체) = 방 나가기 확인 모달 */
     if (connected && typeof mpAmHost === "function" && !mpAmHost() && target !== "mp"){
-      mpFlash("게임은 호스트가 골라줄 거야");
-      mp.game = null;
-      resetGame("mp"); go("mp");
+      if (target === "home"){
+        snConfirm("🚪", "방에서 나갈까?", "다시 들어오려면 호스트의 초대 QR이 필요해", "나가기", () => { mpReset(); go("home"); });
+      } else {
+        mp.game = null;
+        resetGame("mp"); go("mp");
+      }
       return;
     }
     if (target !== "home"){
