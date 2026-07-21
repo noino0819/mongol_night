@@ -5,7 +5,25 @@
    호스트가 별(스타) 중심이 되어 게스트별 1:1 연결을 들고 중계한다.
    ponytail: 자동 재연결 없음(끊기면 재초대) — 게임 붙일 때 필요해지면 추가. */
 
-let mp = { role: null, name: "", peers: [], hostChan: null, hostPc: null, hostName: "", rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+
+/* 아바타로 쓸 캐릭터 스프라이트 (오브젝트 제외, 동물·텡그리 20종) */
+const MP_AVATARS = ["bor", "fox", "wolf", "crow", "hawk", "hedgehog", "mole", "rooster", "goat", "squirrel", "rabbit", "otter", "turtle", "badger", "crane", "camel", "owl2", "marmot", "owlprof", "tengri"];
+const MP_DEF_SPR = "bor";
+/* 원격에서 온 캐릭터 값은 허용목록 밖이면 기본값으로 (px-sprite name 속성 신뢰경계) */
+function mpSprOk(s){ return MP_AVATARS.includes(s) ? s : MP_DEF_SPR; }
+/* 캐릭터 선택 UI — mp-role 진입 시 그림 */
+function mpRenderAvatars(){
+  const box = $("mp-avatars"); if (!box) return;
+  box.innerHTML = "";
+  MP_AVATARS.forEach((k) => {
+    const b = document.createElement("button");
+    b.className = k === mp.spr ? "on" : "";
+    b.innerHTML = '<px-sprite name="' + k + '" scale="2"></px-sprite>'; /* k는 상수 목록에서만 옴 */
+    b.onclick = () => { mp.spr = k; prefs.mpSpr = k; savePrefs(); mpRenderAvatars(); };
+    box.append(b);
+  });
+}
 
 /* ---------- 시그널링 페이로드 (QR에 담는 문자열) ---------- */
 /* MP-PURE:START — tools/test-mp.mjs가 이 블록을 추출해 검증 */
@@ -170,15 +188,17 @@ function mpWireHostPeer(peer){
   peer.chan.onclose = () => { peer.on = false; if (mp.role === "host"){ mpRoom(); mpRoster(); } };
   peer.chan.onmessage = (e) => {
     let msg; try { msg = JSON.parse(e.data); } catch (err) { return; }
-    if (msg.t === "hi"){ peer.name = String(msg.name || "게스트").slice(0, 8); mpRoom(); mpRoster(); }
+    if (msg.t === "hi"){ peer.name = String(msg.name || "게스트").slice(0, 8); peer.spr = mpSprOk(msg.spr); mpRoom(); mpRoster(); }
     if (msg.t === "ping") mpSend(peer.chan, { t: "pong", ts: msg.ts });
     if (msg.t === "pong"){ peer.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
     if (msg.t === "poke"){ mpPoke(peer.name); mp.peers.forEach((p) => { if (p !== peer) mpSend(p.chan, { t: "poke", from: peer.name }); }); }
   };
 }
 function mpRoster(){
-  const names = [mp.name].concat(mp.peers.filter((p) => p.on).map((p) => p.name || "게스트"));
-  mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names }));
+  const on = mp.peers.filter((p) => p.on);
+  const names = [mp.name].concat(on.map((p) => p.name || "게스트"));
+  const sprs = [mp.spr].concat(on.map((p) => p.spr || MP_DEF_SPR));
+  mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
 }
 async function mpInvite(){
   try {
@@ -189,7 +209,7 @@ async function mpInvite(){
     const pc = mpNewPc();
     mp.pendingPc = pc; /* 취소·리셋 시 정리 대상 — 연결 성사되면 해제 */
     const chan = pc.createDataChannel("sn");
-    const peer = { pc, chan, name: "", rtt: null, on: false };
+    const peer = { pc, chan, name: "", spr: MP_DEF_SPR, rtt: null, on: false };
     mpWireHostPeer(peer);
     await pc.setLocalDescription(await pc.createOffer());
     await mpGather(pc);
@@ -236,14 +256,14 @@ async function mpJoin(){
       mp.hostPc = pc;
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { mpSend(e.channel, { t: "hi", name: mp.name }); mpRoom(); };
+        e.channel.onopen = () => { mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpRoom(); };
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
           if (msg.t === "ping") mpSend(mp.hostChan, { t: "pong", ts: msg.ts });
           if (msg.t === "pong"){ mp.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
           if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8));
-          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mpRoom(); }
+          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mpRoom(); }
         };
       };
       await pc.setRemoteDescription({ type: "offer", sdp: o.sdp });
@@ -263,14 +283,16 @@ async function mpJoin(){
 }
 
 /* ---------- 방(연결됨) 화면 ---------- */
-function mpPeerRow(name, on, rtt){
+function mpPeerRow(name, on, rtt, spr){
   const d = document.createElement("div");
   d.className = "mp-peer" + (on ? "" : " off");
   const dot = document.createElement("span"); dot.className = "dot";
+  const av = document.createElement("span"); av.className = "av";
+  av.innerHTML = '<px-sprite name="' + mpSprOk(spr) + '" scale="2"></px-sprite>'; /* mpSprOk → 허용목록 값만 삽입 */
   const nm = document.createElement("span"); nm.textContent = name; /* 원격 입력 → textContent만 사용 */
   const rt = document.createElement("span"); rt.className = "rtt";
   rt.textContent = !on ? "끊김" : (rtt ? rtt + "ms" : "");
-  d.append(dot, nm, rt);
+  d.append(dot, av, nm, rt);
   return d;
 }
 function mpRoom(){
@@ -279,18 +301,20 @@ function mpRoom(){
   box.innerHTML = "";
   if (mp.role === "host"){
     $("mp-room-label").textContent = "연결된 폰 (" + mp.peers.filter((p) => p.on).length + ")";
+    box.append(mpPeerRow(mp.name + " (나·호스트)", true, null, mp.spr));
     if (!mp.peers.length){
       const d = document.createElement("div");
       d.className = "hint";
       d.textContent = "아직 아무도 없어 — 아래 버튼으로 초대해봐";
       box.append(d);
     }
-    mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt)));
+    mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt, p.spr)));
     $("mp-invite-more").style.display = "";
     $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼";
   } else {
     $("mp-room-label").textContent = "내 연결";
-    box.append(mpPeerRow((mp.hostName || "호스트") + " (호스트)", !!(mp.hostChan && mp.hostChan.readyState === "open"), mp.rtt));
+    box.append(mpPeerRow(mp.name + " (나)", true, null, mp.spr));
+    box.append(mpPeerRow((mp.hostName || "호스트") + " (호스트)", !!(mp.hostChan && mp.hostChan.readyState === "open"), mp.rtt, mp.hostSpr));
     $("mp-invite-more").style.display = "none";
     $("mp-room-hint").textContent = mp.rosterNames ? "지금 이 방: " + mp.rosterNames.join(", ") : "";
   }
@@ -303,7 +327,10 @@ function mpReset(){
   mp.peers.forEach((p) => { try { p.pc.close(); } catch (e) { /* 무시 */ } });
   if (mp.hostPc){ try { mp.hostPc.close(); } catch (e) { /* 무시 */ } }
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } }
-  mp = { role: null, name: "", peers: [], hostChan: null, hostPc: null, hostName: "", rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+  mp = { role: null, name: "", spr: mpSprOk(prefs.mpSpr), peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: MP_DEF_SPR, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+  /* 대표로 저장해둔 이름·캐릭터 미리 채우기 */
+  if (prefs.mpName) $("mp-name").value = prefs.mpName;
+  mpRenderAvatars();
   /* 브라우저(미설치)로 열었으면 설치 유도 — 오프라인 현장에선 설치된 앱만 열리니까 */
   const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   $("mp-install-warn").style.display = standalone ? "none" : "";
@@ -320,12 +347,14 @@ $("mp-host-btn").addEventListener("click", () => {
   if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아");
   mp.role = "host";
   mp.name = ($("mp-name").value.trim() || "호스트").slice(0, 8);
+  prefs.mpName = $("mp-name").value.trim(); savePrefs();
   mpInvite();
 });
 $("mp-join-btn").addEventListener("click", () => {
   if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아");
   mp.role = "guest";
   mp.name = ($("mp-name").value.trim() || "게스트").slice(0, 8);
+  prefs.mpName = $("mp-name").value.trim(); savePrefs();
   mpJoin();
 });
 $("mp-flow-cancel").addEventListener("click", () => {

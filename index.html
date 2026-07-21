@@ -768,6 +768,11 @@
   .mp-peer .dot{width:10px;height:10px;border-radius:2px;background:var(--steppe);flex-shrink:0}
   .mp-peer.off .dot{background:var(--danger)}
   .mp-peer .rtt{margin-left:auto;font-size:12px;color:var(--dim);font-weight:400}
+  .mp-avatars{display:flex;gap:8px;overflow-x:auto;padding:6px 2px;margin-top:2px}
+  .mp-avatars button{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:5px;line-height:0;cursor:pointer}
+  .mp-avatars button.on{border-color:var(--fire);background:var(--card)}
+  .mp-peer .av{flex-shrink:0;line-height:0}
+  .mp-peer.off .av{opacity:.45}
   .mp-poke{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:800;color:var(--milk);z-index:80;pointer-events:none;animation:mpPokePop .3s steps(3) both}
   @keyframes mpPokePop{from{transform:scale(.4)}to{transform:scale(1)}}
 </style>
@@ -931,6 +936,7 @@
       </div>
       <p class="hint">여러 폰을 <b>인터넷 없이</b> 직접 연결하는 테스트야. 먼저 한 명이 핫스팟을 켜고(인터넷 안 돼도 돼 · 안드로이드는 유심 없이도 켜져) 전원이 그 Wi-Fi에 붙은 뒤, 한 명이 호스트를 맡아. 카메라는 QR 맞스캔에만 쓰여.</p>
       <div class="field"><label>내 이름</label><input id="mp-name" class="mp-input" type="text" maxlength="8" placeholder="이름 (다른 폰에 보여요)" enterkeyhint="done"></div>
+      <div class="field"><label>내 캐릭터 (다른 폰에 대표로 보여요)</label><div id="mp-avatars" class="mp-avatars"></div></div>
       <button class="btn mt" id="mp-host-btn">📡 호스트 하기 — 방 만들기</button>
       <button class="btn ghost" id="mp-join-btn">📷 참가하기 — 초대 QR 스캔</button>
     </div>
