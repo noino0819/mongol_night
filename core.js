@@ -124,6 +124,7 @@ function resetGame(name){
   if (name === "gq"){ gqReset(); }
   if (name === "ta"){ taReset(); }
   if (name === "nb"){ nbReset(); }
+  if (name === "mp"){ mpEnter(); } /* 연결 유지 중이면 방 화면 복귀, 아니면 초기화 */
 }
 
 /* ================= 일행 등록 ================= */
