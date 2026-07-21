@@ -61,7 +61,14 @@ snAddCss(`/* ---------- 그림 릴레이 ---------- */
   .dr-chain{display:flex;flex-direction:column;gap:12px;margin-top:6px}
   .dr-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
   .dr-item .by{font-size:12px;color:var(--dim);font-weight:700;margin-bottom:6px}
-  .dr-item img{width:100%;border-radius:10px;background:#F7F2E6}`);
+  .dr-item img{width:100%;border-radius:10px;background:#F7F2E6}
+  .dr-wheel-sw{background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+  .dr-wheel-panel{display:none;flex-basis:100%;width:100%;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
+  .dr-wheel-panel.open{display:flex}
+  .dr-wheel-wrap{position:relative;line-height:0}
+  .dr-wheel-cv{border-radius:50%;touch-action:none;cursor:crosshair}
+  .dr-wheel-mk{position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.6);transform:translate(-50%,-50%);pointer-events:none}
+  .dr-wheel-val{width:180px;max-width:80%}`);
 /* ================= 그림 릴레이 (갈틱폰 스타일) ================= */
 const DR_COLORS = ["#1A1A1A","#E8434A","#2E7DD1","#2E9E5B","#F0A030","#8B5CC9","#E86AA6"];
 const DR_WORDS = [].concat(WORDS["몽골 스페셜"], WORDS["동물"], WORDS["음식"], WORDS["장소"], FH_BANK["동작"],
@@ -200,16 +207,66 @@ function drBuildColorBar(){
   });
   drAddPicker(bar, v => { dr.color = v; dr.erasing = false; drToolSel(dr.size > 6 ? "dr-thick" : "dr-pen"); });
 }
-/* 네이티브 컬러 피커 스와치 — 캐치마인드·그림 릴레이 공용 */
+/* 원형 색상 휠(HSV) — 캐치마인드·그림 릴레이 공용. 무지개 스와치를 누르면 펼쳐짐 */
 function drAddPicker(bar, onPick){
-  const inp = document.createElement("input");
-  inp.type = "color"; inp.className = "dr-color pick"; inp.value = "#8B5A2B";
-  inp.addEventListener("input", () => {
-    onPick(inp.value);
+  const R = 66;                                   // 휠 반지름(px = CSS px, 1x 렌더면 충분)
+  let hue = 28, sat = 0.7, val = 0.5, dragging = false; // 기본값 = 갈색 계열
+  const swatch = document.createElement("button");
+  swatch.className = "dr-color dr-wheel-sw"; swatch.title = "색 골라내기";
+  const panel = document.createElement("div"); panel.className = "dr-wheel-panel";
+  const wrap = document.createElement("div"); wrap.className = "dr-wheel-wrap";
+  const cv = document.createElement("canvas");
+  cv.className = "dr-wheel-cv"; cv.width = cv.height = R * 2;
+  cv.style.width = cv.style.height = R * 2 + "px";
+  const marker = document.createElement("div"); marker.className = "dr-wheel-mk";
+  wrap.appendChild(cv); wrap.appendChild(marker);
+  const slider = document.createElement("input");
+  slider.type = "range"; slider.min = 0; slider.max = 100; slider.value = 50;
+  slider.className = "dr-wheel-val"; slider.title = "밝기";
+  panel.appendChild(wrap); panel.appendChild(slider);
+  const ctx = cv.getContext("2d");
+  const hsv2rgb = (h, s, v) => {
+    const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+    const t = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x]
+      : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+    return t.map(n => Math.round((n + m) * 255));
+  };
+  const hex = ([r, g, b]) => "#" + [r, g, b].map(n => n.toString(16).padStart(2, "0")).join("");
+  function renderWheel(){
+    const img = ctx.createImageData(R * 2, R * 2), d = img.data;
+    for (let y = 0; y < R * 2; y++) for (let x = 0; x < R * 2; x++){
+      const dx = x - R + 0.5, dy = y - R + 0.5, dist = Math.hypot(dx, dy), i = (y * R * 2 + x) * 4;
+      if (dist > R){ d[i + 3] = 0; continue; }
+      let h = Math.atan2(dy, dx) * 180 / Math.PI; if (h < 0) h += 360;
+      const [r, g, b] = hsv2rgb(h, Math.min(1, dist / R), val);
+      d[i] = r; d[i + 1] = g; d[i + 2] = b; d[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function placeMarker(){
+    const a = hue * Math.PI / 180;
+    marker.style.left = (R + Math.cos(a) * sat * R) + "px";
+    marker.style.top = (R + Math.sin(a) * sat * R) + "px";
+  }
+  function emit(){
+    onPick(hex(hsv2rgb(hue, sat, val)));
     bar.querySelectorAll(".dr-color").forEach(x => x.classList.remove("sel"));
-    inp.classList.add("sel");
-  });
-  bar.appendChild(inp);
+    swatch.classList.add("sel");
+  }
+  function pick(e){
+    const r = cv.getBoundingClientRect();
+    const dx = e.clientX - r.left - R, dy = e.clientY - r.top - R;
+    let h = Math.atan2(dy, dx) * 180 / Math.PI; if (h < 0) h += 360;
+    hue = h; sat = Math.min(1, Math.hypot(dx, dy) / R);
+    placeMarker(); emit();
+  }
+  cv.addEventListener("pointerdown", e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); dragging = true; pick(e); });
+  cv.addEventListener("pointermove", e => { if (dragging) pick(e); });
+  const end = () => { dragging = false; };
+  cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  slider.addEventListener("input", () => { val = slider.value / 100; renderWheel(); emit(); });
+  swatch.addEventListener("click", () => { if (panel.classList.toggle("open")){ renderWheel(); placeMarker(); } });
+  bar.appendChild(swatch); bar.appendChild(panel);
 }
 function drToolSel(id){
   ["dr-pen","dr-thick","dr-eraser"].forEach(x => $(x).classList.toggle("sel", x === id));
