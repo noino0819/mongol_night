@@ -308,6 +308,7 @@ function omEnterMulti(doNav){
 function omHostRecv(from, m){
   if (!m || m.t !== "move" || om.over) return;
   if (om.turn !== 2) return;                        /* 백(게스트) 차례에만 게스트 착수 허용 */
+  if (from !== mpNames()[1]) return;                /* 백=첫 게스트(mpNames[1]) — 그 폰이 보낸 것만 (vg.js:102 패턴, 관전자 착수 차단) */
   const r = m.r, c = m.c;
   if (!Number.isInteger(r) || !Number.isInteger(c)) return;
   if (r < 0 || c < 0 || r >= om.size || c >= om.size || om.board[r][c]) return;

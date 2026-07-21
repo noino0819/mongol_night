@@ -67,7 +67,7 @@ function startLiarMulti(cat){
   mp.game = { onMsg(){}, onPeers(){} }; /* 호스트도 게임 활성 (공개 브로드캐스트용) */
   /* 개인 역할 배달 — party 순서 = mpNames() 순서 → liarIdx로 매칭 */
   mpParty().forEach((pl, i) => {
-    const payload = { t: "role", liar: i === liarIdx, word, cat };
+    const payload = { t: "role", liar: i === liarIdx, word: i === liarIdx ? null : word, cat }; /* 라이어 폰엔 제시어 미전송(끝날 때 reveal로 공개) */
     if (pl.self) liarState.myRole = payload; else pl.send(payload);
   });
   liarShowPlay(cat, true);

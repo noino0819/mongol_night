@@ -142,6 +142,7 @@ function mafShowGuide(){
 /* play 화면 표시. 여러 폰이면 호스트 자기 역할 카드도 맨 위에. */
 function mafShowPlay(multi){
   $("mafia-setup").style.display = "none";
+  $("mafia-modview").style.display = multi ? "none" : ""; /* 멀티는 각자 폰에 역할 배달 → 사회자 명단(전원 역할 열람)은 호스트 치트 벡터라 숨김 */
   let my = $("maf-myrole");
   if (multi){
     if (!my){ my = document.createElement("div"); my.id = "maf-myrole"; my.style.marginBottom = "14px"; $("mafia-play").prepend(my); }

@@ -89,6 +89,7 @@ function vgApply(action){
   if (action.act === "roll"){ if (vg.roll) return; vgRoll(); }
   else if (action.act === "place"){ vgPlace(action.face); }
   else if (action.act === "next"){ vgNext(); }
+  else if (action.act === "end"){ vg.phase = "end"; }   /* 호스트 탈출: 이탈로 턴이 멈췄을 때 현재 상금 순으로 즉시 종료 */
   else return;
   vgRender();
   if (vgMode === "multi" && mpAmHost()) mpBroadcast({ t: "state", st: vgSerialize() });
@@ -203,6 +204,18 @@ function vgRenderFaces(){
     box.appendChild(b);
   }
 }
+/* 여러 폰: 현 차례 게스트가 이탈하면 턴이 멈춘다 — 호스트만 보이는 즉시 종료 버튼 (idempotent, vg-turn 내부라 다른 단계선 자동 숨김) */
+function vgHostEscape(show){
+  let b = $("vg-host-end");
+  if (!b){
+    b = document.createElement("button");
+    b.id = "vg-host-end"; b.className = "btn ghost"; b.style.marginTop = "10px";
+    b.textContent = "게임 끝내기 (현재 상금 순 정산)";
+    b.addEventListener("click", () => snConfirm("💰", "게임을 끝낼까요?", "지금까지 상금이 많은 사람이 승리!", "끝내기", () => vgApply({ act: "end" })));
+    $("vg-turn").appendChild(b);
+  }
+  b.style.display = show ? "" : "none";
+}
 function vgRender(){
   if (vg.phase === "setup"){ vgShow("vg-setup"); return; }
   if (vg.phase === "end"){ vgEnd(); return; }
@@ -214,6 +227,7 @@ function vgRender(){
   vgShow("vg-turn");
   const actor = vg.players[vg.turn], mine = vgMyTurn();
   $("vg-turn-name").textContent = actor.name + (vgMode === "multi" && mine ? " (나)" : "");
+  vgHostEscape(vgMode === "multi" && mpAmHost() && !mine); /* 남 차례 대기 중 이탈 스톨 대비 호스트 탈출 버튼 */
   const roll = $("vg-roll"), tray = $("vg-tray"), faces = $("vg-faces"), wait = $("vg-wait");
   if (!vg.roll){
     vgClearDiceAnim();

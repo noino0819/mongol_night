@@ -80,6 +80,13 @@ const empty = (n) => Array.from({ length: n }, () => Array(n).fill(0));
   api.omHostRecv("G", { t: "move", r: 1.5, c: 2 });    /* 비정수 */
   api.omHostRecv("G", { t: "move", r: 99, c: 0 });     /* 범위 밖 */
   assert.equal(bcast.length, before, "무효 착수는 전부 반려");
+
+  /* 백 차례라도 백(mpNames[1]="G")이 아닌 관전자가 쏜 착수는 반려 (from 검증) */
+  api.om.turn = 2;
+  const before2 = bcast.length;
+  api.omHostRecv("X", { t: "move", r: 5, c: 5 });
+  assert.equal(api.om.board[5][5], 0, "관전자(비-백) 착수는 반려");
+  assert.equal(bcast.length, before2, "관전자 착수 시 브로드캐스트 없음");
 }
 
 console.log("test-omok: OK");
