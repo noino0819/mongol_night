@@ -36,8 +36,25 @@ function mpSlimSdp(sdp){
     return /^udp$/i.test(f[2]) && f[7] === "host";
   }).join("\r\n") + "\r\n";
 }
-/* LAN 접속 감지: 수집된 host 후보가 0개면 이 폰은 어떤 Wi-Fi에도 안 붙은 상태 */
-function mpHasLan(sdp){ return /a=candidate:/.test(mpSlimSdp(sdp)); }
+/* 후보 주소가 같은 LAN에서 서로 닿는 대역인가 — 사설 IP·링크로컬·mDNS만 LAN.
+   셀룰러(데이터)는 공인 IP나 CGNAT(100.64/10)라 여기서 걸러진다. */
+function mpIsLanAddr(a){
+  if (/\.local$/i.test(a)) return true;                        /* mDNS(권한 전 obfuscation) — LAN일 수 있어 통과(fail-open) */
+  const m = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(a);
+  if (m){ const x = +m[1], y = +m[2];
+    return x === 10 || (x === 172 && y >= 16 && y <= 31) || (x === 192 && y === 168) || (x === 169 && y === 254); }
+  const s = a.toLowerCase();                                   /* IPv6: ULA(fc/fd)·링크로컬(fe80::/10) */
+  return /^f[cd]/.test(s) || /^fe[89ab]/.test(s);
+}
+/* LAN(핫스팟·Wi-Fi) 접속 감지: host 후보 중 LAN 대역이 하나라도 있나.
+   후보가 없거나(비행기모드) 전부 셀룰러 공인 IP면 false → 방 생성/참가를 막는다. */
+function mpHasLan(sdp){
+  return sdp.split(/\r?\n/).some((l) => {
+    if (!l.startsWith("a=candidate:")) return false;
+    const f = l.split(" ");
+    return /^udp$/i.test(f[2]) && f[7] === "host" && mpIsLanAddr(f[4]);
+  });
+}
 function mpB64(bytes){
   let s = "";
   for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
@@ -204,8 +221,9 @@ function mpRoster(){
   mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
   if (typeof mpGamePeers === "function") mpGamePeers(); /* 여러 폰 게임에 참가자 변동 통지 (net.js) */
 }
-/* 방 만들기 전 프리플라이트: 이 폰이 Wi-Fi(핫스팟·LAN)에 붙어 있나?
-   카메라 권한 없이도 host 후보 유무로 감지된다 (없으면 방 생성을 아예 막음). */
+/* 방 만들기 전 프리플라이트: 이 폰이 핫스팟·Wi-Fi(LAN)에 붙어 있나?
+   카메라 권한 없이 mDNS 후보로도 LAN 대역을 판별 — 셀룰러만이면 막는다.
+   (권한 전엔 사설 IP가 .local로 가려지므로 mDNS는 통과, 실제 판별은 카메라 뒤 실 IP로 재확인) */
 async function mpProbeLan(){
   const pc = mpNewPc();
   try {
@@ -221,7 +239,7 @@ async function mpInvite(){
     /* 핫스팟(Wi-Fi) 없으면 카메라 요청·초대장 만들기 전에 여기서 바로 막는다 */
     mpFlow("Wi-Fi 확인 중", "핫스팟에 붙어 있는지 확인하는 중…");
     if (!(await mpProbeLan())){
-      alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있어 — 핫스팟부터 켜고(안드로이드는 유심 없이도 켜져) 다시 [호스트 하기]를 눌러줘");
+      alert("핫스팟이나 Wi-Fi에 먼저 붙어야 해 — 셀룰러(데이터)만으론 다른 폰이 못 붙어.\n핫스팟을 켜고(안드로이드는 유심 없이도 켜져) 다시 [호스트 하기]를 눌러줘");
       mp.peers.length ? mpRoom() : mpView("mp-role");
       return;
     }
@@ -239,7 +257,7 @@ async function mpInvite(){
     if (!mpHasLan(pc.localDescription.sdp)){
       try { pc.close(); } catch (e) { /* 무시 */ }
       mp.pendingPc = null;
-      alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있는 것 같아 — 핫스팟부터 켜고 전원이 붙은 뒤 다시 해줘");
+      alert("핫스팟·Wi-Fi에 안 붙어 있어(셀룰러 데이터만으론 안 돼) — 핫스팟 켜고 다시 해줘");
       mp.peers.length ? mpRoom() : mpView("mp-role");
       return;
     }
@@ -304,7 +322,7 @@ async function mpJoin(){
       if (!mpHasLan(pc.localDescription.sdp)){
         try { pc.close(); } catch (e) { /* 무시 */ }
         mp.hostPc = null; mp.hostChan = null;
-        alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있는 것 같아 — 호스트와 같은 Wi-Fi에 붙은 뒤 다시 해줘");
+        alert("핫스팟·Wi-Fi에 안 붙어 있어(셀룰러 데이터만으론 안 돼) — 호스트와 같은 Wi-Fi에 붙고 다시 참가해줘");
         mpView("mp-role");
         return;
       }

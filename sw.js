@@ -1,6 +1,6 @@
 /* 초원의 밤 — 서비스워커: 전체 precache + cache-first (오프라인 절대 보장) */
 "use strict";
-const V = "v2.0.0+__BUILD__"; /* __BUILD__는 CI 배포 시 커밋 SHA로 치환됨 (pages.yml) — 배포마다 SW가 자동 갱신됨 */
+const V = "v2.1.0+__BUILD__"; /* __BUILD__는 CI 배포 시 커밋 SHA로 치환됨 (pages.yml) — 배포마다 SW가 자동 갱신됨 */
 const CACHE = "steppe-night-" + V;
 const ASSETS = [
   "./",

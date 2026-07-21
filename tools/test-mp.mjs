@@ -5,7 +5,7 @@ import { createRequire } from "node:module";
 const src = fs.readFileSync(new URL("../games/mp.js", import.meta.url), "utf8");
 const m = src.match(/\/\* MP-PURE:START[\s\S]*?\*\/([\s\S]*?)\/\* MP-PURE:END \*\//);
 if (!m) throw new Error("MP-PURE 블록 추출 실패");
-const pure = new Function(m[1] + "; return { mpSlimSdp, mpB64, mpUnb64, mpPack, mpUnpack, mpHasLan };")();
+const pure = new Function(m[1] + "; return { mpSlimSdp, mpB64, mpUnb64, mpPack, mpUnpack, mpHasLan, mpIsLanAddr };")();
 
 const require = createRequire(import.meta.url);
 const qrcode = require("../lib/qrcode-gen.js");
@@ -47,11 +47,28 @@ ok("srflx 후보 제거", !slim.includes("a=candidate:3 "));
 ok("일반 라인(ufrag·fingerprint) 보존", slim.includes("a=ice-ufrag:abcd") && slim.includes("a=fingerprint:sha-256"));
 ok("CRLF 종결 유지", slim.endsWith("\r\n"));
 
-console.log("mpHasLan (Wi-Fi 미접속 감지)");
-ok("host 후보 있음 → true", pure.mpHasLan(SDP) === true);
+console.log("mpIsLanAddr (LAN 대역 판별 — 셀룰러 배제)");
+ok("사설 192.168 → LAN", pure.mpIsLanAddr("192.168.43.15") === true);
+ok("사설 10.x → LAN", pure.mpIsLanAddr("10.1.2.3") === true);
+ok("사설 172.16~31 → LAN", pure.mpIsLanAddr("172.20.10.1") === true);
+ok("172.32 (사설 밖) → 아님", pure.mpIsLanAddr("172.32.0.1") === false);
+ok("링크로컬 169.254 → LAN", pure.mpIsLanAddr("169.254.1.1") === true);
+ok("CGNAT 100.64 (셀룰러) → 아님", pure.mpIsLanAddr("100.64.1.5") === false);
+ok("공인 IP → 아님", pure.mpIsLanAddr("8.8.8.8") === false && pure.mpIsLanAddr("1.2.3.4") === false);
+ok("mDNS .local → LAN(통과)", pure.mpIsLanAddr("abcd-1234.local") === true);
+ok("IPv6 링크로컬 fe80 → LAN", pure.mpIsLanAddr("fe80::1") === true);
+ok("IPv6 ULA fd → LAN", pure.mpIsLanAddr("fd12:3456::1") === true);
+ok("IPv6 공인 2001: → 아님", pure.mpIsLanAddr("2001:db8::1") === false);
+
+console.log("mpHasLan (핫스팟·Wi-Fi 접속 감지, 셀룰러만이면 false)");
+ok("사설 udp host 있음 → true", pure.mpHasLan(SDP) === true);
 const noLan = SDP.split("\r\n").filter((l) => !l.startsWith("a=candidate:")).join("\r\n") + "\r\n";
-ok("후보 0개 → false", pure.mpHasLan(noLan) === false);
-ok("tcp·srflx만 있어도 false", pure.mpHasLan(noLan.replace("a=ice-ufrag:abcd", "a=candidate:2 1 tcp 1 10.0.0.1 9 typ host tcptype active\r\na=ice-ufrag:abcd")) === false);
+const inject = (cand) => noLan.replace("a=ice-ufrag:abcd", cand + "\r\na=ice-ufrag:abcd");
+ok("후보 0개(비행기) → false", pure.mpHasLan(noLan) === false);
+ok("셀룰러 CGNAT udp host만 → false", pure.mpHasLan(inject("a=candidate:9 1 udp 1 100.64.1.5 5000 typ host")) === false);
+ok("셀룰러 공인 udp host만 → false", pure.mpHasLan(inject("a=candidate:9 1 udp 1 8.8.8.8 5000 typ host")) === false);
+ok("mDNS udp host만 → true(fail-open)", pure.mpHasLan(inject("a=candidate:9 1 udp 1 zz.local 5000 typ host")) === true);
+ok("tcp 사설이어도 (udp 아님) false", pure.mpHasLan(inject("a=candidate:2 1 tcp 1 10.0.0.1 9 typ host tcptype active")) === false);
 
 console.log("mpB64 (base64url 왕복)");
 const bytes = new Uint8Array(70000).map((_, i) => i % 256); // 청크 경계(0x8000) 교차 확인
