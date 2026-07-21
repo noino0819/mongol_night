@@ -175,18 +175,17 @@ $("gm-diff").addEventListener("click", (e) => {
 function gmRoll(dc, label){
   $("gm-diff").style.display = "none";
   $("gm-dice").style.display = "";
-  const face = $("gm-die");
+  const face = $("gm-die").firstElementChild; /* px-sprite die1~die6 */
   $("gm-roll-res").innerHTML = "";
   clearInterval(gm.tumble);
   haptic(15);
-  const FACES = "⚀⚁⚂⚃⚄⚅";
   let n = 0;
   gm.tumble = setInterval(() => {
-    face.textContent = FACES[Math.floor(Math.random() * 6)];
+    face.setAttribute("name", "die" + (1 + Math.floor(Math.random() * 6)));
     if (++n >= 8){
       clearInterval(gm.tumble);
       const roll = 1 + Math.floor(Math.random() * 6);
-      face.textContent = FACES[roll - 1];
+      face.setAttribute("name", "die" + roll);
       const t = gmTier(roll, dc);
       const color = t.cls === "crit" ? "var(--steppe)" : t.cls === "fumble" ? "var(--danger)" : t.cls === "ok" ? "var(--milk)" : "var(--dim)";
       $("gm-roll-res").innerHTML =
