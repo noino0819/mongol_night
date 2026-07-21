@@ -543,9 +543,11 @@ const GQ_GROUPS = {
 const GQ_DLABEL = { 1: "쉬움", 2: "보통", 3: "도전" };
 let gq = { sel: [], groups: ["hist","geo","sci","cult","soc"], limit: 45,
            p: [], turn: 0, queue: [], qi: 0, cur: null, end: 0, tid: null, qtid: null, phase: "setup" };
+let gqMode = "solo"; /* "solo"=폰 하나(턴제 스피드전) · "multi"=여러 폰 골든벨(동시 출제·탈락전) */
 
 function gqShow(id){
   ["gq-setup","gq-pass","gq-play","gq-between","gq-end"].forEach(x => $(x).style.display = "none");
+  const mpEl = $("gq-mp"); if (mpEl) mpEl.style.display = "none"; /* 멀티 컨테이너 숨김 (솔로엔 없음) */
   $(id).style.display = (id === "gq-setup" || id === "gq-play") ? "" : "flex";
 }
 function gqReset(){
@@ -567,6 +569,19 @@ function gqReset(){
     });
     box.appendChild(b);
   });
+  if (gqMode === "multi" && !mpLive()) gqMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  const multi = gqMode === "multi";
+  $("gq-players").closest(".field").style.display = multi ? "none" : ""; /* 멀티는 연결된 게스트가 참가자 */
+  $("gq-time").closest(".field").style.display = multi ? "none" : "";     /* 멀티는 문제별 진행이라 개인 제한시간 불필요 */
+  const hint = $("gq-setup").querySelector("p.hint");
+  if (hint){
+    if (!hint.dataset.solo) hint.dataset.solo = hint.innerHTML;
+    hint.innerHTML = multi
+      ? '📡 <b>여러 폰 골든벨</b>! 호스트 폰이 문제를 내면 <b>각자 자기 폰에 답</b>을 골라. 틀리면 탈락, 끝까지 살아남으면 골든벨 주인공. 분야만 고르고 시작하자.'
+      : hint.dataset.solo;
+  }
+  $("gq-start").textContent = multi ? "🦉 골든벨 열기" : "🦉 골든벨 시작!";
+  snModeBar($("gq-setup"), gqMode, (m) => { gqMode = m; gqReset(); });
 }
 $("gq-groups").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
   const g = b.dataset.g;
@@ -582,6 +597,7 @@ $("gq-time").querySelectorAll("button").forEach(b => b.addEventListener("click",
   gq.limit = +b.dataset.s;
 }));
 $("gq-start").addEventListener("click", () => {
+  if (gqMode === "multi") return startGqMulti();
   if (gq.sel.length < 2) return alert("2명 이상 선택!");
   const cats = new Set();
   gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
@@ -618,13 +634,17 @@ function gqTick(){
   $("gq-timefill").style.width = (rem / (gq.limit * 1000) * 100) + "%";
   $("gq-timebar").classList.toggle("hot", rem <= 10000);
 }
-function gqNextQ(){
-  if (gq.phase !== "play") return;
+/* 문제 1개 뽑기 — 보기 순서 섞고 정답 인덱스(ci) 계산. 솔로·멀티 공용. */
+function gqPickQ(){
   if (gq.qi >= gq.queue.length){ gq.queue = shuffle(gq.queue); gq.qi = 0; } /* 다 쓰면 리셔플 */
   const src = gq.queue[gq.qi++];
-  const order = shuffle([0, 1, 2, 3]); /* 보기 순서 섞기 — 사람마다 정답 위치 달라지게 */
-  gq.cur = { q: src.q, opts: order.map(i => src.o[i]), ci: order.indexOf(src.a),
-             ans: src.o[src.a], c: src.c, d: src.d, done: false };
+  const order = shuffle([0, 1, 2, 3]); /* 보기 순서 섞기 — 정답 위치 랜덤 */
+  return { q: src.q, opts: order.map(i => src.o[i]), ci: order.indexOf(src.a),
+           ans: src.o[src.a], c: src.c, d: src.d, done: false };
+}
+function gqNextQ(){
+  if (gq.phase !== "play") return;
+  gq.cur = gqPickQ();
   $("gq-qtype").textContent = gq.cur.c + " · " + GQ_DLABEL[gq.cur.d];
   $("gq-qtext").textContent = gq.cur.q;
   [0, 1, 2, 3].forEach(i => {
@@ -692,3 +712,188 @@ function gqEnd(){
   $("gq-rank").innerHTML = '<div class="lbl">최종 스코어</div><div class="val" style="font-size:18px;line-height:2">' + rows.join("<br>") + "</div>";
 }
 $("gq-again").addEventListener("click", gqReset);
+
+/* ============ 여러 폰 골든벨 (multi) ============
+   호스트 폰 = 사회자/전광판(문제 출제·정답 공개·생존 현황).
+   게스트 폰 = 각자 답 쓰는 응답기. 틀리면 탈락, 마지막 생존자가 주인공.
+   문제 뽑기·정답 판정은 솔로와 동일(gqPickQ·ci). 네트워크는 문제 배포·답 수집·결과 배포만.
+   ponytail: 문제별 타이머 없음(호스트가 진행·수동 공개). 게임 늘어지면 그때 추가. */
+
+function gqMpEl(){
+  let el = $("gq-mp");
+  if (!el){ el = document.createElement("div"); el.id = "gq-mp"; $("scr-gq").appendChild(el); }
+  return el;
+}
+function gqShowMp(){
+  ["gq-setup","gq-pass","gq-play","gq-between","gq-end"].forEach(x => $(x).style.display = "none");
+  gqMpEl().style.display = "";
+}
+
+/* ---------- 호스트 (사회자) ---------- */
+function startGqMulti(){
+  const names = mpNames();                /* [호스트, 게스트…] */
+  const contestants = names.slice(1);     /* 게스트가 참가자, 호스트는 사회자 */
+  if (contestants.length < 1){ alert("여러 폰 골든벨은 게스트가 1명 이상 연결돼야 해 (지금 " + contestants.length + "명)"); return; }
+  const cats = new Set();
+  gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
+  gq.queue = shuffle(GQ_BANK.filter(q => cats.has(q.c)));
+  gq.qi = 0;
+  gq.contestants = contestants.slice();
+  gq.alive = contestants.slice();
+  gq.correct = {}; contestants.forEach(n => gq.correct[n] = 0);
+  gq.qnum = 0;
+  gq.phase = "mp";
+  mpNav("gq");                            /* 게스트들 gq 화면으로 → __guest_gq 대기 */
+  mp.game = { onMsg: gqHostMsg, onPeers(){ if (gq.phase === "mp") gqHostRender(); } };
+  gqHostNextQ();
+}
+function gqHostNextQ(){
+  gq.cur = gqPickQ();
+  gq.answers = {};
+  gq.roundAlive = gq.alive.slice();       /* 이번 문제 응답 대상 스냅샷 */
+  gq.qnum++;
+  gq.mpPhase = "ask";
+  mpBroadcast({ t: "q", n: gq.qnum, q: gq.cur.q, opts: gq.cur.opts, c: gq.cur.c, d: gq.cur.d, alive: gq.alive.slice() });
+  gqHostRender();
+}
+function gqHostMsg(from, m){
+  if (m.t !== "a" || gq.mpPhase !== "ask") return;
+  if (!gq.roundAlive.includes(from) || gq.answers[from] !== undefined) return; /* 살아있는 참가자의 첫 답만 */
+  gq.answers[from] = m.i;
+  gqHostRender();
+  if (gq.roundAlive.every(n => gq.answers[n] !== undefined)) gqHostReveal(); /* 다 답하면 자동 공개 */
+}
+function gqHostReveal(){
+  if (gq.mpPhase !== "ask") return;
+  gq.mpPhase = "revealed";
+  const ci = gq.cur.ci, result = {};
+  gq.roundAlive.forEach(n => { const ok = gq.answers[n] === ci; result[n] = ok; if (ok) gq.correct[n]++; });
+  const anyCorrect = gq.roundAlive.some(n => result[n]);
+  const elim = [];
+  if (anyCorrect){                        /* 아무도 못 맞히면 전멸 방지 — 이번 판은 아무도 탈락 안 함 */
+    gq.roundAlive.forEach(n => { if (!result[n]) elim.push(n); });
+    gq.alive = gq.roundAlive.filter(n => result[n]);
+  }
+  mpBroadcast({ t: "r", ci, ans: gq.cur.ans, result, alive: gq.alive.slice(), elim });
+  gqHostRender();
+}
+function gqHostRender(){
+  gqShowMp();
+  const el = gqMpEl(), revealed = gq.mpPhase === "revealed";
+  const answered = gq.roundAlive.filter(n => gq.answers[n] !== undefined).length;
+  const choices = gq.cur.opts.map((o, i) =>
+    '<button disabled' + (revealed && i === gq.cur.ci ? ' class="ok"' : '') + '>' + escHtml(o) + '</button>'
+  ).join("");
+  const chip = (s, n, dim) =>
+    '<span style="display:inline-block;margin:3px;padding:4px 9px;border-radius:8px;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--night2)' + (dim ? ';opacity:.4' : '') + '">' + s + ' ' + escHtml(n) + '</span>';
+  const chips = gq.contestants.map(n => {
+    if (!gq.roundAlive.includes(n)) return chip("💀", n, true);            /* 이전 판에 탈락 */
+    if (revealed) return gq.alive.includes(n) ? chip("⭕", n, false) : chip("❌", n, true);
+    return chip(gq.answers[n] !== undefined ? "✅" : "⌛", n, false);
+  }).join("");
+  const flash = revealed
+    ? '<div class="um-flash ok">정답: 「' + escHtml(gq.cur.ans) + '」 · 생존 ' + gq.alive.length + '명</div>'
+    : '<div class="um-flash">답 받는 중… ' + answered + '/' + gq.roundAlive.length + '</div>';
+  let ctrl;
+  if (revealed)
+    ctrl = gq.alive.length <= 1
+      ? '<button class="btn" id="gq-mp-end">골든벨 결과 보기 →</button>'
+      : '<button class="btn" id="gq-mp-next">다음 문제 →</button><button class="btn ghost mt" id="gq-mp-stop">지금 끝내기</button>';
+  else
+    ctrl = '<button class="btn" id="gq-mp-reveal">정답 공개' + (answered < gq.roundAlive.length ? ' (안 낸 사람 탈락)' : '') + '</button><button class="btn ghost mt" id="gq-mp-stop">지금 끝내기</button>';
+  el.innerHTML =
+    '<div class="um-hud"><div class="who">📡 골든벨 · ' + gq.qnum + '번</div><div><span class="tag">생존 ' + gq.alive.length + '명</span></div></div>'
+    + '<div class="um-qcard"><div class="tp">' + escHtml(gq.cur.c) + ' · ' + GQ_DLABEL[gq.cur.d] + '</div><div class="qq">' + escHtml(gq.cur.q) + '</div></div>'
+    + '<div class="um-choices gq-choices">' + choices + '</div>'
+    + flash
+    + '<div style="text-align:center;margin:12px 0">' + chips + '</div>'
+    + ctrl;
+  const on = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
+  on("gq-mp-reveal", gqHostReveal);
+  on("gq-mp-next", gqHostNextQ);
+  on("gq-mp-end", gqMpEnd);
+  on("gq-mp-stop", gqMpEnd);
+}
+function gqMpEnd(){
+  gq.mpPhase = "end";
+  const rank = gq.contestants.map(n => ({ name: n, correct: gq.correct[n] || 0, alive: gq.alive.includes(n) }))
+    .sort((a, b) => (b.alive - a.alive) || (b.correct - a.correct));
+  const winner = gq.alive.length ? gq.alive.slice()
+               : rank.filter(r => r.correct === rank[0].correct).map(r => r.name); /* 다 탈락하면 최다 정답자 */
+  mpBroadcast({ t: "end", rank, winner });
+  gqMpEndRender(rank, winner, null);
+}
+function gqMpEndRender(rank, winner, meName){
+  gqShowMp();
+  const rows = rank.map((r, i) => {
+    const crown = winner.includes(r.name) ? "👑" : (i + 1) + ".";
+    const mine = meName && r.name === meName ? ' style="color:var(--fire)"' : '';
+    return '<div' + mine + '>' + crown + ' ' + escHtml(r.name) + ' — ' + r.correct + '개' + (r.alive ? ' · 생존' : '') + '</div>';
+  }).join("");
+  const head = meName == null
+    ? '👑 ' + winner.map(escHtml).join(", ")     /* 호스트: 주인공 발표 */
+    : (winner.includes(meName) ? '👑 골든벨 주인공!' : '수고했어');
+  gqMpEl().innerHTML =
+    '<div class="stage-center"><span class="tag">골든벨 주인공 발표</span>'
+    + '<div class="who" style="color:var(--fire)">' + head + '</div>'
+    + '<div class="reveal-card"><div class="val" style="font-size:16px;line-height:1.9">' + rows + '</div></div>'
+    + (meName == null ? '<button class="btn" id="gq-mp-again">다시 하기</button>' : '<div class="hint" style="margin:0">호스트가 다시 시작할 때까지 대기</div>')
+    + '</div>';
+  const ag = $("gq-mp-again"); if (ag) ag.addEventListener("click", () => { gq.phase = "setup"; gqReset(); });
+}
+
+/* ---------- 게스트 (응답기) ---------- */
+window.__guest_gq = function(){
+  gq.mpPhase = "wait";
+  gqShowMp();
+  gqMpEl().innerHTML = '<div class="stage-center"><span class="tag">여러 폰 골든벨</span><div class="who">대기 중…</div><div class="hint" style="margin:0">호스트가 문제를 내면 여기 떠. 답은 네 폰에서 골라</div></div>';
+  mp.game = { onMsg(from, m){ gqGuestMsg(m); } };
+};
+function gqGuestMsg(m){
+  if (m.t === "q") return gqGuestQ(m);
+  if (m.t === "r") return gqGuestR(m);
+  if (m.t === "end") return gqMpEndRender(m.rank, m.winner, mp.name);
+}
+function gqGuestQ(m){
+  gq.gAlive = m.alive.includes(mp.name);   /* 이번 문제에서 나 살아있나 */
+  gq.gAnswered = false; gq.gPick = null;
+  gqShowMp();
+  const el = gqMpEl();
+  el.innerHTML =
+    '<div class="um-hud"><div class="who">🦉 ' + m.n + '번</div><div><span class="tag">' + escHtml(m.c) + ' · ' + GQ_DLABEL[m.d] + '</span></div></div>'
+    + '<div class="um-qcard"><div class="qq">' + escHtml(m.q) + '</div></div>'
+    + '<div class="um-choices gq-choices" id="gq-g-ch"></div>'
+    + '<div class="um-flash" id="gq-g-fl">' + (gq.gAlive ? '답을 골라 — 틀리면 탈락이야' : '💀 탈락 · 구경 중') + '</div>';
+  const box = el.querySelector("#gq-g-ch");
+  m.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.textContent = o;                     /* 원격 보기 → textContent로 안전 삽입 */
+    if (!gq.gAlive) b.disabled = true;
+    else b.addEventListener("click", () => gqGuestPick(i, box));
+    box.appendChild(b);
+  });
+}
+function gqGuestPick(i, box){
+  if (gq.gAnswered || !gq.gAlive) return;
+  gq.gAnswered = true; gq.gPick = i;
+  const btns = box.querySelectorAll("button");
+  btns.forEach(b => b.disabled = true);
+  if (btns[i]) btns[i].style.borderColor = "var(--fire)";
+  const fl = $("gq-g-fl"); if (fl) fl.textContent = "제출 완료! 정답 공개 기다리는 중…";
+  mpToHost({ t: "a", i });
+  haptic(15);
+}
+function gqGuestR(m){
+  const box = $("gq-g-ch");
+  if (box){
+    const btns = box.querySelectorAll("button");
+    if (btns[m.ci]) btns[m.ci].classList.add("ok");
+    if (gq.gPick != null && gq.gPick !== m.ci && btns[gq.gPick]) btns[gq.gPick].classList.add("no");
+  }
+  const fl = $("gq-g-fl"); if (!fl) return;
+  if (!gq.gAlive){ fl.textContent = "💀 구경 중"; return; }
+  const ok = !!m.result[mp.name], alive = m.alive.includes(mp.name);
+  if (ok){ fl.textContent = "⭕ 정답!" + (alive ? " 생존!" : ""); fl.className = "um-flash ok"; haptic(15); }
+  else if (alive){ fl.textContent = "❌ 오답… 근데 아무도 못 맞혀서 생존!"; fl.className = "um-flash"; }
+  else { fl.textContent = "❌ 땡! 정답은 「" + escHtml(m.ans) + "」 — 탈락"; fl.className = "um-flash no"; haptic([30, 40, 30]); }
+}
