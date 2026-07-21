@@ -7,7 +7,8 @@ const ASSETS = [
   "./",
   "./index.html",
   "./core.js",
-  "./games/manifest.js"
+  "./games/manifest.js",
+  "./assets/sprites.js"
 ].concat(SN_SCRIPTS.map((p) => "./" + p)).concat([
   "./manifest.webmanifest",
   "./icons/icon-192.png",

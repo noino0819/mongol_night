@@ -16,10 +16,10 @@ const SYM = {
 /* 소스: index.html 공용 SPR + 각 games/*.js의 SPR_BEGIN/END 등록 블록 (병렬 세션 충돌 방지 구조) */
 import path from "path";
 const root = new URL("..", import.meta.url);
-const html = fs.readFileSync(new URL("index.html", root), "utf8");
-const m = html.match(/const SPR=\{([\s\S]*?)\n\};/);
+const base = fs.readFileSync(new URL("assets/sprites.js", root), "utf8");
+const m = base.match(/const SPR=\{([\s\S]*?)\n\};/);
 if (!m){ console.error("SPR 블록을 못 찾음"); process.exit(1); }
-const sources = { "index.html": new Function("return {" + m[1] + "\n}")() };
+const sources = { "assets/sprites.js": new Function("return {" + m[1] + "\n}")() };
 for (const f of fs.readdirSync(new URL("games", root)).filter((f) => f.endsWith(".js"))){
   const src = fs.readFileSync(new URL("games/" + f, root), "utf8");
   const blocks = [...src.matchAll(/\/\*SPR_BEGIN\*\/([\s\S]*?)\/\*SPR_END\*\//g)];

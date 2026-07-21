@@ -16,6 +16,7 @@
 ## 핵심 규칙 (전 에이전트 공통)
 1. **오프라인 100%**: 외부 CDN/폰트/이미지 요청 0건. 에셋은 리포 내 정적 파일 or base64 인라인만.
 2. 시작 코드: `app/초원의밤_몽골게임팩.html` (v1, 게임 15종 동작 확인됨) → `index.html`로 rename 후 확장. **기존 게임 로직은 읽기 전용** — need 맵·resetGame 스위치 2곳만 수정 허용.
+   **신규 게임은 index.html·sw.js·core.js 무수정이 원칙**: `games/X.js` 안에서 `snAddScreen()`(마크업)·`snAddCss()`(전용 CSS)·`snAddSprites()`(전용 스프라이트)·`snRegisterGame(name, resetFn)`(리셋)을 등록하고, `games/manifest.js` 로드 목록 1줄 + `shell.js` 카탈로그 1줄만 추가한다 (er가 표본). 공용 스프라이트는 `assets/sprites.js`.
 3. 게임별 ID/함수 접두어 고정 (확장기획서 A-3장 표 준수). 신규 예약: lv, bz, nb, gq(상식퀴즈), ta(텍스트 어드벤처), guide(연결 가이드).
 4. 색상은 CSS 변수만 (스케일업 기획서 2-2 팔레트). 스프라이트는 16×16 문자열 맵 → canvas 렌더 (이미지 파일 금지, 아이콘/OG 등 앱 셸 에셋만 예외). **신규 스프라이트는 `docs/도트스프라이트_가이드.md`의 법칙 필수 준수** — 의미가 겹치면 재사용, 독립 개념이면 신규 제작(다양성 우선). **게임 전용 스프라이트는 index.html SPR이 아니라 그 게임의 games/*.js에서 `snAddSprites()`로 등록** (병렬 세션 충돌 방지 — 가이드 1장). 제작 후 `node tools/sprite-lint.mjs`.
 5. 사용자 입력 → innerHTML 경로는 `escHtml()` 필수. 타이머는 상태 객체에 저장하고 Reset 함수에서 clear.

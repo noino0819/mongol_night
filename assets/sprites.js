@@ -900,4 +900,5 @@ draw(this._cv,this.getAttribute('name'),+(this.getAttribute('scale')||3));}
 }
 if(!customElements.get('px-sprite'))customElements.define('px-sprite',PxSprite);
 window.SN_SPRITES={PAL,SPR,draw,stamp};
+window.snAddSprites=function(m){Object.assign(SPR,m);}; /* 게임 전용 스프라이트 등록 — games/*.js에서 호출 */
 })();
