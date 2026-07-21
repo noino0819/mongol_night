@@ -1,6 +1,6 @@
 "use strict";
 /* ================= 과일 종! (할리갈리) ================= */
-const FRUITS = ["🍓","🍌","🥝","🍇"];
+const FRUITS = ["strawberry","banana","kiwi","grape"]; /* SPR 스프라이트 키 */
 /* 정식 할리갈리 분포: 과일당 1개×5장, 2개×3장, 3개×3장, 4개×2장, 5개×1장 = 14장 × 4과일 = 56장 */
 const FRUIT_DIST = [[1,5],[2,3],[3,3],[4,2],[5,1]];
 const FZ_LAYOUT = { 2:["bc","tc"], 3:["bc","tl","tr"], 4:["bl","br","tl","tr"], 5:["bl","br","tl","tr","lm"], 6:["bl","br","tl","tr","lm","rm"] };
@@ -69,13 +69,33 @@ function buildFruitArena(){
   });
   fruitRenderTurn();
 }
+/* 도트 카드: 밀크 바탕 위 주사위(pip) 배치 — 개수를 위치로 즉독 */
+const FR_PIPS = { 1:[[19,10]], 2:[[2,2],[36,18]], 3:[[2,2],[19,10],[36,18]], 4:[[2,2],[36,2],[2,18],[36,18]], 5:[[2,2],[36,2],[19,10],[2,18],[36,18]] };
+function fruitCardCv(f, n, pop){
+  const { PAL, stamp } = window.SN_SPRITES;
+  const S = 2, W = 54, H = 36; /* 도트 단위, ×2 = 108×72px */
+  const cv = document.createElement("canvas");
+  cv.width = W * S; cv.height = H * S;
+  cv.className = "fzcard" + (pop ? " pop" : "");
+  const g = cv.getContext("2d");
+  g.fillStyle = PAL[6]; g.fillRect(0, 0, W * S, H * S);
+  /* 광원 좌상 → 우·하단 1도트 음영 */
+  g.fillStyle = PAL[2]; g.fillRect(0, (H - 1) * S, W * S, S); g.fillRect((W - 1) * S, 0, S, H * S);
+  /* 픽셀 라운드 코너 */
+  [[0,0],[1,0],[0,1],[W-1,0],[W-2,0],[W-1,1],[0,H-1],[0,H-2],[1,H-1],[W-1,H-1],[W-2,H-1],[W-1,H-2]]
+    .forEach(([x, y]) => g.clearRect(x * S, y * S, S, S));
+  FR_PIPS[n].forEach(([x, y]) => stamp(g, f, x, y, S));
+  return cv;
+}
 function fruitRenderZone(i, pop){
+  const z = $("fz-" + i);
   const pile = fr.faceup[i];
   const top = pile.length ? pile[pile.length - 1] : null;
-  $("fz-" + i).innerHTML =
+  z.innerHTML =
     '<div class="fzname">' + escHtml(fr.players[i]) + '</div>' +
-    (top ? '<div class="fzcard' + (pop ? ' pop' : '') + '">' + top.f.repeat(top.n) + '</div>' : '<div class="fzcard none">비었음</div>') +
+    (top ? '' : '<div class="fzcard none">비었음</div>') +
     '<div class="fzflip">🃏 ' + fr.decks[i].length + '</div>';
+  if (top) z.insertBefore(fruitCardCv(top.f, top.n, pop), z.lastElementChild);
 }
 function fruitRenderTurn(){
   fr.players.forEach((_, j) => {
