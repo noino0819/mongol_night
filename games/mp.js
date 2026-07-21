@@ -144,11 +144,11 @@ async function mpScan(expect, onOk){
 function mpView(id){ ["mp-role", "mp-flow", "mp-room"].forEach((x) => $(x).style.display = (x === id ? "" : "none")); }
 function mpFlow(tag, msg){
   mpView("mp-flow");
+  $("mp-flow").classList.remove("dual");
   $("mp-step-tag").textContent = tag;
   $("mp-step-msg").textContent = msg;
   $("mp-qr").style.display = "none";
   $("mp-cam").style.display = "none";
-  $("mp-flow-next").style.display = "none";
 }
 function mpShowQr(code, tag, msg){
   mpFlow(tag, msg);
@@ -156,12 +156,6 @@ function mpShowQr(code, tag, msg){
   $("mp-qr").style.display = "";
 }
 function mpShowCam(){ $("mp-cam").style.display = ""; }
-function mpNext(label, fn){
-  const b = $("mp-flow-next");
-  b.style.display = "";
-  b.textContent = label;
-  b.onclick = fn;
-}
 
 /* ---------- 연결 공통 ---------- */
 function mpNewPc(){ return new RTCPeerConnection({ iceServers: [] }); }
@@ -200,6 +194,7 @@ function mpWireHostPeer(peer){
     peer.on = true;
     if (mp.pendingPc === peer.pc) mp.pendingPc = null;
     mp.peers.push(peer);
+    localStorage.setItem("snMpWas", "host:" + Date.now()); /* 앱이 죽었다 켜지면 "연결 끊김" 안내용 */
     mpFlash("🔗 폰 연결됨!");
     mpRoom();
     mpRoster();
@@ -244,24 +239,23 @@ async function mpInvite(){
       return;
     }
     const code = await mpPack("O", pc.localDescription.sdp);
-    mpShowQr(code, "① 초대 QR", "게스트 폰: [참가하기]로 이 QR을 스캔 → 게스트 화면에 답장 QR이 뜨면 아래 버튼");
-    mpNext("② 게스트 답장 스캔 →", () => {
-      mpFlow("답장 스캔", "게스트 화면의 답장 QR을 비춰줘");
-      mpShowCam();
-      mpScan("SN1A", async (data) => {
-        const p = await mpUnpack(data);
-        if (!p) return;
-        mpFlow("연결 중", "별들을 잇는 중…");
-        await pc.setRemoteDescription({ type: "answer", sdp: p.sdp });
-        const t = setTimeout(() => {
-          if (!peer.on){
-            try { pc.close(); } catch (e) { /* 무시 */ }
-            alert("연결이 안 됐어. 전원이 같은 Wi-Fi(핫스팟)인지 확인하고 다시 초대해줘");
-            mpRoom();
-          }
-        }, 15000);
-        mp.timers.push(t);
-      });
+    /* QR 보여주면서 동시에 카메라로 답장을 기다린다 — 폰을 서로 마주 대면 스캔→답장→연결이 한 번에 끝남 */
+    mpShowQr(code, "초대 QR", "게스트: [참가하기]로 위 QR을 스캔 → 게스트 화면에 답장 QR이 뜨면 아래 카메라에 비춰줘. 그럼 자동 연결!");
+    $("mp-flow").classList.add("dual");
+    mpShowCam();
+    await mpScan("SN1A", async (data) => {
+      const p = await mpUnpack(data);
+      if (!p) return;
+      mpFlow("연결 중", "별들을 잇는 중…");
+      await pc.setRemoteDescription({ type: "answer", sdp: p.sdp });
+      const t = setTimeout(() => {
+        if (!peer.on){
+          try { pc.close(); } catch (e) { /* 무시 */ }
+          alert("연결이 안 됐어. 전원이 같은 Wi-Fi(핫스팟)인지 확인하고 다시 초대해줘");
+          mpRoom();
+        }
+      }, 15000);
+      mp.timers.push(t);
     });
   } catch (e) { mpFail(e); }
 }
@@ -269,7 +263,7 @@ async function mpInvite(){
 /* ---------- 게스트 ---------- */
 async function mpJoin(){
   try {
-    mpFlow("초대 스캔", "호스트 화면의 초대 QR을 비춰줘");
+    mpFlow("초대 스캔", "먼저 호스트가 켠 핫스팟(Wi-Fi)에 붙어 있는지 확인! 그다음 호스트 화면의 초대 QR을 비춰줘");
     mpShowCam();
     await mpScan("SN1O", async (data) => {
       const o = await mpUnpack(data);
@@ -287,7 +281,7 @@ async function mpJoin(){
       };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { opened = true; mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
+        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
@@ -309,7 +303,7 @@ async function mpJoin(){
         return;
       }
       const code = await mpPack("A", pc.localDescription.sdp);
-      mpShowQr(code, "② 답장 QR", "이제 호스트가 이 QR을 스캔하면 자동으로 연결돼. 이 화면 그대로 기다려줘");
+      mpShowQr(code, "답장 QR", "이 QR을 호스트 폰 카메라에 비춰주면 자동으로 연결돼. 이 화면 그대로!");
     });
   } catch (e) { mpFail(e); }
 }
@@ -380,6 +374,8 @@ function mpReset(){
   /* 브라우저(미설치)로 열었으면 설치 유도 — 오프라인 현장에선 설치된 앱만 열리니까 */
   const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   $("mp-install-warn").style.display = standalone ? "none" : "";
+  localStorage.removeItem("snMpWas");
+  $("mp-reload-warn").style.display = "none";
   mpView("mp-role");
 }
 /* 홈에 다녀와도 연결 유지 — 활성 연결이 없을 때만 초기화 */
@@ -424,3 +420,17 @@ $("mp-poke-btn").addEventListener("click", () => {
   if (mp.role === "host") mp.peers.forEach((p) => mpSend(p.chan, { t: "poke", from: mp.name }));
   else mpSend(mp.hostChan, { t: "poke" });
 });
+
+/* ---------- 앱 재시작 감지 ---------- */
+/* 방에 연결된 채로 앱이 죽었다 다시 켜지면(백그라운드 메모리 회수 등) WebRTC는 복구 불가 —
+   말없이 홈에 떨구는 대신 연결 화면으로 데려가서 "끊겼으니 다시 연결해" 안내. 3시간 지난 흔적은 무시. */
+(function(){
+  const m = /^(host|guest):(\d+)$/.exec(localStorage.getItem("snMpWas") || "");
+  if (!m) return;
+  const fresh = Date.now() - +m[2] < 3 * 3600e3;
+  mpReset(); /* 플래그 제거 + role 화면 준비 */
+  if (!fresh) return;
+  $("mp-reload-warn").textContent = "📴 앱이 재시작되면서 방 연결이 끊겼어 — " + (m[1] === "host" ? "방을 다시 만들고 게스트를 초대해줘" : "호스트의 초대 QR로 다시 들어가줘");
+  $("mp-reload-warn").style.display = "";
+  go("mp");
+})();
