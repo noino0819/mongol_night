@@ -796,7 +796,7 @@
   .mp-roster{display:flex;flex-wrap:wrap;gap:8px}
   .mp-chip{display:flex;align-items:center;gap:6px;background:var(--night2);border:1px solid var(--line);border-radius:20px;padding:4px 12px 4px 6px;font-size:13px;font-weight:700;color:var(--milk)}
   .mp-chip .av{line-height:0}
-  .mp-poke{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:800;color:var(--milk);z-index:80;pointer-events:none;animation:mpPokePop .3s steps(3) both}
+  .mp-poke{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:min(64px,12vw);font-weight:800;color:var(--milk);z-index:80;pointer-events:none;animation:mpPokePop .3s steps(3) both}
   @keyframes mpPokePop{from{transform:scale(.4)}to{transform:scale(1)}}
 </style>
 </head>
@@ -1749,6 +1749,12 @@
     </div>
   </div>
 
+  <!-- ============ 색찾기 (cf) — 여러 폰 색 사냥 ============ -->
+  <div class="screen" id="scr-cf">
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌈 색찾기</h2></div>
+    <div id="cf-root"></div>
+  </div>
+
 </div>
 <script>
 "use strict";
@@ -2272,6 +2278,7 @@ window.SN_SPRITES={PAL,SPR,draw};
 <script src="games/nb.js"></script>
 <script src="games/gm.js"></script>
 <script src="games/er.js"></script>
+<script src="games/cf.js"></script>
 <script src="lib/qrcode-gen.js"></script>
 <script src="lib/jsqr.js"></script>
 <script src="games/mp.js"></script>

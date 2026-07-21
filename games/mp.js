@@ -161,15 +161,16 @@ function mpGather(pc){
 function mpSend(chan, obj){
   if (chan && chan.readyState === "open"){ try { chan.send(JSON.stringify(obj)); } catch (e) { /* 무시 */ } }
 }
-function mpPoke(from){
+function mpFlash(txt){
   const d = document.createElement("div");
   d.className = "mp-poke";
-  d.textContent = "👋 " + from;
+  d.textContent = txt;
   document.body.appendChild(d);
   if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
   const t = setTimeout(() => d.remove(), 1100);
   mp.timers.push(t);
 }
+function mpPoke(from){ mpFlash("👋 " + from); }
 function mpFail(e){
   alert("연결 준비에 실패했어" + (e && e.name === "NotAllowedError" ? " — 카메라 허용이 필요해" : ""));
   mpStopScan();
@@ -182,6 +183,7 @@ function mpWireHostPeer(peer){
     peer.on = true;
     if (mp.pendingPc === peer.pc) mp.pendingPc = null;
     mp.peers.push(peer);
+    mpFlash("🔗 폰 연결됨!");
     mpRoom();
     mpRoster();
   };
@@ -256,9 +258,17 @@ async function mpJoin(){
       mpFlow("답장 만드는 중", "…");
       const pc = mpNewPc();
       mp.hostPc = pc;
+      /* 게스트도 실패를 알아야 함 — 호스트만 15초 타임아웃이 있고 게스트는 QR 화면에서 무한 대기였음 */
+      let opened = false;
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === "failed" && !opened){
+          alert("연결이 안 됐어 — 호스트와 같은 Wi-Fi(핫스팟)인지 확인하고 다시 참가해줘");
+          mpReset();
+        }
+      };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpRoom(); };
+        e.channel.onopen = () => { opened = true; mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
