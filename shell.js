@@ -291,7 +291,8 @@ const SN_CATS = [
     { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
     { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
     { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
-    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 } ] },
+    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 },
+    { id:"colorhunt",go:"cf",        need:0, name:"색찾기",        spr:"rooster",  desc:"카메라로 목표색 찾기 · 폰 여럿",  p:[2,8],  t:10 } ] },
   { id:"draw", emoji:"🎨", name:"그림", spr:"rabbit", games:[
     { id:"relay",    go:"drawrelay", need:3, name:"그림 릴레이",   spr:"rabbit",   desc:"그림으로 전하는 전화게임",      p:[3,10], t:15 },
     { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마",        p:[3,8],  t:15 } ] },

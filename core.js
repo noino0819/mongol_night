@@ -129,6 +129,7 @@ function resetGame(name){
   if (name === "er"){ erReset(); }
   if (name === "nb"){ nbReset(); }
   if (name === "gm"){ gmReset(); }
+  if (name === "cf"){ cfReset(); }
   if (name === "mp"){ mpEnter(); } /* 연결 유지 중이면 방 화면 복귀, 아니면 초기화 */
 }
 
