@@ -635,16 +635,30 @@ const BZ_OX = [
   { q: "크루아상은 프랑스에서 처음 만들어졌다", a: false, d: 3 },
   { q: "환타는 미국에서 처음 만들어졌다", a: false, d: 3 }
 ];
-let bz = { sel: [], types: ["ox"], goal: 7, scores: [], cur: null, locked: [], phase: "idle", taps: [], winner: -1, oxUsed: [], tid: null, tapTid: null };
+let bz = { sel: [], types: ["ox"], goal: 7, scores: [], cur: null, locked: [], phase: "idle", taps: [], winner: -1, oxUsed: [], tid: null, tapTid: null, multi: false };
+let bzMode = "solo"; /* "solo"=폰 하나(기존) · "multi"=여러 폰(각자 폰이 자기 버저) */
+/* ponytail: 원격 버저는 호스트 도착순(performance.now)으로 판정 — 지연 보정 안 함(파티겜엔 충분).
+   답/채점은 호스트 화면에서 기존 로직 그대로. 게스트 폰은 버저+상태 표시 전용. */
 
 function bzReset(){
   clearInterval(bz.tid); bz.tid = null;
   clearTimeout(bz.tapTid); bz.tapTid = null;
   bz.phase = "idle";
-  ["bz-setup","bz-play","bz-end"].forEach(id => $(id).style.display = "none");
+  bz.multi = false;
+  if (bzMode === "multi" && !mpLive()) bzMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  const g = $("bz-guest"); if (g) g.style.display = "none"; /* 게스트 오버레이 치우기 */
+  ["bz-play","bz-end"].forEach(id => $(id).style.display = "none");
   $("bz-setup").style.display = "";
+  snModeBar($("bz-setup"), bzMode, (m) => { bzMode = m; bzReset(); });
   const box = $("bz-players");
   box.innerHTML = "";
+  if (bzMode === "multi"){
+    const names = mpLive() ? mpNames() : [];
+    box.innerHTML = names.length
+      ? names.map(n => '<button class="sel" disabled>' + escHtml(n) + "</button>").join("")
+      : '<span class="hint" style="margin:0">연결된 폰이 없어. 연결 먼저 하고 와</span>';
+    return; /* 참가자 = 연결된 폰 전부, 시작 때 mpNames()로 확정 */
+  }
   bz.sel = roster.slice(0, 4);
   roster.forEach(n => {
     const b = document.createElement("button");
@@ -673,6 +687,7 @@ $("bz-goal").querySelectorAll("button").forEach(b => b.addEventListener("click",
   bz.goal = +b.dataset.g;
 }));
 $("bz-start").addEventListener("click", () => {
+  if (bzMode === "multi") return bzStartMulti();
   if (bz.sel.length < 2) return alert("2명 이상 선택!");
   bz.scores = bz.sel.map(() => 0);
   bz.oxUsed = [];
@@ -680,6 +695,35 @@ $("bz-start").addEventListener("click", () => {
   $("bz-play").style.display = "";
   bzNextQ();
 });
+/* ---------- 여러 폰 (호스트) ---------- */
+function bzStartMulti(){
+  const names = mpNames();
+  if (!mpLive() || names.length < 2) return alert("여러 폰은 폰 2대 이상 연결돼야 해");
+  bz.sel = names;                    /* 참가자 = 연결된 폰 전부 (호스트 먼저, 인원 제한 없음) */
+  bz.scores = bz.sel.map(() => 0);
+  bz.oxUsed = [];
+  bz.multi = true;
+  mpNav("bz");                       /* 게스트들 버저 화면으로 (게스트: __guest_bz 실행 → 대기) */
+  mp.game = { onMsg: bzHostMsg, onPeers(){} };
+  ["bz-setup","bz-end"].forEach(id => $(id).style.display = "none");
+  $("bz-play").style.display = "";
+  bzNextQ();
+}
+/* 게스트 버저 수신 → 그 사람 인덱스로 로컬 탭 처리(도착시각 = 순위). 기존 판정 재사용. */
+function bzHostMsg(from, m){
+  if (m && m.t === "buzz"){
+    const i = bz.sel.indexOf(from);
+    if (i >= 0) bzTap(i, performance.now());
+  }
+}
+/* 여러 폰일 때만 게스트 폰에 상태 브로드캐스트 */
+function bzBeam(m){ if (bz.multi) mpBroadcast(m); }
+/* 문제 표시 텍스트(호스트/게스트 공용) */
+function bzQFace(c){
+  if (c.type === "ox") return { main: c.q + "?", sub: c.d === 3 ? "🔥 어려움 — 맞히면 +2" : c.d === 1 ? "몸풀기 OX" : "⭕냐 ❌냐" };
+  if (c.type === "cho") return { main: c.q, sub: c.sub, spaced: true };
+  return { main: c.q, sub: "빠른 계산" };
+}
 /* 아랫줄 = 앞쪽 절반, 윗줄 = 나머지(180° 회전 배치) */
 function bzIsTop(i){ return i >= Math.ceil(bz.sel.length / 2); }
 function bzRenderZones(){
@@ -746,6 +790,7 @@ function bzNextQ(){
   $("bz-mid").classList.remove("flip");
   $("bz-mid").innerHTML = "";
   bzRenderZones();
+  bzBeam({ t: "st", phase: "count" });
   let cd = 3;
   bzSetQ('<b style="font-size:32px">' + cd + "</b>");
   clearInterval(bz.tid);
@@ -766,13 +811,13 @@ function bzShowQ(){
   bz.taps = [];
   bz.winner = -1;
   const c = bz.cur;
-  if (c.type === "ox") bzSetQ(c.q + "?", c.d === 3 ? "🔥 어려움 — 맞히면 +2" : c.d === 1 ? "몸풀기 OX" : "⭕냐 ❌냐");
-  else if (c.type === "cho") bzSetQ('<b style="letter-spacing:4px">' + c.q + "</b>", c.sub);
-  else bzSetQ(c.q, "빠른 계산");
+  const f = bzQFace(c);
+  bzSetQ(f.spaced ? '<b style="letter-spacing:4px">' + f.main + "</b>" : f.main, f.sub);
   $("bz-mid").classList.remove("flip");
   $("bz-mid").innerHTML = '<span class="tag">🔔 버저!</span>';
   bzRenderZones();
   haptic(20);
+  bzBeam({ t: "st", phase: "buzz", q: f, locked: bz.locked.map(i => bz.sel[i]) });
 }
 function bzTap(i, ts){
   if (bz.phase !== "buzz" || bz.locked.includes(i)) return;
@@ -800,6 +845,7 @@ function bzResolveTap(){
   haptic([30, 40, 30]);
   bzRenderZones();
   bzAnswerUI();
+  bzBeam({ t: "st", phase: "won", win: bz.sel[w] });
 }
 function bzAnswerUI(){
   const c = bz.cur;
@@ -837,6 +883,7 @@ function bzJudge(correct){
   if (bz.phase !== "answer") return;
   clearInterval(bz.tid); bz.tid = null;
   const w = bz.winner;
+  const wname = bz.sel[w];
   bz.winner = -1;
   if (correct){
     const pts = bz.cur.pts || 1;
@@ -846,6 +893,7 @@ function bzJudge(correct){
     bz.phase = "gap";
     $("bz-mid").innerHTML = '<div class="bz-ans" style="color:var(--steppe)">⭕ 정답! +' + pts + "</div>";
     bzRenderZones();
+    bzBeam({ t: "st", phase: "gap", correct: true, win: wname, pts });
     bz.tid = setTimeout(bzNextQ, 1000);
   } else {
     bz.scores[w] = Math.max(0, bz.scores[w] - 1);
@@ -857,10 +905,12 @@ function bzJudge(correct){
       $("bz-mid").classList.remove("flip");
       $("bz-mid").innerHTML = '<div class="hint" style="margin:0">전원 오답! 정답은</div><div class="bz-ans">' + bzAnsText() + '</div><button class="btn bz-next" id="bz-nq">다음 문제 →</button>';
       $("bz-nq").addEventListener("click", bzNextQ);
+      bzBeam({ t: "st", phase: "reveal", ans: bzAnsText() });
     } else {
       bz.phase = "gap";
       $("bz-mid").innerHTML = '<div class="bz-ans" style="color:var(--danger)">❌ 땡! −1</div><div class="hint" style="margin:0">같은 문제, 남은 사람 재버저!</div>';
       bzRenderZones();
+      bzBeam({ t: "st", phase: "gap", correct: false, win: wname });
       bz.tid = setTimeout(bzShowQ, 1000);
     }
   }
@@ -876,6 +926,74 @@ function bzEnd(w){
   const medals = ["🥇","🥈","🥉"];
   $("bz-rank").innerHTML = '<div class="lbl">최종 스코어</div><div class="val" style="font-size:18px;line-height:2">' +
     rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — " + r.s + "점").join("<br>") + "</div>";
+  bzBeam({ t: "st", phase: "end", champ: bz.sel[w] });
 }
 $("bz-again").addEventListener("click", bzReset);
+
+/* ================= 여러 폰 (게스트) — 자기 폰이 버저 ================= */
+/* scr-bz 안에 게스트 전용 오버레이. 호스트용 stage(bz-play) 마크업은 안 건드림. */
+function bzGuestEl(){
+  let el = $("bz-guest");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "bz-guest";
+    el.style.cssText = "display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px 14px;min-height:60vh;text-align:center";
+    $("scr-bz").appendChild(el);
+  }
+  return el;
+}
+function bzGuestBuzz(e){
+  e.preventDefault();
+  const btn = $("bz-buzz");
+  if (!btn || btn.dataset.sent) return;
+  btn.dataset.sent = "1";
+  btn.classList.remove("live"); btn.classList.add("win");
+  btn.innerHTML = '🔔<span class="sc" style="font-size:14px">전송됨! 결과 대기…</span>';
+  haptic(30);
+  mpToHost({ t: "buzz" });
+}
+/* 호스트가 보낸 상태(st)로 게스트 화면 그리기 */
+function bzGuestShow(m){
+  const el = bzGuestEl();
+  el.style.display = "flex";
+  const me = mp.name;
+  if (m.phase === "wait"){
+    el.innerHTML = '<span class="tag">🔔 버저 퀴즈쇼</span><div class="hint" style="margin:0">호스트가 문제 준비 중… 폰 꽉 잡아</div>';
+  } else if (m.phase === "count"){
+    el.innerHTML = '<span class="tag">준비!</span><div class="who" style="font-size:30px">곧 버저 열려</div><div class="hint" style="margin:0">먼저 탭하는 사람이 답할 권리!</div>';
+  } else if (m.phase === "buzz"){
+    const q = m.q || {};
+    let h = '<div style="font-size:24px;font-weight:700;line-height:1.35">' + (q.spaced ? '<span style="letter-spacing:4px">' + escHtml(q.main) + "</span>" : escHtml(q.main)) + "</div>";
+    if (q.sub) h += '<div class="hint" style="margin:0">' + escHtml(q.sub) + "</div>";
+    if ((m.locked || []).includes(me)){
+      h += '<div class="bz-zone lock" style="width:100%;min-height:160px;pointer-events:none">이 문제 탈락<span class="sc">다음 문제 대기</span></div>';
+      el.innerHTML = h;
+    } else {
+      h += '<button class="bz-zone live" id="bz-buzz" style="width:100%;min-height:200px;font-size:44px">🔔<span class="sc" style="font-size:15px">먼저 탭!</span></button>';
+      el.innerHTML = h;
+      const b = $("bz-buzz");
+      b.addEventListener("pointerdown", bzGuestBuzz);
+      b.addEventListener("contextmenu", (ev) => ev.preventDefault());
+    }
+  } else if (m.phase === "won"){
+    const mine = m.win === me;
+    el.innerHTML = '<span class="tag">' + (mine ? "네가 잡았어!" : escHtml(m.win) + " 버저!") + "</span>"
+      + '<div class="who" style="font-size:40px">' + (mine ? "🔔" : "⏳") + "</div>"
+      + '<div class="hint" style="margin:0">' + (mine ? "호스트 화면 보고 대답해!" : "호스트가 정답 확인 중…") + "</div>";
+  } else if (m.phase === "gap"){
+    el.innerHTML = m.correct
+      ? '<div class="bz-ans" style="color:var(--steppe)">⭕ ' + escHtml(m.win) + " 정답! +" + m.pts + "</div><div class=\"hint\" style=\"margin:0\">다음 문제 준비</div>"
+      : '<div class="bz-ans" style="color:var(--danger)">❌ 땡! −1</div><div class="hint" style="margin:0">남은 사람 재버저!</div>';
+  } else if (m.phase === "reveal"){
+    el.innerHTML = '<div class="hint" style="margin:0">전원 오답! 정답은</div><div class="bz-ans">' + escHtml(m.ans) + '</div><div class="hint" style="margin:0">다음 문제 준비</div>';
+  } else if (m.phase === "end"){
+    el.innerHTML = '<span class="tag">퀴즈쇼 종료!</span><div class="who" style="color:var(--fire);font-size:34px">🏆 ' + escHtml(m.champ) + '</div><div class="hint" style="margin:0">호스트 화면에서 최종 순위 확인!</div>';
+  }
+}
+/* 게스트 진입 훅 — 호스트가 mpNav("bz") 하면 자동 호출 */
+window.__guest_bz = function(){
+  ["bz-setup","bz-play","bz-end"].forEach(id => $(id).style.display = "none");
+  bzGuestShow({ phase: "wait" });
+  mp.game = { onMsg(from, m){ if (m && m.t === "st") bzGuestShow(m); } };
+};
 
