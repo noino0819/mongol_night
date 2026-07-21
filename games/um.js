@@ -1,4 +1,44 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("um", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📖 우리말 겨루기</h2></div>
+    <div id="um-setup">
+      <p class="hint">한 명씩 돌아가며 <b>2지선다 스피드 퀴즈</b>! 맞춤법·속담·우리말 뜻이 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 우승</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 보여주니까 구경꾼도 같이 배우기~</p>
+      <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="um-players"></div></div>
+      <div class="field"><label>문제 유형 (복수 선택)</label><div class="seg" id="um-types">
+        <button data-t="spell" class="sel">맞춤법</button><button data-t="prov" class="sel">속담</button><button data-t="mean" class="sel">우리말 뜻</button>
+      </div></div>
+      <div class="field"><label>1인당 제한 시간</label><div class="seg" id="um-time">
+        <button data-s="30">30초</button><button data-s="45" class="sel">45초</button><button data-s="60">60초</button>
+      </div></div>
+      <button class="btn" id="um-start">📖 겨루기 시작!</button>
+    </div>
+    <div id="um-pass" style="display:none" class="pass-stage">
+      <div class="who-label">도전 차례</div>
+      <div class="who" id="um-pass-name">-</div>
+      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
+      <button class="btn pass-next" id="um-go">준비 완료, 시작! →</button>
+    </div>
+    <div id="um-play" style="display:none">
+      <div class="um-hud"><div class="who" id="um-play-name">-</div><div><span class="tag" id="um-clock">45</span> <span class="um-score" id="um-play-score">0점</span></div></div>
+      <div class="um-timebar" id="um-timebar"><i id="um-timefill" style="width:100%"></i></div>
+      <div class="um-qcard"><div class="tp" id="um-qtype">맞춤법</div><div class="qq" id="um-qtext">-</div></div>
+      <div class="um-choices"><button id="um-c0">-</button><button id="um-c1">-</button></div>
+      <div class="um-flash" id="um-flash"></div>
+    </div>
+    <div id="um-between" style="display:none" class="stage-center">
+      <span class="tag">타임 업!</span>
+      <div class="who" id="um-bt-name" style="color:var(--fire)">-</div>
+      <div class="hint" id="um-bt-msg" style="margin:0">-</div>
+      <button class="btn" id="um-next-player">다음 사람 →</button>
+    </div>
+    <div id="um-end" style="display:none" class="stage-center">
+      <span class="tag">우리말 지킴이 발표</span>
+      <div class="reveal-card" id="um-rank"></div>
+      <button class="btn" id="um-again">다시 하기</button>
+    </div>
+  `);
 /* ================= 우리말 겨루기 ================= */
 /* 문항: [문제, 정답, 오답] — 전부 표준국어대사전 기준 검수 */
 const UM_BANK = {
@@ -221,4 +261,4 @@ function umEnd(){
   $("um-rank").innerHTML = '<div class="lbl">최종 스코어</div><div class="val" style="font-size:18px;line-height:2">' + rows.join("<br>") + "</div>";
 }
 $("um-again").addEventListener("click", umReset);
-
+snRegisterGame("um", umReset);

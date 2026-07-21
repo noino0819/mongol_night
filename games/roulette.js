@@ -1,4 +1,33 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("roulette", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎯 복불복 룰렛</h2></div>
+    <div class="stage-center">
+      <span class="tag" id="rou-tag">오늘의 주인공은?</span>
+      <div class="roulette-name" id="rou-name">···</div>
+      <div class="penalty" id="rou-penalty"></div>
+      <button class="btn" id="rou-spin">돌리기!</button>
+      <button class="btn ghost" id="rou-penalty-btn">벌칙도 뽑기</button>
+      <button class="btn ghost" id="rou-list-btn">벌칙 목록 / 수정</button>
+      <div class="pen-panel" id="rou-list-panel" hidden>
+        <p class="pen-hint">한 줄에 벌칙 하나. 룰렛·폭탄 게임 공용으로 쓰여.</p>
+        <textarea class="pen-edit" id="rou-list-edit" rows="10" spellcheck="false" autocapitalize="off"></textarea>
+        <div class="pen-actions">
+          <button class="btn" id="rou-list-save">저장</button>
+          <button class="btn ghost" id="rou-list-reset">기본값 복원</button>
+        </div>
+        <div class="pen-saved" id="rou-list-saved"></div>
+      </div>
+    </div>
+  `);
+snAddCss(`.penalty{font-size:18px;font-weight:700;color:var(--fire);min-height:28px;line-height:1.5;word-break:keep-all}
+  .rou-confetti{position:absolute;top:42%;font-size:30px;pointer-events:none;will-change:transform,opacity;animation:rouConf 1.2s ease-out forwards}
+  .pen-panel{width:100%;margin-top:12px;text-align:left}
+  .pen-hint{font-size:12px;color:var(--dim);margin:0 0 8px}
+  .pen-edit{width:100%;box-sizing:border-box;background:var(--night2);color:var(--milk);border:1px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:15px;line-height:1.7;resize:vertical}
+  .pen-actions{display:flex;gap:10px;margin-top:10px}
+  .pen-saved{font-size:13px;color:var(--steppe);font-weight:700;min-height:20px;margin-top:8px;text-align:center}`);
 /* ================= 룰렛 ================= */
 /* 당첨 리액션 — 매번 랜덤으로 골라 웃긴 문구 + 이모지 + 애니메이션이 다르게 나옴 */
 const ROU_HITS = [
@@ -81,4 +110,4 @@ $("rou-list-reset").addEventListener("click", () => {
   $("rou-list-edit").value = PENALTIES.join("\n");
   $("rou-list-saved").textContent = "기본값으로 복원됨";
 });
-
+snRegisterGame("roulette", function(){ $("rou-name").textContent="···"; $("rou-name").className="roulette-name"; $("rou-penalty").textContent=""; $("rou-tag").textContent="오늘의 주인공은?"; });

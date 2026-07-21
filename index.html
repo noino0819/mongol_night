@@ -135,12 +135,6 @@
   .liar-role small{display:block;font-size:13px;color:var(--dim);font-weight:600}
   .liar-role.liar{border-color:var(--danger);color:var(--danger)}
   .liar-role.liar small{color:var(--danger);opacity:.85}
-  .stepper{display:flex;align-items:center;gap:14px}
-  .stepper button{
-    width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
-    background:var(--night2);color:var(--milk);font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;
-  }
-  .stepper span{font-size:20px;font-weight:800;min-width:34px;text-align:center}
   .toggle-row{display:flex;justify-content:space-between;align-items:center;background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px}
   .toggle-row span{font-size:15px;font-weight:700}
   .tg{width:52px;height:30px;border-radius:999px;background:var(--line);border:none;position:relative;cursor:pointer;transition:background .15s}
@@ -177,20 +171,10 @@
   .reveal-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-top:8px}
   .reveal-card .lbl{font-size:12px;color:var(--dim);font-weight:700;letter-spacing:.1em}
   .reveal-card .val{font-size:26px;font-weight:800;margin-top:8px;word-break:keep-all;line-height:1.4}
-
-  /* ---------- 밸런스 ---------- */
-  .vs-wrap{flex:1;display:flex;flex-direction:column;gap:12px;justify-content:center}
-  .vs-opt{
-    flex:0 0 auto;min-height:120px;border-radius:20px;border:1px solid var(--line);
-    background:var(--card);color:var(--milk);font-family:inherit;font-size:20px;font-weight:800;
-    padding:22px;cursor:pointer;word-break:keep-all;line-height:1.45;transition:all .15s ease;
-  }
   .vs-opt.picked{background:var(--fire);color:#231303;border-color:var(--fire)}
-  .vs-mid{text-align:center;font-size:15px;font-weight:800;color:var(--ember);letter-spacing:.3em}
 
   /* ---------- 룰렛 ---------- */
   .roulette-name{font-size:42px;font-weight:800;min-height:60px;word-break:keep-all}
-  .penalty{font-size:18px;font-weight:700;color:var(--fire);min-height:28px;line-height:1.5;word-break:keep-all}
   #scr-roulette .stage-center{position:relative}
   .roulette-name.rhit1{animation:rhit1 .6s ease}
   @keyframes rhit1{0%{transform:scale(.3);opacity:0}55%{transform:scale(1.28)}75%{transform:scale(.9)}100%{transform:scale(1)}}
@@ -200,89 +184,26 @@
   @keyframes rhit3{0%{transform:rotate(-8deg) scale(.4);opacity:0}60%{transform:rotate(360deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
   .roulette-name.rhit4{animation:rhit4 .6s ease}
   @keyframes rhit4{0%{transform:translateY(-46px);opacity:0}55%{transform:translateY(10px)}72%{transform:translateY(-5px)}100%{transform:translateY(0)}}
-  .rou-confetti{position:absolute;top:42%;font-size:30px;pointer-events:none;will-change:transform,opacity;animation:rouConf 1.2s ease-out forwards}
   @keyframes rouConf{0%{transform:translate(0,0) scale(.4) rotate(0);opacity:0}18%{opacity:1}100%{transform:translate(var(--dx),-150px) scale(1.15) rotate(var(--rot));opacity:0}}
-  .pen-panel{width:100%;margin-top:12px;text-align:left}
-  .pen-hint{font-size:12px;color:var(--dim);margin:0 0 8px}
-  .pen-edit{width:100%;box-sizing:border-box;background:var(--night2);color:var(--milk);border:1px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:15px;line-height:1.7;resize:vertical}
-  .pen-actions{display:flex;gap:10px;margin-top:10px}
   .pen-actions .btn{flex:1}
-  .pen-saved{font-size:13px;color:var(--steppe);font-weight:700;min-height:20px;margin-top:8px;text-align:center}
-
-  /* ---------- 과일 종! (할리갈리) ---------- */
-  .fruit-arena{position:relative;flex:1;min-height:480px;border:1px solid var(--line);border-radius:20px;background:var(--night2);overflow:hidden;margin-top:4px}
-  .fzone{
-    position:absolute;width:112px;height:130px;border-radius:16px;border:2px solid var(--line);
-    background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    font-weight:800;font-size:13px;cursor:pointer;touch-action:manipulation;transition:background .1s;padding:4px;
-  }
   .fzone.turn{border-color:var(--fire)}
   .fzone.dead{opacity:.35;pointer-events:none}
-  .fzone.good{background:#1E4633;border-color:var(--steppe)}
-  .fzone.bad{background:#4A2230;border-color:var(--danger)}
-  .fzone .fzname{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fzone .fzcard{image-rendering:pixelated}
   .fzone .fzcard.none{
     min-width:72px;min-height:56px;display:flex;align-items:center;justify-content:center;
     border:1px dashed var(--line);color:var(--dim);font-size:11px;
   }
   .fzone .fzcard.pop{animation:fzpop .18s steps(2)}
   @keyframes fzpop{0%{transform:scale(1.3)}100%{transform:scale(1)}}
-  .fzone .fzflip{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim);border:1px solid var(--line);padding:2px 10px;white-space:nowrap}
   .fzone.turn .fzflip{background:#3A3324;color:var(--fire);border-color:var(--fire);animation:fzpulse 1s steps(2) infinite}
   .fzone.turn .fzflip::after{content:" 탭!"}
   @keyframes fzpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-  .fzone.tl{top:10px;left:10px;transform:rotate(180deg)}
-  .fzone.tr{top:10px;right:10px;transform:rotate(180deg)}
-  .fzone.tc{top:10px;left:50%;transform:translateX(-50%) rotate(180deg)}
-  .fzone.bl{bottom:10px;left:10px}
   .fzone.br{bottom:10px;right:10px}
-  .fzone.bc{bottom:10px;left:50%;transform:translateX(-50%)}
-  .fzone.lm{top:50%;left:10px;transform:translateY(-50%) rotate(90deg)}
-  .fzone.rm{top:50%;right:10px;transform:translateY(-50%) rotate(-90deg)}
-  .fcenter{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    display:flex;gap:8px;align-items:center;justify-content:center;
-  }
-  .fbell{font-size:42px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
-  .fmsg{position:absolute;top:50%;left:50%;transform:translate(-50%,58px);font-size:14px;font-weight:800;color:var(--fire);text-align:center;width:150px}
-
-  /* ---------- 오목 ---------- */
-  .omok-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .omok-turn{font-size:16px;font-weight:800}
-  .omok-turn .stone{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px;margin-right:7px;border:1px solid #888}
-  #omok-canvas{display:block;width:100%;border-radius:14px;touch-action:manipulation}
-  .omok-btns{display:flex;gap:8px;margin-top:12px}
   .omok-btns .btn{flex:1}
-
-  /* ---------- 이마 퀴즈 ---------- */
-  .fh-stage{flex:1;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;border:1px solid var(--line);min-height:440px;position:relative}
-  .fh-word-area{flex:1;display:flex;align-items:center;justify-content:center;background:var(--night2);text-align:center;padding:20px}
-  .fh-word{font-size:46px;font-weight:800;word-break:keep-all;line-height:1.3}
-  .fh-controls{display:flex;height:120px}
-  .fh-pass,.fh-ok{flex:1;border:none;font-family:inherit;font-size:19px;font-weight:800;cursor:pointer}
-  .fh-pass{background:#3A3324;color:var(--fire)}
-  .fh-ok{background:#1E4633;color:var(--steppe)}
-  .fh-top{display:flex;justify-content:space-between;padding:12px 16px;background:var(--card);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
-  .fh-flash-ok{animation:flashok .35s ease}
-  .fh-flash-pass{animation:flashpass .35s ease}
   @keyframes flashok{0%{background:#1E4633}100%{background:var(--night2)}}
   @keyframes flashpass{0%{background:#3A3324}100%{background:var(--night2)}}
-  .fh-list{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;font-size:15px;line-height:2}
-  .fh-quit{background:none;border:none;color:var(--dim);font-family:inherit;font-size:15px;font-weight:800;cursor:pointer;padding:0}
-  /* 가로모드: 폰은 세로로 들고, 화면만 90도 돌려서 렌더 (멀리서도 보이게 왕크게) */
-  #fh-game.fh-land{
-    position:fixed;top:0;left:0;z-index:70;margin:0;border:none;border-radius:0;min-height:0;
-    width:100vh;height:100vw;transform:rotate(90deg) translateY(-100vw);transform-origin:top left;
-    background:var(--night2);
-  }
   @supports (width:100dvh){
     #fh-game.fh-land{width:100dvh;height:100dvw;transform:rotate(90deg) translateY(-100dvw)}
   }
-  #fh-game.fh-land .fh-top{font-size:18px;padding:12px 22px}
-  #fh-game.fh-land .fh-quit{font-size:18px}
-  #fh-game.fh-land .fh-controls{height:96px}
-  #fh-game.fh-land .fh-pass,#fh-game.fh-land .fh-ok{font-size:24px}
 
   /* ---------- 몽골 대장정 ---------- */
   .life-banner{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
@@ -299,8 +220,6 @@
   .ltile.t-bad{background:#3C1F2A;border-color:#5E3040}
   .ltile.t-salary{background:#3A3018;border-color:#5E4E24}
   .ltile.t-start,.ltile.t-end{background:#243050;border-color:#3A4C7E;font-size:11px;font-weight:800}
-  .ltile .toks{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px;flex-wrap:wrap;padding:0 2px}
-  .ltile .toks i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.6)}
   .life-sheep{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
   .life-sheep .sp{display:flex;align-items:center;gap:6px;background:var(--night2);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700}
   .life-sheep .sp i{width:10px;height:10px;border-radius:50%}
@@ -316,11 +235,7 @@
   .life-modal .ds{font-size:14px;color:var(--dim);line-height:1.6;word-break:keep-all}
   .life-modal .row{display:flex;gap:10px;margin-top:18px}
   .life-modal .row .btn{flex:1}
-
-  /* ---------- 그림 릴레이 ---------- */
-  .dr-prompt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:10px}
   .dr-prompt .lb{font-size:12px;color:var(--dim);font-weight:700}
-  .dr-prompt .wd{font-size:22px;font-weight:800;margin-top:4px;word-break:keep-all}
   #draw-canvas,#cm-canvas{display:block;width:100%;background:#F7F2E6;border-radius:14px;touch-action:none} /* touch-action:none 없으면 모바일이 터치를 스크롤로 뺏어 pointercancel → 획 끊김 */
   .dr-tools{display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap}
   .dr-color{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;flex-shrink:0}
@@ -332,25 +247,13 @@
   .dr-tool{background:var(--night2);border:1px solid var(--line);border-radius:10px;color:var(--milk);padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
   .dr-tool.sel{background:var(--fire);color:#231303;border-color:var(--fire)}
   .dr-timer{margin-left:auto;font-size:14px;font-weight:800;color:var(--dim);font-variant-numeric:tabular-nums}
-  .dr-guess-img{width:100%;border-radius:14px;background:#F7F2E6;margin-bottom:12px}
   .dr-input{width:100%;background:var(--night2);border:1px solid var(--line);border-radius:12px;color:var(--milk);padding:14px;font-size:16px;font-family:inherit;outline:none;margin-bottom:10px}
   .dr-input:focus{border-color:var(--fire)}
-  .dr-chain{display:flex;flex-direction:column;gap:12px;margin-top:6px}
-  .dr-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
-  .dr-item .by{font-size:12px;color:var(--dim);font-weight:700;margin-bottom:6px}
   .dr-item .tx{font-size:19px;font-weight:800;word-break:keep-all}
-  .dr-item img{width:100%;border-radius:10px;background:#F7F2E6}
-
-  /* ---------- 그림 퀴즈 (캐치마인드식) ---------- */
-  .cm-score-strip{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
   .cm-score-strip .sp{background:var(--night2);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700}
   .cm-score-strip .sp.now{border-color:var(--fire);color:var(--fire)}
-  .cm-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .cm-topline b{font-size:15px}
   .cm-topline .dr-timer{margin-left:0}
-  .cm-actions{display:flex;gap:8px;margin-top:10px}
   .cm-actions .btn{flex:1;padding:13px;font-size:15px}
-  .cm-peek{font-size:13px !important}
   .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .name-grid button{
     background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--milk);
@@ -364,24 +267,10 @@
   .mb-strip .sp i{width:9px;height:9px;border-radius:50%;display:inline-block}
   .mb-strip .sp.now{border-color:var(--fire);color:var(--fire)}
   .mb-strip .sp.dead{opacity:.4;text-decoration:line-through}
-  .mb-board{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin:4px 0 12px}
-  .mb-cell{aspect-ratio:1}
-  .mb-tile{aspect-ratio:1;background:var(--night2);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:8px;line-height:1.15;text-align:center;color:var(--dim);font-weight:700;padding:1px;word-break:keep-all}
   .mb-tile .em{font-size:11px;line-height:1.1}
-  .mb-tile .price{font-size:7.5px;opacity:.85}
-  .mb-tile.corner{background:#20294A;border-color:#3A4A7A;color:var(--milk)}
-  .mb-tile.owned{color:var(--milk)}
-  .mb-tile .own{position:absolute;left:0;right:0;bottom:0;height:3px}
-  .mb-toks{position:absolute;top:1px;right:1px;display:flex;gap:1px;flex-wrap:wrap;max-width:75%;justify-content:flex-end}
-  .mb-toks i{width:6px;height:6px;border-radius:50%;border:1px solid rgba(0,0,0,.45)}
-  .mb-center{position:absolute;left:13.5%;top:13.5%;right:13.5%;bottom:13.5%;background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;text-align:center}
-  .mb-center .whom{font-size:13px;font-weight:800}
-  .mb-center .roller{font-size:10.5px;color:var(--dim)}
   .mb-center .dice{font-size:23px;font-weight:900;letter-spacing:2px;min-height:29px;color:var(--fire)}
   .mb-center .info{font-size:10px;color:var(--dim)}
-  .mb-toks i.mb-hop{animation:mbHopA .13s ease;box-shadow:0 0 0 2px var(--fire),0 2px 4px rgba(0,0,0,.5);position:relative;z-index:2}
   @keyframes mbHopA{0%{transform:translateY(0) scale(1)}55%{transform:translateY(-5px) scale(1.7)}100%{transform:translateY(0) scale(1)}}
-  .mb-tile.mb-built{animation:mbBuilt .5s ease;z-index:2}
   @keyframes mbBuilt{0%{transform:scale(1)}30%{transform:scale(1.22);box-shadow:0 0 10px var(--fire)}100%{transform:scale(1)}}
   .mb-center .dice.mb-rolling{animation:mbTumble .16s linear infinite}
   @keyframes mbTumble{0%{transform:rotate(-14deg) scale(.9)}50%{transform:rotate(14deg) scale(1.12)}100%{transform:rotate(-14deg) scale(.9)}}
@@ -393,9 +282,6 @@
   .mb-teamcard b{display:flex;align-items:center;gap:6px;margin-bottom:3px}
   .mb-teamcard b i{width:10px;height:10px;border-radius:50%;display:inline-block}
   .mb-teamcard span{color:var(--dim);font-size:12.5px}
-
-  /* ---------- 주사위 배팅 ---------- */
-  .lv-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 8px}
   .lv-slot{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:88px}
   .lv-slot .face{font-size:12px;color:var(--dim);font-weight:700}
   .lv-slot .prize{font-size:18px;font-weight:900;color:var(--fire)}
@@ -407,7 +293,6 @@
   .lv-faces button:active:not(:disabled){border-color:var(--fire);color:var(--fire)}
   .lv-faces button .cnt{position:absolute;top:-7px;right:-4px;background:var(--fire);color:#231303;border-radius:999px;font-size:11px;font-weight:800;padding:1px 6px}
   .lv-faces button .fl{font-size:11px;color:var(--dim);font-weight:700;margin-top:2px}
-  .lv-junk{color:var(--danger);font-weight:800}
   .lv-tray{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;min-height:46px;margin:8px 0 2px}
   .lv-die{font-size:34px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
   .lv-die.tumbling{animation:lvTumble .14s linear infinite}
@@ -416,33 +301,13 @@
   @keyframes lvTumble{0%{transform:rotate(-16deg) scale(.82)}50%{transform:rotate(16deg) scale(1.12)}100%{transform:rotate(-16deg) scale(.82)}}
   @keyframes lvLand{0%{transform:scale(1.55)}60%{transform:scale(.84)}100%{transform:scale(1)}}
   @keyframes lvBurn{0%{opacity:1;transform:scale(1)}40%{transform:translateY(-4px) scale(1.15)}100%{opacity:.28;transform:translateY(-14px) scale(.6) rotate(18deg)}}
-  /* 라스베가스: 카지노 6곳·눈 6면 → 3열 그리드 (lv-slot·lv-faces 재사용) */
-  .vg-casinos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 8px}
-  .vg-faces{grid-template-columns:repeat(3,1fr)}
-
-  /* ---------- 버저 퀴즈쇼 ---------- */
-  .bz-stage{display:flex;flex-direction:column;height:calc(100dvh - 150px);min-height:440px;gap:8px}
-  .bz-row{display:flex;gap:8px;height:23%}
-  .bz-zone{flex:1;background:var(--night2);border:2px solid var(--line);border-radius:14px;color:var(--milk);font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-  .bz-zone b{font-size:18px;font-weight:800}
   .bz-zone .sc{font-size:13px;color:var(--dim);font-weight:700}
   .bz-zone.live{border-color:var(--fire);animation:bzPulse 1s steps(2) infinite}
   .bz-zone.win{border-color:var(--fire);color:var(--fire);animation:none}
   .bz-zone.lock{opacity:.32;animation:none}
   .bz-row.top .bz-zone{transform:rotate(180deg)}
   @keyframes bzPulse{0%,100%{border-color:var(--fire)}50%{border-color:var(--line)}}
-  .bz-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;padding:2px 0}
-  .bz-q{font-size:19px;font-weight:800;text-align:center;line-height:1.45;min-height:1.4em;padding:0 4px;word-break:keep-all}
   .bz-q.flip,.bz-mid.flip{transform:rotate(180deg)}
-  .bz-q .bz-sub{display:block;font-size:12px;color:var(--dim);font-weight:700}
-  .bz-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:110px}
-  .bz-timer{font-size:30px;font-weight:900;color:var(--ember)}
-  .bz-btns{display:flex;gap:10px}
-  .bz-btns button{background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--milk);font-size:26px;padding:10px 22px;font-family:inherit;font-weight:800}
-  .bz-btns button:active{border-color:var(--fire);color:var(--fire)}
-  .bz-btns button.bz-sm{font-size:14px;padding:10px 14px}
-  .bz-ans{font-size:26px;font-weight:900;color:var(--fire)}
-  .bz-next{width:auto;padding:10px 18px;font-size:15px}
 
   /* ---------- 우리말 겨루기 ---------- */
   .um-hud{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
@@ -456,8 +321,7 @@
   .um-qcard .qq{font-size:21px;font-weight:800;line-height:1.5;word-break:keep-all}
   .um-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .um-choices button{background:var(--night2);border:2px solid var(--line);border-radius:14px;color:var(--milk);font-family:inherit;font-size:18px;font-weight:800;padding:22px 8px;word-break:keep-all;line-height:1.4;touch-action:manipulation}
-  .um-choices button:active{border-color:var(--fire)}
-  .gq-choices button{padding:15px 8px;font-size:16px} /* 4지선다: 2줄이라 살짝 낮게 */
+  .um-choices button:active{border-color:var(--fire)} /* 4지선다: 2줄이라 살짝 낮게 */
   .um-choices button.ok{border-color:var(--steppe);color:var(--steppe)}
   .um-choices button.no{border-color:var(--danger);color:var(--danger)}
   .um-flash{text-align:center;font-size:15px;font-weight:800;min-height:1.6em;margin-top:10px}
@@ -707,8 +571,6 @@
     font-family:var(--font-px);font-weight:800;background:var(--fire);color:#231303;
     border:none;padding:6px 10px;cursor:pointer;font-size:12px;
   }
-/* ---------- 고비의 별 (ta) ---------- */
-.ta-party{display:flex;gap:6px;flex-wrap:wrap}
 .ta-party .pn{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
 .ta-party .empty{color:var(--dim);font-size:13px}
 .ta-hud{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
@@ -719,56 +581,16 @@
 .ta-body{flex:1;min-width:0}
 .ta-nm{font-size:13px;font-weight:800;color:var(--fire);margin-bottom:6px}
 .ta-text{font-size:16px;line-height:1.65;word-break:keep-all;white-space:pre-line}
-
-.ta-turnbar{margin:12px 0 2px;font-size:13px;color:var(--dim);text-align:center}
-.ta-turnbar b{color:var(--steppe)}
-#ta-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 #ta-choices .btn{text-align:left;display:flex;align-items:center;gap:8px}
 #ta-choices .btn .lb{flex:1;min-width:0}
 #ta-choices .btn .ck{flex:0 0 auto;font-size:12px;font-weight:800;background:var(--night2);border:1px solid var(--line);border-radius:6px;padding:3px 7px;color:var(--fire)}
-.ta-roll{position:fixed;inset:0;background:rgba(14,21,38,.82);display:flex;align-items:center;justify-content:center;z-index:60}
-.ta-roll-card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:22px 30px;text-align:center;min-width:220px}
-.ta-roll-tt{font-size:14px;font-weight:800;color:var(--dim);margin-bottom:10px}
-.ta-roll-num{font-size:52px;font-weight:900;line-height:1.1;color:var(--milk)}
-.ta-roll-rs{font-size:15px;font-weight:800;margin-top:10px;min-height:1.5em}
 .ta-roll-rs.ok{color:var(--steppe)}
 .ta-roll-rs.no{color:var(--danger)}
-/* ---------- 이야기꾼의 밤 (gm) ---------- */
-.gm-how{margin:0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.7}
-.gm-how li{margin:4px 0}
-.gm-txt{font-size:17px;line-height:1.6;word-break:keep-all;margin-top:10px;color:var(--milk)}
-.gm-die{font-size:54px;line-height:1;margin-bottom:6px}
-/* ===== 폭탄 돌리기 ===== */
-#bomb-flash{position:fixed;inset:0;background:var(--danger);opacity:0;pointer-events:none;z-index:40}
-#bomb-fusebar{position:relative;width:100%;max-width:300px;margin:0 auto;height:16px;background:var(--night2);border:2px solid var(--line);border-radius:9px;overflow:hidden}
-#bomb-zone{position:absolute;top:0;bottom:0;right:0;left:60%;background:var(--danger);opacity:.28}
-#bomb-fill{position:relative;display:block;height:100%;width:0;background:var(--fire)}
 #bomb-fill.hot{background:var(--ember)}
-#bomb-sec{font-size:13px;font-weight:800;color:var(--dim)}
-.bomb-shake{animation:bombShake .3s linear infinite}
 @keyframes bombShake{0%,100%{transform:translate(0,0) rotate(0deg) scale(1.12)}25%{transform:translate(-4px,2px) rotate(-5deg) scale(1.12)}50%{transform:translate(4px,-2px) rotate(4deg) scale(1.18)}75%{transform:translate(-3px,-3px) rotate(-3deg) scale(1.12)}}
-/* ---------- 숫자야구 ---------- */
-#scr-nb .nb-entry{display:flex;justify-content:center;gap:8px;margin:6px 0 14px}
-.nb-box{width:44px;height:54px;border:2px solid var(--line);border-radius:10px;background:var(--night2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:var(--milk)}
 .nb-box.on{border-color:var(--fire);color:var(--fire)}
-.nb-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto;width:100%}
-.nb-pad button{background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--milk);font-size:22px;font-weight:800;padding:14px 0;font-family:inherit}
-.nb-pad button:active:not(:disabled){border-color:var(--fire);color:var(--fire)}
-.nb-pad button:disabled{opacity:.25}
-.nb-pad .nb-del{color:var(--danger)}
-.nb-pad .nb-ok{background:var(--fire);color:#231303;border-color:var(--fire);font-size:17px}
-.nb-pad .nb-ok:disabled{background:var(--night2);color:var(--dim)}
-.nb-logs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
-.nb-logcol{background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px;min-height:56px}
 .nb-logcol.now{border-color:var(--fire)}
-.nb-logcol .hd{font-size:12px;font-weight:800;color:var(--dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:6px;word-break:keep-all}
-.nb-logrow{display:flex;align-items:center;gap:6px;padding:3px 2px}
 .nb-logrow .n{color:var(--dim);font-size:11px;min-width:14px}
-.nb-logrow b{font-size:17px;letter-spacing:2px;color:var(--milk);flex:1}
-.nb-logrow .sb{font-size:12px;font-weight:800;color:var(--steppe)}
-.nb-logempty{color:var(--dim);font-size:12px;text-align:center;padding:8px 0}
-.nb-reveal-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
-.nb-reveal-row b{font-size:22px;letter-spacing:3px;color:var(--fire)}
 .nb-reveal-row .dim{color:var(--dim);font-size:12px}
   /* ---------- 폰 연결(mp) ---------- */
   #mp-qr{display:block;margin:4px auto;width:min(78vw,300px);height:auto;image-rendering:pixelated;border-radius:6px}
@@ -980,751 +802,29 @@
     </div>
   </div>
 
-  <!-- ============ 라이어 ============ -->
-  <div class="screen" id="scr-liar">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🐺 라이어 게임</h2></div>
-    <div id="liar-setup">
-      <p class="hint">모두에게 같은 제시어가 보이지만, 딱 한 명(라이어)에게는 안 보여요. 돌아가며 제시어에 대해 한 마디씩 말하고, 라이어가 누구인지 투표! 라이어는 제시어를 맞히면 역전승.</p>
-      <div class="field">
-        <label>카테고리</label>
-        <div class="seg" id="liar-cats"></div>
-      </div>
-      <button class="btn mt" id="liar-start">게임 시작</button>
-    </div>
-    <div id="liar-pass" style="display:none" class="pass-stage"></div>
-    <div id="liar-play" style="display:none" class="stage-center">
-      <span class="tag" id="liar-cat-tag"></span>
-      <div class="timer" id="liar-timer">3:00</div>
-      <p class="hint" style="margin:0">돌아가면서 제시어에 대해 한 마디씩!<br>시간이 끝나면 라이어 지목 투표</p>
-      <button class="btn" id="liar-timer-btn">타이머 시작</button>
-      <button class="btn ghost" id="liar-reveal-btn">라이어 공개하기</button>
-      <div class="reveal-card" id="liar-result" style="display:none"></div>
-      <button class="btn ghost" id="liar-again" style="display:none">같은 설정으로 한 판 더</button>
-    </div>
-  </div>
-
-  <!-- ============ 마피아 ============ -->
-  <div class="screen" id="scr-mafia">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌙 마피아</h2></div>
-    <div id="mafia-setup">
-      <p class="hint">역할을 비밀리에 나눠드려요. 마피아끼리는 서로를 확인할 수 있어서 사회자 없이도 진행이 쉬워요.</p>
-      <div class="field">
-        <label>마피아 수</label>
-        <div class="stepper">
-          <button id="maf-minus">−</button><span id="maf-count">1</span><button id="maf-plus">＋</button>
-        </div>
-      </div>
-      <div id="maf-roles"></div>
-      <button class="btn ghost mt" id="maf-help-btn">📖 직업 설명 보기</button>
-      <div class="reveal-card" id="maf-help" style="display:none"></div>
-      <button class="btn mt" id="mafia-start">역할 나누기</button>
-    </div>
-    <div id="mafia-pass" style="display:none" class="pass-stage"></div>
-    <div id="mafia-play" style="display:none">
-      <div class="reveal-card">
-        <div class="lbl">밤 진행 순서 (한 명이 읽어주세요)</div>
-        <div class="val" id="mafia-order" style="font-size:15px;font-weight:600;line-height:1.9"></div>
-      </div>
-      <div class="reveal-card" id="mafia-rules" style="display:none">
-        <div class="lbl">특수 직업 규칙 (헷갈리면 여기 보기)</div>
-        <div class="val" id="mafia-rules-val" style="font-size:14px;font-weight:600;line-height:1.8"></div>
-      </div>
-      <button class="btn ghost mt" id="mafia-modview">🤫 마피아 명단 보기 (꾹 누르기)</button>
-      <div class="reveal-card" id="mafia-modlist" style="display:none"></div>
-      <button class="btn mt" id="mafia-again">역할 다시 섞기</button>
-    </div>
-  </div>
-
-  <!-- ============ 초성 퀴즈 ============ -->
-  <div class="screen" id="scr-choseong">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚡ 초성 퀴즈</h2></div>
-    <div id="cho-setup">
-      <p class="hint">화면을 모두에게 보여주고, 초성을 보고 먼저 정답을 외치는 사람이 1점!</p>
-      <div class="field">
-        <label>카테고리</label>
-        <div class="seg" id="cho-cats"></div>
-      </div>
-      <button class="btn mt" id="cho-start">시작</button>
-    </div>
-    <div id="cho-play" style="display:none" class="stage-center">
-      <span class="tag" id="cho-cat-tag"></span>
-      <div class="big-word" id="cho-word">ㄱㄴㄷ</div>
-      <div class="reveal-card" id="cho-answer" style="display:none"></div>
-      <button class="btn ghost" id="cho-show">정답 보기</button>
-      <button class="btn" id="cho-next">다음 문제 →</button>
-    </div>
-  </div>
-
-  <!-- ============ 밸런스 ============ -->
-  <div class="screen" id="scr-balance">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚖️ 밸런스 게임</h2></div>
-    <p class="hint">하나, 둘, 셋 하면 동시에 손가락으로 가리키기! 소수파가 벌칙 어때요 ㅎㅎ</p>
-    <div class="vs-wrap">
-      <button class="vs-opt" id="bal-a">A</button>
-      <div class="vs-mid">VS</div>
-      <button class="vs-opt" id="bal-b">B</button>
-    </div>
-    <button class="btn mt" id="bal-next">다음 질문 →</button>
-  </div>
-
-  <!-- ============ 과일 종! ============ -->
-  <div class="screen" id="scr-fruit">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 과일 종!</h2></div>
-    <div id="fruit-setup">
-      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판의 카드 더미</b>를 탭해서 한 장씩 뒤집어. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 자기 이름판을 먼저 탭(=종)! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
-      <div class="field">
-        <label>참여자 선택 (탭해서 켜고 끄기, 2~6명)</label>
-        <div class="seg" id="fruit-players"></div>
-      </div>
-      <button class="btn mt" id="fruit-start">카드 돌려! 시작!</button>
-    </div>
-    <div id="fruit-game" style="display:none">
-      <div class="fruit-arena" id="fruit-arena">
-        <div class="fcenter"><div class="fbell"><px-sprite name="bell" scale="3"></px-sprite></div></div>
-        <div class="fmsg" id="fruit-msg"></div>
-      </div>
-      <button class="btn ghost mt" id="fruit-stop">게임 끝내기 (카드 많은 순 정산)</button>
-    </div>
-    <div id="fruit-result" style="display:none" class="stage-center">
-      <span class="tag">최종 결과</span>
-      <div class="reveal-card" id="fruit-rank"></div>
-      <button class="btn" id="fruit-again">한 판 더!</button>
-    </div>
-  </div>
-
-  <!-- ============ 오목 ============ -->
-  <div class="screen" id="scr-omok">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚫ 오목</h2></div>
-    <div class="omok-info">
-      <div class="omok-turn" id="omok-turn"><span class="stone" style="background:#222"></span>흑돌 차례</div>
-      <div class="field" style="margin:0"><div class="seg" id="omok-size">
-        <button data-size="11" class="sel">11줄</button><button data-size="13">13줄</button>
-      </div></div>
-    </div>
-    <div class="field" style="margin-bottom:10px"><div class="seg" id="omok-rule">
-      <button data-rule="free" class="sel">자유룰</button><button data-rule="renju">렌주룰 (흑 금수)</button>
-    </div>
-    <p class="hint" id="omok-rule-hint" style="display:none;margin:8px 0 0">흑(선공)은 <b>삼삼·사사·장목(6목 이상)</b>에 둘 수 없어요. 금수 자리는 ❌로 표시됩니다. 선공 필승법 방지용 정식 룰!</p></div>
-    <canvas id="omok-canvas"></canvas>
-    <div class="omok-btns">
-      <button class="btn ghost" id="omok-undo">한 수 무르기</button>
-      <button class="btn" id="omok-new">새 게임</button>
-    </div>
-  </div>
-
-  <!-- ============ 이마 퀴즈 ============ -->
-  <div class="screen" id="scr-forehead">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎤 이마 퀴즈</h2></div>
-    <div id="fh-setup">
-      <p class="hint">한 명이 폰을 이마에 대면(화면이 남들을 향하게!) 나머지가 말과 몸짓으로 설명해요. 맞히면 오른쪽 <b style="color:var(--steppe)">정답</b>, 모르겠으면 왼쪽 <b style="color:var(--fire)">패스</b>를 탭. 제한시간 안에 몇 개 맞히나! <b>가로 모드</b>면 글자가 왕커져서 멀리서도 잘 보여요</p>
-      <div class="field"><label>카테고리</label><div class="seg" id="fh-cats"></div></div>
-      <div class="field"><label>제한시간</label><div class="seg" id="fh-times">
-        <button data-t="60" class="sel">60초</button><button data-t="90">90초</button><button data-t="120">120초</button>
-      </div></div>
-      <div class="field"><label>화면 방향</label><div class="seg" id="fh-orient">
-        <button data-o="land" class="sel">📺 가로 (왕크게)</button><button data-o="port">세로</button>
-      </div></div>
-      <button class="btn mt" id="fh-start">이마에 대고 시작!</button>
-    </div>
-    <div id="fh-game" style="display:none" class="fh-stage">
-      <div class="fh-top"><span id="fh-score">0개 정답</span><span id="fh-timer">60</span><button class="fh-quit" id="fh-quit">✕ 끝내기</button></div>
-      <div class="fh-word-area" id="fh-area"><div class="fh-word" id="fh-word">준비!</div></div>
-      <div class="fh-controls">
-        <button class="fh-pass" id="fh-pass">◀ 패스</button>
-        <button class="fh-ok" id="fh-ok">정답! ▶</button>
-      </div>
-    </div>
-    <div id="fh-result" style="display:none" class="stage-center">
-      <span class="tag">결과</span>
-      <div class="big-word" id="fh-final"></div>
-      <div class="fh-list" id="fh-history"></div>
-      <button class="btn" id="fh-again">다음 사람 도전!</button>
-    </div>
-  </div>
-
-  <!-- ============ 몽골 대장정 ============ -->
-  <div class="screen" id="scr-life">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🐑 몽골 대장정 2.0</h2></div>
-    <div id="life-setup">
-      <p class="hint">부루마블+인생게임 스타일! 순환 보드를 돌며 <b style="color:var(--steppe)">초원을 사서 통행료</b>를 걷고, ⛺게르를 지어 2배로 뜯고, 🗝️황금열쇠와 ⚔️결투(실제 미니게임 현피!)로 양을 불리세요. 더블이 나오면 한 번 더! 정해진 턴이 끝나면 <b style="color:var(--fire)">총자산(양+초원+게르) 최다 팀이 승리.</b> 파산하면 탈락!</p>
-      <div class="field"><label>모드</label><div class="seg" id="mb-mode">
-        <button data-m="solo" class="sel">개인전</button><button data-m="team">팀전</button>
-      </div></div>
-      <div class="field" id="mb-teamrow" style="display:none"><label>팀 수</label><div class="seg" id="mb-teamn">
-        <button data-n="2" class="sel">2팀</button><button data-n="3">3팀</button>
-      </div></div>
-      <div class="field"><label>참여자 선택</label><div class="seg" id="life-players"></div></div>
-      <div class="field" id="mb-teamview-wrap" style="display:none">
-        <label>팀 배정</label>
-        <div id="mb-teamview"></div>
-        <button class="btn ghost" id="mb-reshuffle" style="margin-top:8px">🔀 팀 다시 섞기</button>
-      </div>
-      <div class="field"><label>게임 길이 (팀당 턴 수)</label><div class="seg" id="mb-len">
-        <button data-l="10">10턴</button><button data-l="14" class="sel">14턴</button><button data-l="18">18턴</button>
-      </div></div>
-      <button class="btn mt" id="life-start">대장정 출발!</button>
-    </div>
-    <div id="life-game" style="display:none">
-      <div class="mb-strip" id="mb-strip"></div>
-      <div class="mb-board" id="mb-board"></div>
-      <button class="btn" id="mb-roll">🎲 주사위 굴리기</button>
-    </div>
-    <div id="life-end" style="display:none" class="stage-center">
-      <span class="tag">대장정 완료!</span>
-      <div class="reveal-card" id="life-rank"></div>
-      <button class="btn" id="life-again">다시 출발!</button>
-    </div>
-  </div>
-
-  <!-- ============ 그림 릴레이 ============ -->
-  <div class="screen" id="scr-drawrelay">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎨 그림 릴레이</h2></div>
-
-    <div id="dr-setup">
-      <p class="hint">첫 사람이 제시어를 정하면 → 다음 사람이 <b>그림</b>으로 → 그 다음 사람은 그림만 보고 <b>추측</b> → 또 그림 → 또 추측... 마지막에 변천사를 쫙 공개! 순서는 자동으로 섞여요.</p>
-      <button class="btn" id="dr-start">첫 라운드 시작!</button>
-    </div>
-
-    <div id="dr-handoff" style="display:none" class="pass-stage">
-      <div class="who-label" id="dr-handoff-label">다음 차례</div>
-      <div class="who" id="dr-handoff-name">-</div>
-      <div class="hint" style="margin:0" id="dr-handoff-hint">폰을 전달해주세요. 다른 사람은 화면 보지 않기!</div>
-      <button class="btn pass-next" id="dr-ready">나 왔어요, 시작! →</button>
-    </div>
-
-    <div id="dr-word" style="display:none">
-      <p class="hint">아무도 안 볼 때 제시어를 정하세요. 직접 입력하거나 랜덤으로!</p>
-      <input class="dr-input" id="dr-word-input" type="text" maxlength="14" placeholder="제시어 직접 입력 (예: 게르에서 라면 먹기)">
-      <button class="btn ghost" id="dr-word-random">🎲 랜덤 제시어 뽑기</button>
-      <button class="btn mt" id="dr-word-ok">이걸로 확정!</button>
-    </div>
-
-    <div id="dr-draw" style="display:none">
-      <div class="dr-prompt"><div class="lb">이걸 그려주세요 (글자 쓰기 금지!)</div><div class="wd" id="dr-draw-word">-</div></div>
-      <canvas id="draw-canvas"></canvas>
-      <div class="dr-tools" id="dr-colors"></div>
-      <div class="dr-tools">
-        <button class="dr-tool sel" id="dr-pen">✏️ 펜</button>
-        <button class="dr-tool" id="dr-thick">🖌️ 굵게</button>
-        <button class="dr-tool" id="dr-eraser">🧽 지우개</button>
-        <button class="dr-tool" id="dr-undo">↩️ 되돌리기</button>
-        <button class="dr-tool" id="dr-clear">🗑️ 전체 삭제</button>
-        <span class="dr-timer" id="dr-timer">90</span>
-      </div>
-      <button class="btn mt" id="dr-draw-done">다 그렸어요! →</button>
-    </div>
-
-    <div id="dr-guess" style="display:none">
-      <p class="hint" style="margin-bottom:8px">앞사람이 그린 그림이에요. 뭘 그린 걸까요?</p>
-      <img class="dr-guess-img" id="dr-guess-img" alt="앞사람의 그림">
-      <input class="dr-input" id="dr-guess-input" type="text" maxlength="14" placeholder="정답 추측 입력">
-      <button class="btn" id="dr-guess-ok">제출! →</button>
-    </div>
-
-    <div id="dr-reveal" style="display:none">
-      <div class="stage-center" style="flex:0;gap:8px;margin-bottom:6px">
-        <span class="tag">🎬 변천사 대공개</span>
-        <div class="big-word" style="font-size:24px" id="dr-reveal-title"></div>
-      </div>
-      <div class="dr-chain" id="dr-chain"></div>
-      <button class="btn mt" id="dr-next-round">다음 라운드 (다음 사람이 출제) →</button>
-    </div>
-  </div>
-
-  <!-- ============ 그림 퀴즈 (캐치마인드식) ============ -->
-  <div class="screen" id="scr-catchmind">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🖍️ 그림 퀴즈</h2></div>
-
-    <div id="cm-setup">
-      <p class="hint">그리는 사람만 제시어를 몰래 확인하고, 폰을 테이블에 놓고 그려요. 나머지는 화면 보면서 정답을 외치기! 맞힌 사람 <b style="color:var(--steppe)">+2점</b>, 그린 사람 <b style="color:var(--fire)">+1점</b>. 전원이 한 번씩 그리면 한 바퀴!</p>
-      <div class="field"><label>카테고리</label><div class="seg" id="cm-cats"></div></div>
-      <div class="field"><label>제한시간</label><div class="seg" id="cm-times">
-        <button data-t="15">15초</button><button data-t="30" class="sel">30초</button><button data-t="60">60초</button>
-      </div></div>
-      <div class="field"><label>바퀴 수 (전원 1번 그리기 = 1바퀴)</label><div class="seg" id="cm-rounds">
-        <button data-r="1" class="sel">1바퀴</button><button data-r="2">2바퀴</button><button data-r="3">3바퀴</button>
-      </div></div>
-      <button class="btn mt" id="cm-start">시작!</button>
-    </div>
-
-    <div id="cm-secret" style="display:none" class="pass-stage">
-      <div class="who-label" id="cm-secret-round">그릴 사람</div>
-      <div class="who" id="cm-secret-name">-</div>
-      <div class="hint" style="margin:0">혼자만 제시어를 확인하세요!</div>
-      <button class="hold-btn" id="cm-secret-hold"><div class="sub">🤫</div><div class="big">꾹 누르면<br>제시어 공개</div><div class="sub">손 떼면 사라져요</div></button>
-      <button class="btn ghost pass-next" id="cm-reroll" style="margin-top:16px">🎲 제시어 재뽑기</button>
-      <button class="btn mt" id="cm-godraw" disabled>외웠어요, 그리기 시작! →</button>
-    </div>
-
-    <div id="cm-draw" style="display:none">
-      <div class="cm-score-strip" id="cm-scores"></div>
-      <div class="cm-topline"><b id="cm-drawer-label">-</b><span class="dr-timer" id="cm-timer">90</span></div>
-      <canvas id="cm-canvas"></canvas>
-      <div class="dr-tools" id="cm-colors"></div>
-      <div class="dr-tools">
-        <button class="dr-tool sel" id="cm-pen">✏️ 펜</button>
-        <button class="dr-tool" id="cm-thick">🖌️ 굵게</button>
-        <button class="dr-tool" id="cm-eraser">🧽 지우개</button>
-        <button class="dr-tool" id="cm-undo">↩️</button>
-        <button class="dr-tool" id="cm-clear" style="line-height:0;padding:6px 10px"><px-sprite name="trash" scale="2"></px-sprite></button>
-        <button class="dr-tool cm-peek" id="cm-peek">🤫 제시어 (꾹, 손으로 가리고!)</button>
-      </div>
-      <div class="cm-actions">
-        <button class="btn" id="cm-correct">🙌 정답 나왔어요!</button>
-        <button class="btn ghost" id="cm-giveup">⏭️ 포기</button>
-      </div>
-    </div>
-
-    <div id="cm-pick" style="display:none">
-      <div class="stage-center" style="flex:0;gap:8px">
-        <span class="tag">누가 맞혔나요?</span>
-      </div>
-      <div class="name-grid" id="cm-pick-grid"></div>
-    </div>
-
-    <div id="cm-end" style="display:none" class="stage-center">
-      <span class="tag">최종 점수</span>
-      <div class="reveal-card" id="cm-rank"></div>
-      <button class="btn" id="cm-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 한밤의 늑대인간 ============ -->
-  <div class="screen" id="scr-wolf">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌕 한밤의 늑대인간</h2></div>
-    <div id="wf-setup">
-      <p class="hint">마피아 10분 압축판! 참가자 수 <b>+3장의 여분 카드</b>가 가운데에 깔려요. 각자 몰래 역할 확인 + 밤 능력 사용 → 토론 → 딱 한 번의 투표로 끝! <b style="color:var(--danger)">늑대가 처형되면 마을 승</b>, 아니면 늑대 승. 늑대가 가운데에만 있을 수도 있어서 추리가 두 배로 꼬입니다</p>
-      <div class="field"><label>참여자 선택 (4명 이상)</label><div class="seg" id="wf-players"></div></div>
-      <div class="field"><label>토론 시간</label><div class="seg" id="wf-times">
-        <button data-t="120">2분</button><button data-t="180" class="sel">3분</button><button data-t="300">5분</button>
-      </div></div>
-      <div class="field"><label>특수 역할 (끄면 주민으로 대체)</label><div id="wf-role-toggles"></div></div>
-      <button class="btn ghost" id="wf-help-btn">📖 역할 설명 · 마피아랑 뭐가 달라?</button>
-      <div class="reveal-card" id="wf-help" style="display:none;margin-bottom:14px"></div>
-      <div class="reveal-card" style="margin-bottom:14px"><div class="lbl">역할 구성 (자동)</div><div class="val" id="wf-roles" style="font-size:14px">-</div></div>
-      <button class="btn mt" id="wf-start">밤이 시작된다... 🌕</button>
-    </div>
-    <div id="wf-pass" style="display:none" class="pass-stage">
-      <div class="who-label" id="wf-pass-label">차례</div>
-      <div class="who" id="wf-pass-name">-</div>
-      <div class="hint" style="margin:0">폰을 전달하세요. 다른 사람은 절대 보지 않기!</div>
-      <button class="btn pass-next" id="wf-pass-go">나 왔어요 →</button>
-    </div>
-    <div id="wf-secret" style="display:none"></div>
-    <div id="wf-day" style="display:none" class="stage-center">
-      <span class="tag">☀️ 아침이 밝았다</span>
-      <div class="who" id="wf-day-timer">3:00</div>
-      <p class="hint" id="wf-day-hint">밤 사이 무슨 일이? 늑대를 찾아내세요!</p>
-      <button class="btn" id="wf-vote-start">🗳️ 투표 시작</button>
-    </div>
-    <div id="wf-vote" style="display:none">
-      <div class="pass-stage" id="wf-vote-pass">
-        <div class="who-label">투표 차례</div>
-        <div class="who" id="wf-vote-name">-</div>
-        <div class="hint" style="margin:0">몰래 투표하세요!</div>
-        <button class="btn pass-next" id="wf-vote-go">나 왔어요 →</button>
-      </div>
-      <div id="wf-vote-pick" style="display:none">
-        <p class="hint">처형할 사람을 고르세요</p>
-        <div class="name-grid" id="wf-vote-grid"></div>
-        <button class="btn ghost mt" id="wf-vote-peace">🕊️ 평화 투표 (아무도 처형하지 않기)</button>
-      </div>
-    </div>
-    <div id="wf-result" style="display:none"></div>
-  </div>
-
-  <!-- ============ 폭탄 돌리기 ============ -->
-  <div class="screen" id="scr-bomb">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>💣 폭탄 돌리기</h2></div>
-    <div id="bomb-setup">
-      <p class="hint">제시어에 맞는 답을 외치고 <b>재빨리 옆 사람에게 폰 패스!</b> 폭탄은 설정한 시간 안에서 랜덤으로 터집니다. 터질 때 들고 있던 사람이 벌칙! 답을 못 하면 패스 금지 (버티기 불가)</p>
-      <div class="field"><label>모드</label><div class="seg" id="bomb-modes">
-        <button data-m="topic" class="sel">주제 토크</button><button data-m="cho">초성 단어</button><button data-m="word">끝말잇기</button>
-      </div></div>
-      <div class="field"><label>폭탄 시간</label><div class="seg" id="bomb-fuses">
-        <button data-f="8-20">⚡ 짧게 8~20초</button><button data-f="15-45" class="sel">보통 15~45초</button><button data-f="30-60">🐢 길게 30~60초</button>
-      </div></div>
-      <button class="btn" id="bomb-start">💣 점화 준비!</button>
-    </div>
-    <div id="bomb-play" style="display:none" class="stage-center">
-      <span class="tag" id="bomb-mode-label">주제</span>
-      <div class="who" id="bomb-prompt" style="font-size:34px">-</div>
-      <div id="bomb-icon"><px-sprite name="bomb" scale="6"></px-sprite></div>
-      <div id="bomb-fusebar"><i id="bomb-zone"></i><i id="bomb-fill"></i></div>
-      <div id="bomb-sec">빨간 구간부터는 언제 터질지 모름!</div>
-      <p class="hint" id="bomb-playhint" style="margin:0">제시어 확인했으면 심지에 불붙여!</p>
-      <button class="btn" id="bomb-go">🔥 심지에 불붙이기!</button>
-      <button class="btn ghost" id="bomb-newprompt">🔁 제시어가 이상해요 (교체)</button>
-    </div>
-    <div id="bomb-flash"></div>
-    <div id="bomb-boom" style="display:none" class="stage-center">
-      <div style="display:flex;justify-content:center"><px-sprite name="boom" scale="7"></px-sprite></div>
-      <div class="who" style="font-size:38px">펑!!!</div>
-      <div class="reveal-card"><div class="lbl">지금 폰 들고 있는 사람 벌칙</div><div class="val" id="bomb-penalty" style="font-size:20px">-</div></div>
-      <button class="btn" id="bomb-again">한 판 더!</button>
-    </div>
-  </div>
-
-  <!-- ============ 텔레파시 게임 ============ -->
-  <div class="screen" id="scr-tele">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>💭 텔레파시 게임</h2></div>
-    <div id="te-setup">
-      <p class="hint">질문을 보고 각자 <b>몰래</b> 답을 입력 → 동시 공개! <b style="color:var(--steppe)">같은 답을 쓴 사람들은 그 인원수만큼 점수</b> (3명 일치 = 각자 3점). 혼자만 쓴 답은 0점. 우리 일행, 얼마나 통할까요?</p>
-      <div class="field"><label>라운드 수</label><div class="seg" id="te-rounds">
-        <button data-r="3">3문제</button><button data-r="5" class="sel">5문제</button><button data-r="7">7문제</button>
-      </div></div>
-      <button class="btn" id="te-start">시작!</button>
-    </div>
-    <div id="te-q" style="display:none" class="stage-center">
-      <span class="tag" id="te-q-step">Q1</span>
-      <div class="who" id="te-question" style="font-size:27px">-</div>
-      <p class="hint" style="margin:0">모두 질문을 확인했으면, 폰을 돌리며 몰래 입력합니다</p>
-      <button class="btn" id="te-input-start">몰래 입력 시작 →</button>
-    </div>
-    <div id="te-pass" style="display:none" class="pass-stage">
-      <div class="who-label">입력 차례</div>
-      <div class="who" id="te-pass-name">-</div>
-      <div class="hint" style="margin:0" id="te-pass-q">-</div>
-      <button class="btn pass-next" id="te-pass-go">나 왔어요 →</button>
-    </div>
-    <div id="te-input" style="display:none">
-      <p class="hint" id="te-input-q" style="margin-bottom:8px">-</p>
-      <input class="dr-input" id="te-answer" type="text" maxlength="16" placeholder="답 입력 (짧게! 띄어쓰기 무시됨)">
-      <button class="btn mt" id="te-submit">제출하고 다음 사람에게 →</button>
-    </div>
-    <div id="te-reveal" style="display:none">
-      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag">동시 공개!</span></div>
-      <div id="te-groups"></div>
-      <div class="mb-strip" id="te-scores" style="margin-top:12px"></div>
-      <button class="btn mt" id="te-next">다음 문제 →</button>
-    </div>
-    <div id="te-end" style="display:none" class="stage-center">
-      <span class="tag">텔레파시 지수 발표</span>
-      <div class="reveal-card" id="te-rank"></div>
-      <button class="btn" id="te-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 주사위 배팅 ============ -->
-  <div class="screen" id="scr-lv">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎰 주사위 배팅</h2></div>
-    <div id="lv-setup">
-      <p class="hint">상금 더미 4개에 주사위 7개로 눈치 배팅! 굴려서 나온 눈 중 <b>하나를 골라 전부 배치</b>해요. 눈 1·2는 꽝(자동 소각 💨). 더미마다 <b>최다 배치자가 상금 독식</b>, 근데 <b style="color:var(--danger)">1위가 동률이면 그들 전원 무효</b> — 차순위가 꿀꺽!</p>
-      <div class="field"><label>참여자 선택 (2~5명)</label><div class="seg" id="lv-players"></div></div>
-      <div class="field"><label>라운드 수</label><div class="seg" id="lv-rounds">
-        <button data-r="2">2라운드</button><button data-r="3" class="sel">3라운드</button><button data-r="4">4라운드</button>
-      </div></div>
-      <button class="btn" id="lv-start">🎲 배팅 시작!</button>
-    </div>
-    <div id="lv-turn" style="display:none">
-      <div class="mb-strip" id="lv-strip"></div>
-      <div class="lv-slots" id="lv-slots"></div>
-      <div class="stage-center" style="flex:0;gap:6px;margin:14px 0 10px">
-        <span class="tag" id="lv-round-tag">ROUND 1</span>
-        <div class="who" id="lv-turn-name" style="font-size:32px">-</div>
-        <div class="hint" id="lv-roll-msg" style="margin:0">남은 주사위를 전부 굴려요!</div>
-      </div>
-      <button class="btn" id="lv-roll">🎲 굴리기!</button>
-      <div class="lv-tray" id="lv-tray"></div>
-      <div class="lv-faces" id="lv-faces" style="display:none"></div>
-      <button class="btn ghost mt" id="lv-junk-next" style="display:none">아쉽다… 다음 사람 →</button>
-    </div>
-    <div id="lv-settle" style="display:none">
-      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag" id="lv-settle-tag">정산!</span></div>
-      <div id="lv-settle-list"></div>
-      <div class="mb-strip" id="lv-settle-strip" style="margin-top:12px"></div>
-      <button class="btn mt" id="lv-next-round">다음 라운드 →</button>
-    </div>
-    <div id="lv-end" style="display:none" class="stage-center">
-      <span class="tag">최종 결과</span>
-      <div class="reveal-card" id="lv-rank"></div>
-      <button class="btn" id="lv-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 라스베가스 ============ -->
-  <div class="screen" id="scr-vg">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎰 라스베가스</h2></div>
-    <div id="vg-setup">
-      <p class="hint">카지노 6곳(1~6번)에 주사위 8개로 배팅! 굴려서 나온 눈 중 <b>하나를 골라 전부</b> 그 번호 카지노에 올려. 카지노마다 <b>주사위 최다 순서로 지폐를 나눠 갖는데</b>, <b style="color:var(--danger)">1등이 동률이면 그들끼리 상쇄(꽝)</b> — 다음 순서가 챙겨. 라운드 끝나면 💰 최다 부자 승!</p>
-      <div class="field"><label id="vg-players-label">참여자 선택 (2~6명)</label><div class="seg" id="vg-players"></div></div>
-      <div class="field"><label>라운드 수</label><div class="seg" id="vg-rounds">
-        <button data-r="3">3라운드</button><button data-r="4" class="sel">4라운드</button>
-      </div></div>
-      <button class="btn" id="vg-start">🎲 게임 시작!</button>
-    </div>
-    <div id="vg-turn" style="display:none">
-      <div class="mb-strip" id="vg-strip"></div>
-      <div class="vg-casinos" id="vg-casinos"></div>
-      <div class="stage-center" style="flex:0;gap:6px;margin:14px 0 10px">
-        <span class="tag" id="vg-round-tag">ROUND 1</span>
-        <div class="who" id="vg-turn-name" style="font-size:30px">-</div>
-        <div class="hint" id="vg-roll-msg" style="margin:0"></div>
-      </div>
-      <button class="btn" id="vg-roll">🎲 굴리기!</button>
-      <div class="lv-tray" id="vg-tray"></div>
-      <div class="lv-faces vg-faces" id="vg-faces" style="display:none"></div>
-      <div class="hint" id="vg-wait" style="display:none;text-align:center"></div>
-    </div>
-    <div id="vg-settle" style="display:none">
-      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag" id="vg-settle-tag">정산!</span></div>
-      <div id="vg-settle-list"></div>
-      <div class="mb-strip" id="vg-settle-strip" style="margin-top:12px"></div>
-      <button class="btn mt" id="vg-next-round">다음 라운드 →</button>
-      <p class="hint" id="vg-settle-wait" style="display:none;text-align:center">호스트가 다음 라운드를 시작하길 기다리는 중…</p>
-    </div>
-    <div id="vg-end" style="display:none" class="stage-center">
-      <span class="tag">최종 결과</span>
-      <div class="reveal-card" id="vg-rank"></div>
-      <button class="btn" id="vg-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 버저 퀴즈쇼 ============ -->
-  <div class="screen" id="scr-bz">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 버저 퀴즈쇼</h2></div>
-    <div id="bz-setup">
-      <p class="hint">폰을 테이블 <b>한가운데</b> 놓고 각자 자기 버저 앞에! 문제 뜨면 <b>먼저 탭한 사람만</b> 답할 권리를 얻어요. 맞으면 +1, 틀리면 −1이고 <b style="color:var(--danger)">그 문제엔 재도전 금지</b> — 남은 사람들이 같은 문제로 재버저! 5명 이상이면 2인 1팀으로 뭉치자</p>
-      <div class="field"><label>버저 인원 (2~4명, 마주 보고 앉기)</label><div class="seg" id="bz-players"></div></div>
-      <div class="field"><label>문제 유형 (복수 선택 가능)</label><div class="seg" id="bz-types">
-        <button data-t="ox" class="sel">OX 상식</button><button data-t="cho">초성 퀴즈</button><button data-t="calc">빠른 계산</button>
-      </div></div>
-      <div class="field"><label>목표 점수 (선취)</label><div class="seg" id="bz-goal">
-        <button data-g="5">5점</button><button data-g="7" class="sel">7점</button><button data-g="10">10점</button>
-      </div></div>
-      <button class="btn" id="bz-start">🔔 퀴즈쇼 시작!</button>
-    </div>
-    <div id="bz-play" style="display:none">
-      <div class="bz-stage">
-        <div class="bz-row top" id="bz-top"></div>
-        <div class="bz-center">
-          <div class="bz-q flip" id="bz-q-flip"></div>
-          <div class="bz-mid" id="bz-mid"></div>
-          <div class="bz-q" id="bz-q"></div>
-        </div>
-        <div class="bz-row" id="bz-bottom"></div>
-      </div>
-    </div>
-    <div id="bz-end" style="display:none" class="stage-center">
-      <span class="tag">퀴즈쇼 종료!</span>
-      <div class="who" id="bz-champ" style="color:var(--fire)">-</div>
-      <div class="reveal-card" id="bz-rank"></div>
-      <button class="btn" id="bz-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 우리말 겨루기 ============ -->
-  <div class="screen" id="scr-um">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📖 우리말 겨루기</h2></div>
-    <div id="um-setup">
-      <p class="hint">한 명씩 돌아가며 <b>2지선다 스피드 퀴즈</b>! 맞춤법·속담·우리말 뜻이 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 우승</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 보여주니까 구경꾼도 같이 배우기~</p>
-      <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="um-players"></div></div>
-      <div class="field"><label>문제 유형 (복수 선택)</label><div class="seg" id="um-types">
-        <button data-t="spell" class="sel">맞춤법</button><button data-t="prov" class="sel">속담</button><button data-t="mean" class="sel">우리말 뜻</button>
-      </div></div>
-      <div class="field"><label>1인당 제한 시간</label><div class="seg" id="um-time">
-        <button data-s="30">30초</button><button data-s="45" class="sel">45초</button><button data-s="60">60초</button>
-      </div></div>
-      <button class="btn" id="um-start">📖 겨루기 시작!</button>
-    </div>
-    <div id="um-pass" style="display:none" class="pass-stage">
-      <div class="who-label">도전 차례</div>
-      <div class="who" id="um-pass-name">-</div>
-      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
-      <button class="btn pass-next" id="um-go">준비 완료, 시작! →</button>
-    </div>
-    <div id="um-play" style="display:none">
-      <div class="um-hud"><div class="who" id="um-play-name">-</div><div><span class="tag" id="um-clock">45</span> <span class="um-score" id="um-play-score">0점</span></div></div>
-      <div class="um-timebar" id="um-timebar"><i id="um-timefill" style="width:100%"></i></div>
-      <div class="um-qcard"><div class="tp" id="um-qtype">맞춤법</div><div class="qq" id="um-qtext">-</div></div>
-      <div class="um-choices"><button id="um-c0">-</button><button id="um-c1">-</button></div>
-      <div class="um-flash" id="um-flash"></div>
-    </div>
-    <div id="um-between" style="display:none" class="stage-center">
-      <span class="tag">타임 업!</span>
-      <div class="who" id="um-bt-name" style="color:var(--fire)">-</div>
-      <div class="hint" id="um-bt-msg" style="margin:0">-</div>
-      <button class="btn" id="um-next-player">다음 사람 →</button>
-    </div>
-    <div id="um-end" style="display:none" class="stage-center">
-      <span class="tag">우리말 지킴이 발표</span>
-      <div class="reveal-card" id="um-rank"></div>
-      <button class="btn" id="um-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 상식퀴즈 (초원의 골든벨) ============ -->
-  <div class="screen" id="scr-gq">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🦉 상식퀴즈</h2></div>
-    <div id="gq-setup">
-      <p class="hint">한 명씩 돌아가며 <b>4지선다 상식 스피드전</b>! 역사·과학·지리·문화가 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 골든벨 주인공</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 알려주니까 구경꾼도 같이 배우기~</p>
-      <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="gq-players"></div></div>
-      <div class="field"><label>분야 (복수 선택)</label><div class="seg" id="gq-groups">
-        <button data-g="hist" class="sel">역사</button><button data-g="geo" class="sel">지리</button><button data-g="sci" class="sel">과학</button><button data-g="cult" class="sel">문화·예술</button><button data-g="soc" class="sel">사회·생활</button>
-      </div></div>
-      <div class="field"><label>1인당 제한 시간</label><div class="seg" id="gq-time">
-        <button data-s="30">30초</button><button data-s="45" class="sel">45초</button><button data-s="60">60초</button>
-      </div></div>
-      <button class="btn" id="gq-start">🦉 골든벨 시작!</button>
-    </div>
-    <div id="gq-pass" style="display:none" class="pass-stage">
-      <div class="who-label">도전 차례</div>
-      <div class="who" id="gq-pass-name">-</div>
-      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
-      <button class="btn pass-next" id="gq-go">준비 완료, 시작! →</button>
-    </div>
-    <div id="gq-play" style="display:none">
-      <div class="um-hud"><div class="who" id="gq-play-name">-</div><div><span class="tag" id="gq-clock">45</span> <span class="um-score" id="gq-play-score">0점</span></div></div>
-      <div class="um-timebar" id="gq-timebar"><i id="gq-timefill" style="width:100%"></i></div>
-      <div class="um-qcard"><div class="tp" id="gq-qtype">상식</div><div class="qq" id="gq-qtext">-</div></div>
-      <div class="um-choices gq-choices"><button id="gq-c0">-</button><button id="gq-c1">-</button><button id="gq-c2">-</button><button id="gq-c3">-</button></div>
-      <div class="um-flash" id="gq-flash"></div>
-    </div>
-    <div id="gq-between" style="display:none" class="stage-center">
-      <span class="tag">타임 업!</span>
-      <div class="who" id="gq-bt-name" style="color:var(--fire)">-</div>
-      <div class="hint" id="gq-bt-msg" style="margin:0">-</div>
-      <button class="btn" id="gq-next-player">다음 사람 →</button>
-    </div>
-    <div id="gq-end" style="display:none" class="stage-center">
-      <span class="tag">골든벨 주인공 발표</span>
-      <div class="reveal-card" id="gq-rank"></div>
-      <button class="btn" id="gq-again">다시 하기</button>
-    </div>
-  </div>
-
-  <!-- ============ 고비의 별 (텍스트 어드벤처) ============ -->
-  <div class="screen" id="scr-ta">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📜 고비의 별</h2></div>
-    <div id="ta-setup">
-      <p class="hint">텡그리와 떠나는 <b>3일 밤의 협동 어드벤처</b>. 선택은 일행이 돌아가며 담당하고, 판정은 <b>스탯 + 🎲d6</b>이 결정해요. 실패해도 죽지 않아요 — 길이 험해질 뿐! 엔딩은 4종!</p>
-      <div class="field"><label>파티 (설정의 일행 순서대로 선택권이 돌아요)</label><div class="ta-party" id="ta-party"></div></div>
-      <button class="btn" id="ta-new">🌠 처음부터 떠나기</button>
-      <button class="btn ghost mt" id="ta-continue" style="display:none">⏳ 이어하기</button>
-    </div>
-    <div id="ta-play" style="display:none">
-      <div class="ta-hud" id="ta-hud"></div>
-      <div class="ta-box">
-        <div class="ta-port" id="ta-port"></div>
-        <div class="ta-body">
-          <div class="ta-nm" id="ta-nm"></div>
-          <div class="ta-text" id="ta-text"></div>
-        </div>
-      </div>
-      <div class="ta-turnbar" id="ta-turnbar" style="display:none"></div>
-      <div id="ta-choices"></div>
-    </div>
-    <div class="ta-roll" id="ta-roll" style="display:none">
-      <div class="ta-roll-card">
-        <div class="ta-roll-tt" id="ta-roll-tt"></div>
-        <div class="ta-roll-num" id="ta-roll-num">?</div>
-        <div class="ta-roll-rs" id="ta-roll-rs"></div>
-      </div>
-    </div>
-  </div>
 
 
-  <!-- ============ 숫자야구 ============ -->
-  <div class="screen" id="scr-nb">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚾ 숫자야구</h2></div>
-    <div id="nb-setup">
-      <p class="hint">서로의 비밀 숫자를 추리하는 2인 대전! 0~9 <b>중복 없는</b> 숫자, 자리·숫자 다 맞으면 <b>S(스트라이크)</b>, 숫자만 맞으면 <b>B(볼)</b>. 올 스트라이크 먼저 맞히면 승리 — 단 <b style="color:var(--fire)">후공에겐 마지막 동수 기회</b>가 있어.</p>
-      <div class="field"><label>대결할 2명 (선공 · 후공)</label><div class="seg" id="nb-players"></div></div>
-      <div class="field"><label>자릿수</label><div class="seg" id="nb-digits">
-        <button data-d="3" class="sel">3자리</button><button data-d="4">4자리</button>
-      </div></div>
-      <button class="btn" id="nb-start">⚾ 비밀 숫자 정하기 →</button>
-    </div>
-    <div id="nb-set" style="display:none" class="stage-center">
-      <span class="tag" id="nb-set-name">-</span>
-      <div class="hint" id="nb-set-msg" style="margin:0"></div>
-      <div class="nb-entry" id="nb-set-entry"></div>
-      <div class="nb-pad" id="nb-set-pad"></div>
-    </div>
-    <div id="nb-play" style="display:none">
-      <div class="stage-center" style="flex:0;gap:6px;margin:6px 0 10px">
-        <span class="tag" id="nb-turn-tag">추측할 차례</span>
-        <div class="who" id="nb-turn-name" style="font-size:26px">-</div>
-        <div class="hint" id="nb-turn-msg" style="margin:0"></div>
-      </div>
-      <div class="nb-logs" id="nb-logs"></div>
-      <div class="nb-entry" id="nb-play-entry"></div>
-      <div class="nb-pad" id="nb-play-pad"></div>
-    </div>
-    <div id="nb-end" style="display:none" class="stage-center">
-      <div class="reveal-card" id="nb-result"></div>
-      <div id="nb-reveal"></div>
-      <button class="btn mt" id="nb-again">다시 하기</button>
-    </div>
-  </div>
 
-  <!-- ============ 이야기꾼의 밤 (gm) — GM 보조 즉흥 모험 ============ -->
-  <div class="screen" id="scr-gm">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔥 이야기꾼의 밤</h2></div>
-    <div id="gm-intro">
-      <p class="hint">한 명이 <b>이야기꾼(GM)</b>이 돼. 앱이 상황을 던지면 살을 붙여 들려주고, 나머진 "난 이렇게 할래" 외쳐. 애매하면 <b>주사위</b>로 판가름 — 정답도 대본도 없어, 매판 다른 이야기가 나와.</p>
-      <div class="field"><label>이렇게 놀아 (3명+ 추천)</label>
-        <ol class="gm-how">
-          <li>이야기꾼 한 명을 정해 (폰 쥔 사람). 나머진 모험가.</li>
-          <li>🌀 <b>다음 장면</b>으로 상황을 뽑고, 이야기꾼이 실감나게 묘사해.</li>
-          <li>모험가가 행동을 선언하면 🎲 <b>판정</b>으로 성공·실패를 가려.</li>
-          <li>❗꼬임·👤인물로 이야기를 비틀고, 🏁결말로 마무리해.</li>
-        </ol>
-      </div>
-      <button class="btn" id="gm-begin">🔥 이야기 시작 →</button>
-    </div>
-    <div id="gm-play" style="display:none">
-      <div class="reveal-card" style="text-align:center">
-        <div class="lbl" id="gm-kind">여정의 시작</div>
-        <div class="gm-txt" id="gm-card-txt"></div>
-      </div>
-      <div class="reveal-card" id="gm-dice" style="display:none;text-align:center;margin-top:10px">
-        <div class="gm-die" id="gm-die"><px-sprite name="die6" scale="4"></px-sprite></div>
-        <div id="gm-roll-res"></div>
-      </div>
-      <div class="seg" id="gm-actions" style="margin-top:14px">
-        <button data-act="scene">🌀 다음 장면</button>
-        <button data-act="twist">❗ 꼬임</button>
-        <button data-act="npc">👤 인물</button>
-        <button data-act="roll">🎲 판정</button>
-        <button data-act="end">🏁 결말</button>
-      </div>
-      <div class="seg" id="gm-diff" style="display:none;margin-top:10px">
-        <button data-dc="3">쉬움</button>
-        <button data-dc="4">보통</button>
-        <button data-dc="5">어려움</button>
-      </div>
-      <button class="btn ghost mt" id="gm-restart">새 이야기</button>
-    </div>
-  </div>
 
-  <!-- ============ 룰렛 ============ -->
-  <div class="screen" id="scr-roulette">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎯 복불복 룰렛</h2></div>
-    <div class="stage-center">
-      <span class="tag" id="rou-tag">오늘의 주인공은?</span>
-      <div class="roulette-name" id="rou-name">···</div>
-      <div class="penalty" id="rou-penalty"></div>
-      <button class="btn" id="rou-spin">돌리기!</button>
-      <button class="btn ghost" id="rou-penalty-btn">벌칙도 뽑기</button>
-      <button class="btn ghost" id="rou-list-btn">벌칙 목록 / 수정</button>
-      <div class="pen-panel" id="rou-list-panel" hidden>
-        <p class="pen-hint">한 줄에 벌칙 하나. 룰렛·폭탄 게임 공용으로 쓰여.</p>
-        <textarea class="pen-edit" id="rou-list-edit" rows="10" spellcheck="false" autocapitalize="off"></textarea>
-        <div class="pen-actions">
-          <button class="btn" id="rou-list-save">저장</button>
-          <button class="btn ghost" id="rou-list-reset">기본값 복원</button>
-        </div>
-        <div class="pen-saved" id="rou-list-saved"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ============ 색찾기 (cf) — 여러 폰 색 사냥 ============ -->
-  <div class="screen" id="scr-cf">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌈 색찾기</h2></div>
-    <div id="cf-root"></div>
-  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </div>
 <script src="assets/sprites.js"></script>

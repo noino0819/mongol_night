@@ -1,4 +1,68 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("catchmind", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🖍️ 그림 퀴즈</h2></div>
+
+    <div id="cm-setup">
+      <p class="hint">그리는 사람만 제시어를 몰래 확인하고, 폰을 테이블에 놓고 그려요. 나머지는 화면 보면서 정답을 외치기! 맞힌 사람 <b style="color:var(--steppe)">+2점</b>, 그린 사람 <b style="color:var(--fire)">+1점</b>. 전원이 한 번씩 그리면 한 바퀴!</p>
+      <div class="field"><label>카테고리</label><div class="seg" id="cm-cats"></div></div>
+      <div class="field"><label>제한시간</label><div class="seg" id="cm-times">
+        <button data-t="15">15초</button><button data-t="30" class="sel">30초</button><button data-t="60">60초</button>
+      </div></div>
+      <div class="field"><label>바퀴 수 (전원 1번 그리기 = 1바퀴)</label><div class="seg" id="cm-rounds">
+        <button data-r="1" class="sel">1바퀴</button><button data-r="2">2바퀴</button><button data-r="3">3바퀴</button>
+      </div></div>
+      <button class="btn mt" id="cm-start">시작!</button>
+    </div>
+
+    <div id="cm-secret" style="display:none" class="pass-stage">
+      <div class="who-label" id="cm-secret-round">그릴 사람</div>
+      <div class="who" id="cm-secret-name">-</div>
+      <div class="hint" style="margin:0">혼자만 제시어를 확인하세요!</div>
+      <button class="hold-btn" id="cm-secret-hold"><div class="sub">🤫</div><div class="big">꾹 누르면<br>제시어 공개</div><div class="sub">손 떼면 사라져요</div></button>
+      <button class="btn ghost pass-next" id="cm-reroll" style="margin-top:16px">🎲 제시어 재뽑기</button>
+      <button class="btn mt" id="cm-godraw" disabled>외웠어요, 그리기 시작! →</button>
+    </div>
+
+    <div id="cm-draw" style="display:none">
+      <div class="cm-score-strip" id="cm-scores"></div>
+      <div class="cm-topline"><b id="cm-drawer-label">-</b><span class="dr-timer" id="cm-timer">90</span></div>
+      <canvas id="cm-canvas"></canvas>
+      <div class="dr-tools" id="cm-colors"></div>
+      <div class="dr-tools">
+        <button class="dr-tool sel" id="cm-pen">✏️ 펜</button>
+        <button class="dr-tool" id="cm-thick">🖌️ 굵게</button>
+        <button class="dr-tool" id="cm-eraser">🧽 지우개</button>
+        <button class="dr-tool" id="cm-undo">↩️</button>
+        <button class="dr-tool" id="cm-clear" style="line-height:0;padding:6px 10px"><px-sprite name="trash" scale="2"></px-sprite></button>
+        <button class="dr-tool cm-peek" id="cm-peek">🤫 제시어 (꾹, 손으로 가리고!)</button>
+      </div>
+      <div class="cm-actions">
+        <button class="btn" id="cm-correct">🙌 정답 나왔어요!</button>
+        <button class="btn ghost" id="cm-giveup">⏭️ 포기</button>
+      </div>
+    </div>
+
+    <div id="cm-pick" style="display:none">
+      <div class="stage-center" style="flex:0;gap:8px">
+        <span class="tag">누가 맞혔나요?</span>
+      </div>
+      <div class="name-grid" id="cm-pick-grid"></div>
+    </div>
+
+    <div id="cm-end" style="display:none" class="stage-center">
+      <span class="tag">최종 점수</span>
+      <div class="reveal-card" id="cm-rank"></div>
+      <button class="btn" id="cm-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 그림 퀴즈 (캐치마인드식) ---------- */
+  .cm-score-strip{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .cm-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .cm-topline b{font-size:15px}
+  .cm-actions{display:flex;gap:8px;margin-top:10px}
+  .cm-peek{font-size:13px !important}`);
 /* ================= 그림 퀴즈 (캐치마인드식) ================= */
 const CM_BANK = {
   "쉬움 (사물/동물)": [].concat(WORDS["동물"], ["게르","텐트","별","말","우산","안경","라면","기타","자전거","선인장","무지개","전구","시계","눈사람"]),
@@ -222,4 +286,4 @@ $("cm-thick").addEventListener("click", () => { cm.erasing = false; cm.size = 10
 $("cm-eraser").addEventListener("click", () => { cm.erasing = true; cmToolSel("cm-eraser"); });
 $("cm-undo").addEventListener("click", () => { cm.strokes.pop(); cmRepaint(); });
 $("cm-clear").addEventListener("click", () => { cm.strokes = []; cmRepaint(); });
-
+snRegisterGame("catchmind", cmReset);

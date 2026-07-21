@@ -1,4 +1,49 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("gm", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔥 이야기꾼의 밤</h2></div>
+    <div id="gm-intro">
+      <p class="hint">한 명이 <b>이야기꾼(GM)</b>이 돼. 앱이 상황을 던지면 살을 붙여 들려주고, 나머진 "난 이렇게 할래" 외쳐. 애매하면 <b>주사위</b>로 판가름 — 정답도 대본도 없어, 매판 다른 이야기가 나와.</p>
+      <div class="field"><label>이렇게 놀아 (3명+ 추천)</label>
+        <ol class="gm-how">
+          <li>이야기꾼 한 명을 정해 (폰 쥔 사람). 나머진 모험가.</li>
+          <li>🌀 <b>다음 장면</b>으로 상황을 뽑고, 이야기꾼이 실감나게 묘사해.</li>
+          <li>모험가가 행동을 선언하면 🎲 <b>판정</b>으로 성공·실패를 가려.</li>
+          <li>❗꼬임·👤인물로 이야기를 비틀고, 🏁결말로 마무리해.</li>
+        </ol>
+      </div>
+      <button class="btn" id="gm-begin">🔥 이야기 시작 →</button>
+    </div>
+    <div id="gm-play" style="display:none">
+      <div class="reveal-card" style="text-align:center">
+        <div class="lbl" id="gm-kind">여정의 시작</div>
+        <div class="gm-txt" id="gm-card-txt"></div>
+      </div>
+      <div class="reveal-card" id="gm-dice" style="display:none;text-align:center;margin-top:10px">
+        <div class="gm-die" id="gm-die"><px-sprite name="die6" scale="4"></px-sprite></div>
+        <div id="gm-roll-res"></div>
+      </div>
+      <div class="seg" id="gm-actions" style="margin-top:14px">
+        <button data-act="scene">🌀 다음 장면</button>
+        <button data-act="twist">❗ 꼬임</button>
+        <button data-act="npc">👤 인물</button>
+        <button data-act="roll">🎲 판정</button>
+        <button data-act="end">🏁 결말</button>
+      </div>
+      <div class="seg" id="gm-diff" style="display:none;margin-top:10px">
+        <button data-dc="3">쉬움</button>
+        <button data-dc="4">보통</button>
+        <button data-dc="5">어려움</button>
+      </div>
+      <button class="btn ghost mt" id="gm-restart">새 이야기</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 이야기꾼의 밤 (gm) ---------- */
+.gm-how{margin:0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.7}
+.gm-how li{margin:4px 0}
+.gm-txt{font-size:17px;line-height:1.6;word-break:keep-all;margin-top:10px;color:var(--milk)}
+.gm-die{font-size:54px;line-height:1;margin-bottom:6px}`);
 /* ================= 이야기꾼의 밤 (gm) — GM 보조 즉흥 모험 =================
    사람이 GM(이야기꾼). 앱은 상황 씨앗·주사위·인물만 던진다. 대본 없음.
    → 사전 저작 분기 그래프인 고비의 별(ta)과 대비되는, 매판 달라지는 즉흥판. */
@@ -196,3 +241,4 @@ function gmRoll(dc, label){
     }
   }, 55);
 }
+snRegisterGame("gm", gmReset);

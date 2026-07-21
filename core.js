@@ -121,31 +121,8 @@ document.addEventListener("click", (e) => {
   }
 });
 function resetGame(name){
-  if (name === "liar") liarReset();
-  if (name === "mafia") mafiaReset();
-  if (name === "choseong"){ $("cho-setup").style.display = ""; $("cho-play").style.display = "none"; }
-  if (name === "balance"){ balNext(); }
-  if (name === "roulette"){ $("rou-name").textContent = "···"; $("rou-name").className = "roulette-name"; $("rou-penalty").textContent = ""; $("rou-tag").textContent = "오늘의 주인공은?"; }
-  if (name === "fruit"){ fruitReset(); }
-  if (name === "omok"){ omokNew(); }
-  if (name === "forehead"){ fhReset(); }
-  if (name === "life"){ lifeReset(); }
-  if (name === "drawrelay"){ drReset(); }
-  if (name === "catchmind"){ cmReset(); }
-  if (name === "wolf"){ wfReset(); }
-  if (name === "bomb"){ bombReset(); }
-  if (name === "tele"){ teReset(); }
-  if (name === "lv"){ lvReset(); }
-  if (name === "vg"){ vgReset(); }
-  if (name === "bz"){ bzReset(); }
-  if (name === "um"){ umReset(); }
-  if (name === "gq"){ gqReset(); }
-  if (name === "ta"){ taReset(); }
-  if (name === "nb"){ nbReset(); }
-  if (name === "gm"){ gmReset(); }
-  if (name === "cf"){ cfReset(); }
-  if (name === "mp"){ mpEnter(); } /* 연결 유지 중이면 방 화면 복귀, 아니면 초기화 */
-  if (SN_RESETS[name]) SN_RESETS[name]();   /* 신규 게임: snRegisterGame 레지스트리 (위 스위치 수정 불필요) */
+  if (name === "mp"){ mpEnter(); } /* 연결 유지 중이면 방 화면 복귀 */
+  if (SN_RESETS[name]) SN_RESETS[name]();   /* 게임 리셋은 각 games/*.js가 snRegisterGame으로 등록 */
 }
 
 /* ---- 게임 자체 등록 인프라: 새 게임은 index.html 무수정 (games/*.js에서 화면·CSS·리셋 등록) ---- */

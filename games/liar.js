@@ -1,4 +1,27 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("liar", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🐺 라이어 게임</h2></div>
+    <div id="liar-setup">
+      <p class="hint">모두에게 같은 제시어가 보이지만, 딱 한 명(라이어)에게는 안 보여요. 돌아가며 제시어에 대해 한 마디씩 말하고, 라이어가 누구인지 투표! 라이어는 제시어를 맞히면 역전승.</p>
+      <div class="field">
+        <label>카테고리</label>
+        <div class="seg" id="liar-cats"></div>
+      </div>
+      <button class="btn mt" id="liar-start">게임 시작</button>
+    </div>
+    <div id="liar-pass" style="display:none" class="pass-stage"></div>
+    <div id="liar-play" style="display:none" class="stage-center">
+      <span class="tag" id="liar-cat-tag"></span>
+      <div class="timer" id="liar-timer">3:00</div>
+      <p class="hint" style="margin:0">돌아가면서 제시어에 대해 한 마디씩!<br>시간이 끝나면 라이어 지목 투표</p>
+      <button class="btn" id="liar-timer-btn">타이머 시작</button>
+      <button class="btn ghost" id="liar-reveal-btn">라이어 공개하기</button>
+      <div class="reveal-card" id="liar-result" style="display:none"></div>
+      <button class="btn ghost" id="liar-again" style="display:none">같은 설정으로 한 판 더</button>
+    </div>
+  `);
 /* ================= 라이어 게임 =================
    폰 하나 모드: 폰 돌려가며 꾹눌러 제시어 확인(runPassPhase, 기존 그대로).
    여러 폰 모드: 각자 폰에 자기 역할만 뜸 → 안 돌려도 됨. 호스트가 역할 배분·공개.
@@ -143,3 +166,4 @@ $("liar-reveal-btn").addEventListener("click", () => {
   if (liarState.multi) mpBroadcast({ t: "reveal", liarName: liarState.liarName, word: liarState.word });
   });
 });
+snRegisterGame("liar", liarReset);

@@ -1,4 +1,53 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("bz", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 버저 퀴즈쇼</h2></div>
+    <div id="bz-setup">
+      <p class="hint">폰을 테이블 <b>한가운데</b> 놓고 각자 자기 버저 앞에! 문제 뜨면 <b>먼저 탭한 사람만</b> 답할 권리를 얻어요. 맞으면 +1, 틀리면 −1이고 <b style="color:var(--danger)">그 문제엔 재도전 금지</b> — 남은 사람들이 같은 문제로 재버저! 5명 이상이면 2인 1팀으로 뭉치자</p>
+      <div class="field"><label>버저 인원 (2~4명, 마주 보고 앉기)</label><div class="seg" id="bz-players"></div></div>
+      <div class="field"><label>문제 유형 (복수 선택 가능)</label><div class="seg" id="bz-types">
+        <button data-t="ox" class="sel">OX 상식</button><button data-t="cho">초성 퀴즈</button><button data-t="calc">빠른 계산</button>
+      </div></div>
+      <div class="field"><label>목표 점수 (선취)</label><div class="seg" id="bz-goal">
+        <button data-g="5">5점</button><button data-g="7" class="sel">7점</button><button data-g="10">10점</button>
+      </div></div>
+      <button class="btn" id="bz-start">🔔 퀴즈쇼 시작!</button>
+    </div>
+    <div id="bz-play" style="display:none">
+      <div class="bz-stage">
+        <div class="bz-row top" id="bz-top"></div>
+        <div class="bz-center">
+          <div class="bz-q flip" id="bz-q-flip"></div>
+          <div class="bz-mid" id="bz-mid"></div>
+          <div class="bz-q" id="bz-q"></div>
+        </div>
+        <div class="bz-row" id="bz-bottom"></div>
+      </div>
+    </div>
+    <div id="bz-end" style="display:none" class="stage-center">
+      <span class="tag">퀴즈쇼 종료!</span>
+      <div class="who" id="bz-champ" style="color:var(--fire)">-</div>
+      <div class="reveal-card" id="bz-rank"></div>
+      <button class="btn" id="bz-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 버저 퀴즈쇼 ---------- */
+  .bz-stage{display:flex;flex-direction:column;height:calc(100dvh - 150px);min-height:440px;gap:8px}
+  .bz-row{display:flex;gap:8px;height:23%}
+  .bz-zone{flex:1;background:var(--night2);border:2px solid var(--line);border-radius:14px;color:var(--milk);font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+  .bz-zone b{font-size:18px;font-weight:800}
+  .bz-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:4px;padding:2px 0}
+  .bz-q{font-size:19px;font-weight:800;text-align:center;line-height:1.45;min-height:1.4em;padding:0 4px;word-break:keep-all}
+  .bz-q .bz-sub{display:block;font-size:12px;color:var(--dim);font-weight:700}
+  .bz-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:110px}
+  .bz-timer{font-size:30px;font-weight:900;color:var(--ember)}
+  .bz-btns{display:flex;gap:10px}
+  .bz-btns button{background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--milk);font-size:26px;padding:10px 22px;font-family:inherit;font-weight:800}
+  .bz-btns button:active{border-color:var(--fire);color:var(--fire)}
+  .bz-btns button.bz-sm{font-size:14px;padding:10px 14px}
+  .bz-ans{font-size:26px;font-weight:900;color:var(--fire)}
+  .bz-next{width:auto;padding:10px 18px;font-size:15px}`);
 /* ================= 버저 퀴즈쇼 ================= */
 /* 난이도 d — 1:몸풀기(순간 헷갈림) 2:반반 갈림 3:오개념 뒤집기("헐 진짜?" · 맞히면 +2) */
 const BZ_OX = [
@@ -1026,4 +1075,4 @@ window.__guest_bz = function(){
   bzGuestShow({ phase: "wait" });
   mp.game = { onMsg(from, m){ if (m && m.t === "st") bzGuestShow(m); } };
 };
-
+snRegisterGame("bz", bzReset);

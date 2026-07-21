@@ -1,4 +1,45 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("gq", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🦉 상식퀴즈</h2></div>
+    <div id="gq-setup">
+      <p class="hint">한 명씩 돌아가며 <b>4지선다 상식 스피드전</b>! 역사·과학·지리·문화가 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 골든벨 주인공</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 알려주니까 구경꾼도 같이 배우기~</p>
+      <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="gq-players"></div></div>
+      <div class="field"><label>분야 (복수 선택)</label><div class="seg" id="gq-groups">
+        <button data-g="hist" class="sel">역사</button><button data-g="geo" class="sel">지리</button><button data-g="sci" class="sel">과학</button><button data-g="cult" class="sel">문화·예술</button><button data-g="soc" class="sel">사회·생활</button>
+      </div></div>
+      <div class="field"><label>1인당 제한 시간</label><div class="seg" id="gq-time">
+        <button data-s="30">30초</button><button data-s="45" class="sel">45초</button><button data-s="60">60초</button>
+      </div></div>
+      <button class="btn" id="gq-start">🦉 골든벨 시작!</button>
+    </div>
+    <div id="gq-pass" style="display:none" class="pass-stage">
+      <div class="who-label">도전 차례</div>
+      <div class="who" id="gq-pass-name">-</div>
+      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
+      <button class="btn pass-next" id="gq-go">준비 완료, 시작! →</button>
+    </div>
+    <div id="gq-play" style="display:none">
+      <div class="um-hud"><div class="who" id="gq-play-name">-</div><div><span class="tag" id="gq-clock">45</span> <span class="um-score" id="gq-play-score">0점</span></div></div>
+      <div class="um-timebar" id="gq-timebar"><i id="gq-timefill" style="width:100%"></i></div>
+      <div class="um-qcard"><div class="tp" id="gq-qtype">상식</div><div class="qq" id="gq-qtext">-</div></div>
+      <div class="um-choices gq-choices"><button id="gq-c0">-</button><button id="gq-c1">-</button><button id="gq-c2">-</button><button id="gq-c3">-</button></div>
+      <div class="um-flash" id="gq-flash"></div>
+    </div>
+    <div id="gq-between" style="display:none" class="stage-center">
+      <span class="tag">타임 업!</span>
+      <div class="who" id="gq-bt-name" style="color:var(--fire)">-</div>
+      <div class="hint" id="gq-bt-msg" style="margin:0">-</div>
+      <button class="btn" id="gq-next-player">다음 사람 →</button>
+    </div>
+    <div id="gq-end" style="display:none" class="stage-center">
+      <span class="tag">골든벨 주인공 발표</span>
+      <div class="reveal-card" id="gq-rank"></div>
+      <button class="btn" id="gq-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`.gq-choices button{padding:15px 8px;font-size:16px}`);
 /* ================= 상식퀴즈 (초원의 골든벨) ================= */
 /* 4지선다 문제은행 501문항 — {q:질문, o:[보기4], a:정답인덱스(0~3), c:카테고리, d:난이도(1쉬움/2보통/3어려움)} */
 /* 게임 로직(gq*)은 이 파일 아래에 추가 예정. 현재는 데이터만 (catalog go:null). */
@@ -896,3 +937,4 @@ function gqGuestR(m){
   else if (alive){ fl.textContent = "❌ 오답… 근데 아무도 못 맞혀서 생존!"; fl.className = "um-flash"; }
   else { fl.textContent = "❌ 땡! 정답은 「" + escHtml(m.ans) + "」 — 탈락"; fl.className = "um-flash no"; haptic([30, 40, 30]); }
 }
+snRegisterGame("gq", gqReset);

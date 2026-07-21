@@ -1,4 +1,10 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("cf", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌈 색찾기</h2></div>
+    <div id="cf-root"></div>
+  `);
 /* ================= 색찾기 (color hunt) — 여러 폰 전용 =================
    호스트가 라운드를 시작하면 모두의 폰에 목표 색이 뜬다. 각자 폰 카메라(중앙 네모)로
    주변에서 그 색과 가장 비슷한 걸 찾아 제출. 호스트가 제출된 색들을 목표와 비교(Lab ΔE)
@@ -263,3 +269,4 @@ function cfGuestMsg(m){
   if (scr && "MutationObserver" in window)
     new MutationObserver(() => { if (!scr.classList.contains("on")) cfCamStop(); }).observe(scr, { attributes:true, attributeFilter:["class"] });
 })();
+snRegisterGame("cf", cfReset);

@@ -1,4 +1,45 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("ta", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📜 고비의 별</h2></div>
+    <div id="ta-setup">
+      <p class="hint">텡그리와 떠나는 <b>3일 밤의 협동 어드벤처</b>. 선택은 일행이 돌아가며 담당하고, 판정은 <b>스탯 + 🎲d6</b>이 결정해요. 실패해도 죽지 않아요 — 길이 험해질 뿐! 엔딩은 4종!</p>
+      <div class="field"><label>파티 (설정의 일행 순서대로 선택권이 돌아요)</label><div class="ta-party" id="ta-party"></div></div>
+      <button class="btn" id="ta-new">🌠 처음부터 떠나기</button>
+      <button class="btn ghost mt" id="ta-continue" style="display:none">⏳ 이어하기</button>
+    </div>
+    <div id="ta-play" style="display:none">
+      <div class="ta-hud" id="ta-hud"></div>
+      <div class="ta-box">
+        <div class="ta-port" id="ta-port"></div>
+        <div class="ta-body">
+          <div class="ta-nm" id="ta-nm"></div>
+          <div class="ta-text" id="ta-text"></div>
+        </div>
+      </div>
+      <div class="ta-turnbar" id="ta-turnbar" style="display:none"></div>
+      <div id="ta-choices"></div>
+    </div>
+    <div class="ta-roll" id="ta-roll" style="display:none">
+      <div class="ta-roll-card">
+        <div class="ta-roll-tt" id="ta-roll-tt"></div>
+        <div class="ta-roll-num" id="ta-roll-num">?</div>
+        <div class="ta-roll-rs" id="ta-roll-rs"></div>
+      </div>
+    </div>
+  `);
+snAddCss(`/* ---------- 고비의 별 (ta) ---------- */
+.ta-party{display:flex;gap:6px;flex-wrap:wrap}
+
+.ta-turnbar{margin:12px 0 2px;font-size:13px;color:var(--dim);text-align:center}
+.ta-turnbar b{color:var(--steppe)}
+#ta-choices{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ta-roll{position:fixed;inset:0;background:rgba(14,21,38,.82);display:flex;align-items:center;justify-content:center;z-index:60}
+.ta-roll-card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:22px 30px;text-align:center;min-width:220px}
+.ta-roll-tt{font-size:14px;font-weight:800;color:var(--dim);margin-bottom:10px}
+.ta-roll-num{font-size:52px;font-weight:900;line-height:1.1;color:var(--milk)}
+.ta-roll-rs{font-size:15px;font-weight:800;margin-top:10px;min-height:1.5em}`);
 /* ================= 고비의 별 (ta) — 텍스트 어드벤처 엔진 ================= */
 /* 데이터 캐논. text는 저작 턴에서 교체 예정인 임시 문안 (분기 구조는 확정).
    검증: node tools/ta-validate.mjs (index.html에서 아래 블록을 추출해 검사) */
@@ -543,3 +584,4 @@ $("ta-new").addEventListener("click", () => {
   taStart(true);
 });
 $("ta-continue").addEventListener("click", taContinue);
+snRegisterGame("ta", taReset);

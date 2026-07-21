@@ -1,4 +1,44 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("tele", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>💭 텔레파시 게임</h2></div>
+    <div id="te-setup">
+      <p class="hint">질문을 보고 각자 <b>몰래</b> 답을 입력 → 동시 공개! <b style="color:var(--steppe)">같은 답을 쓴 사람들은 그 인원수만큼 점수</b> (3명 일치 = 각자 3점). 혼자만 쓴 답은 0점. 우리 일행, 얼마나 통할까요?</p>
+      <div class="field"><label>라운드 수</label><div class="seg" id="te-rounds">
+        <button data-r="3">3문제</button><button data-r="5" class="sel">5문제</button><button data-r="7">7문제</button>
+      </div></div>
+      <button class="btn" id="te-start">시작!</button>
+    </div>
+    <div id="te-q" style="display:none" class="stage-center">
+      <span class="tag" id="te-q-step">Q1</span>
+      <div class="who" id="te-question" style="font-size:27px">-</div>
+      <p class="hint" style="margin:0">모두 질문을 확인했으면, 폰을 돌리며 몰래 입력합니다</p>
+      <button class="btn" id="te-input-start">몰래 입력 시작 →</button>
+    </div>
+    <div id="te-pass" style="display:none" class="pass-stage">
+      <div class="who-label">입력 차례</div>
+      <div class="who" id="te-pass-name">-</div>
+      <div class="hint" style="margin:0" id="te-pass-q">-</div>
+      <button class="btn pass-next" id="te-pass-go">나 왔어요 →</button>
+    </div>
+    <div id="te-input" style="display:none">
+      <p class="hint" id="te-input-q" style="margin-bottom:8px">-</p>
+      <input class="dr-input" id="te-answer" type="text" maxlength="16" placeholder="답 입력 (짧게! 띄어쓰기 무시됨)">
+      <button class="btn mt" id="te-submit">제출하고 다음 사람에게 →</button>
+    </div>
+    <div id="te-reveal" style="display:none">
+      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag">동시 공개!</span></div>
+      <div id="te-groups"></div>
+      <div class="mb-strip" id="te-scores" style="margin-top:12px"></div>
+      <button class="btn mt" id="te-next">다음 문제 →</button>
+    </div>
+    <div id="te-end" style="display:none" class="stage-center">
+      <span class="tag">텔레파시 지수 발표</span>
+      <div class="reveal-card" id="te-rank"></div>
+      <button class="btn" id="te-again">다시 하기</button>
+    </div>
+  `);
 /* ================= 텔레파시 게임 ================= */
 const TELE_QS = [
   "몽골 하면 가장 먼저 떠오르는 것은?",
@@ -120,4 +160,4 @@ function teEnd(){
     rank.map((r, i) => (medals[i] || "·") + " " + r.n + " — " + r.s + "점").join("<br>") + '</div>';
 }
 $("te-again").addEventListener("click", teReset);
-
+snRegisterGame("tele", teReset);

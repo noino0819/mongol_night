@@ -1,4 +1,67 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("drawrelay", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎨 그림 릴레이</h2></div>
+
+    <div id="dr-setup">
+      <p class="hint">첫 사람이 제시어를 정하면 → 다음 사람이 <b>그림</b>으로 → 그 다음 사람은 그림만 보고 <b>추측</b> → 또 그림 → 또 추측... 마지막에 변천사를 쫙 공개! 순서는 자동으로 섞여요.</p>
+      <button class="btn" id="dr-start">첫 라운드 시작!</button>
+    </div>
+
+    <div id="dr-handoff" style="display:none" class="pass-stage">
+      <div class="who-label" id="dr-handoff-label">다음 차례</div>
+      <div class="who" id="dr-handoff-name">-</div>
+      <div class="hint" style="margin:0" id="dr-handoff-hint">폰을 전달해주세요. 다른 사람은 화면 보지 않기!</div>
+      <button class="btn pass-next" id="dr-ready">나 왔어요, 시작! →</button>
+    </div>
+
+    <div id="dr-word" style="display:none">
+      <p class="hint">아무도 안 볼 때 제시어를 정하세요. 직접 입력하거나 랜덤으로!</p>
+      <input class="dr-input" id="dr-word-input" type="text" maxlength="14" placeholder="제시어 직접 입력 (예: 게르에서 라면 먹기)">
+      <button class="btn ghost" id="dr-word-random">🎲 랜덤 제시어 뽑기</button>
+      <button class="btn mt" id="dr-word-ok">이걸로 확정!</button>
+    </div>
+
+    <div id="dr-draw" style="display:none">
+      <div class="dr-prompt"><div class="lb">이걸 그려주세요 (글자 쓰기 금지!)</div><div class="wd" id="dr-draw-word">-</div></div>
+      <canvas id="draw-canvas"></canvas>
+      <div class="dr-tools" id="dr-colors"></div>
+      <div class="dr-tools">
+        <button class="dr-tool sel" id="dr-pen">✏️ 펜</button>
+        <button class="dr-tool" id="dr-thick">🖌️ 굵게</button>
+        <button class="dr-tool" id="dr-eraser">🧽 지우개</button>
+        <button class="dr-tool" id="dr-undo">↩️ 되돌리기</button>
+        <button class="dr-tool" id="dr-clear">🗑️ 전체 삭제</button>
+        <span class="dr-timer" id="dr-timer">90</span>
+      </div>
+      <button class="btn mt" id="dr-draw-done">다 그렸어요! →</button>
+    </div>
+
+    <div id="dr-guess" style="display:none">
+      <p class="hint" style="margin-bottom:8px">앞사람이 그린 그림이에요. 뭘 그린 걸까요?</p>
+      <img class="dr-guess-img" id="dr-guess-img" alt="앞사람의 그림">
+      <input class="dr-input" id="dr-guess-input" type="text" maxlength="14" placeholder="정답 추측 입력">
+      <button class="btn" id="dr-guess-ok">제출! →</button>
+    </div>
+
+    <div id="dr-reveal" style="display:none">
+      <div class="stage-center" style="flex:0;gap:8px;margin-bottom:6px">
+        <span class="tag">🎬 변천사 대공개</span>
+        <div class="big-word" style="font-size:24px" id="dr-reveal-title"></div>
+      </div>
+      <div class="dr-chain" id="dr-chain"></div>
+      <button class="btn mt" id="dr-next-round">다음 라운드 (다음 사람이 출제) →</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 그림 릴레이 ---------- */
+  .dr-prompt{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:center;margin-bottom:10px}
+  .dr-prompt .wd{font-size:22px;font-weight:800;margin-top:4px;word-break:keep-all}
+  .dr-guess-img{width:100%;border-radius:14px;background:#F7F2E6;margin-bottom:12px}
+  .dr-chain{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .dr-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .dr-item .by{font-size:12px;color:var(--dim);font-weight:700;margin-bottom:6px}
+  .dr-item img{width:100%;border-radius:10px;background:#F7F2E6}`);
 /* ================= 그림 릴레이 (갈틱폰 스타일) ================= */
 const DR_COLORS = ["#1A1A1A","#E8434A","#2E7DD1","#2E9E5B","#F0A030","#8B5CC9","#E86AA6"];
 const DR_WORDS = [].concat(WORDS["몽골 스페셜"], WORDS["동물"], WORDS["음식"], WORDS["장소"], FH_BANK["동작"],
@@ -216,4 +279,4 @@ function drStartDrawTimer(){
     if (dr.drawLeft <= 0){ clearInterval(dr.drawTimerId); dr.drawTimerId = null; }
   }, 1000);
 }
-
+snRegisterGame("drawrelay", drReset);

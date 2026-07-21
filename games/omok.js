@@ -1,4 +1,30 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("omok", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚫ 오목</h2></div>
+    <div class="omok-info">
+      <div class="omok-turn" id="omok-turn"><span class="stone" style="background:#222"></span>흑돌 차례</div>
+      <div class="field" style="margin:0"><div class="seg" id="omok-size">
+        <button data-size="11" class="sel">11줄</button><button data-size="13">13줄</button>
+      </div></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><div class="seg" id="omok-rule">
+      <button data-rule="free" class="sel">자유룰</button><button data-rule="renju">렌주룰 (흑 금수)</button>
+    </div>
+    <p class="hint" id="omok-rule-hint" style="display:none;margin:8px 0 0">흑(선공)은 <b>삼삼·사사·장목(6목 이상)</b>에 둘 수 없어요. 금수 자리는 ❌로 표시됩니다. 선공 필승법 방지용 정식 룰!</p></div>
+    <canvas id="omok-canvas"></canvas>
+    <div class="omok-btns">
+      <button class="btn ghost" id="omok-undo">한 수 무르기</button>
+      <button class="btn" id="omok-new">새 게임</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 오목 ---------- */
+  .omok-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .omok-turn{font-size:16px;font-weight:800}
+  .omok-turn .stone{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px;margin-right:7px;border:1px solid #888}
+  #omok-canvas{display:block;width:100%;border-radius:14px;touch-action:manipulation}
+  .omok-btns{display:flex;gap:8px;margin-top:12px}`);
 /* ================= 오목 =================
    폰 하나(solo): 한 폰에서 흑/백 번갈아 착수(기존 그대로).
    여러 폰(multi): 두 폰에 같은 보드 동기화 — 호스트=흑(선), 첫 게스트=백.
@@ -342,3 +368,4 @@ window.__guest_omok = function(){
   mp.game = { onMsg(from, m){ omGuestRecv(m); }, onPeers(){} };
   omRenderModeBar();                                /* 세션 게스트는 토글 숨김 */
 };
+snRegisterGame("omok", omokNew);

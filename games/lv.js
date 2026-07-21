@@ -1,4 +1,44 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("lv", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎰 주사위 배팅</h2></div>
+    <div id="lv-setup">
+      <p class="hint">상금 더미 4개에 주사위 7개로 눈치 배팅! 굴려서 나온 눈 중 <b>하나를 골라 전부 배치</b>해요. 눈 1·2는 꽝(자동 소각 💨). 더미마다 <b>최다 배치자가 상금 독식</b>, 근데 <b style="color:var(--danger)">1위가 동률이면 그들 전원 무효</b> — 차순위가 꿀꺽!</p>
+      <div class="field"><label>참여자 선택 (2~5명)</label><div class="seg" id="lv-players"></div></div>
+      <div class="field"><label>라운드 수</label><div class="seg" id="lv-rounds">
+        <button data-r="2">2라운드</button><button data-r="3" class="sel">3라운드</button><button data-r="4">4라운드</button>
+      </div></div>
+      <button class="btn" id="lv-start">🎲 배팅 시작!</button>
+    </div>
+    <div id="lv-turn" style="display:none">
+      <div class="mb-strip" id="lv-strip"></div>
+      <div class="lv-slots" id="lv-slots"></div>
+      <div class="stage-center" style="flex:0;gap:6px;margin:14px 0 10px">
+        <span class="tag" id="lv-round-tag">ROUND 1</span>
+        <div class="who" id="lv-turn-name" style="font-size:32px">-</div>
+        <div class="hint" id="lv-roll-msg" style="margin:0">남은 주사위를 전부 굴려요!</div>
+      </div>
+      <button class="btn" id="lv-roll">🎲 굴리기!</button>
+      <div class="lv-tray" id="lv-tray"></div>
+      <div class="lv-faces" id="lv-faces" style="display:none"></div>
+      <button class="btn ghost mt" id="lv-junk-next" style="display:none">아쉽다… 다음 사람 →</button>
+    </div>
+    <div id="lv-settle" style="display:none">
+      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag" id="lv-settle-tag">정산!</span></div>
+      <div id="lv-settle-list"></div>
+      <div class="mb-strip" id="lv-settle-strip" style="margin-top:12px"></div>
+      <button class="btn mt" id="lv-next-round">다음 라운드 →</button>
+    </div>
+    <div id="lv-end" style="display:none" class="stage-center">
+      <span class="tag">최종 결과</span>
+      <div class="reveal-card" id="lv-rank"></div>
+      <button class="btn" id="lv-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 주사위 배팅 ---------- */
+  .lv-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 8px}
+  .lv-junk{color:var(--danger);font-weight:800}`);
 /* ================= 주사위 배팅 ================= */
 const LV_COLORS = ["var(--fire)","var(--steppe)","var(--ember)","var(--danger)","var(--milk)"];
 const LV_FACE_EM = { 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅" };
@@ -204,4 +244,4 @@ function lvEnd(){
     rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — 🐑" + r.s + "양").join("<br>") + "</div>";
 }
 $("lv-again").addEventListener("click", lvReset);
-
+snRegisterGame("lv", lvReset);

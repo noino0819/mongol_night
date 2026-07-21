@@ -1,4 +1,57 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("nb", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚾ 숫자야구</h2></div>
+    <div id="nb-setup">
+      <p class="hint">서로의 비밀 숫자를 추리하는 2인 대전! 0~9 <b>중복 없는</b> 숫자, 자리·숫자 다 맞으면 <b>S(스트라이크)</b>, 숫자만 맞으면 <b>B(볼)</b>. 올 스트라이크 먼저 맞히면 승리 — 단 <b style="color:var(--fire)">후공에겐 마지막 동수 기회</b>가 있어.</p>
+      <div class="field"><label>대결할 2명 (선공 · 후공)</label><div class="seg" id="nb-players"></div></div>
+      <div class="field"><label>자릿수</label><div class="seg" id="nb-digits">
+        <button data-d="3" class="sel">3자리</button><button data-d="4">4자리</button>
+      </div></div>
+      <button class="btn" id="nb-start">⚾ 비밀 숫자 정하기 →</button>
+    </div>
+    <div id="nb-set" style="display:none" class="stage-center">
+      <span class="tag" id="nb-set-name">-</span>
+      <div class="hint" id="nb-set-msg" style="margin:0"></div>
+      <div class="nb-entry" id="nb-set-entry"></div>
+      <div class="nb-pad" id="nb-set-pad"></div>
+    </div>
+    <div id="nb-play" style="display:none">
+      <div class="stage-center" style="flex:0;gap:6px;margin:6px 0 10px">
+        <span class="tag" id="nb-turn-tag">추측할 차례</span>
+        <div class="who" id="nb-turn-name" style="font-size:26px">-</div>
+        <div class="hint" id="nb-turn-msg" style="margin:0"></div>
+      </div>
+      <div class="nb-logs" id="nb-logs"></div>
+      <div class="nb-entry" id="nb-play-entry"></div>
+      <div class="nb-pad" id="nb-play-pad"></div>
+    </div>
+    <div id="nb-end" style="display:none" class="stage-center">
+      <div class="reveal-card" id="nb-result"></div>
+      <div id="nb-reveal"></div>
+      <button class="btn mt" id="nb-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 숫자야구 ---------- */
+#scr-nb .nb-entry{display:flex;justify-content:center;gap:8px;margin:6px 0 14px}
+.nb-box{width:44px;height:54px;border:2px solid var(--line);border-radius:10px;background:var(--night2);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:var(--milk)}
+.nb-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto;width:100%}
+.nb-pad button{background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--milk);font-size:22px;font-weight:800;padding:14px 0;font-family:inherit}
+.nb-pad button:active:not(:disabled){border-color:var(--fire);color:var(--fire)}
+.nb-pad button:disabled{opacity:.25}
+.nb-pad .nb-del{color:var(--danger)}
+.nb-pad .nb-ok{background:var(--fire);color:#231303;border-color:var(--fire);font-size:17px}
+.nb-pad .nb-ok:disabled{background:var(--night2);color:var(--dim)}
+.nb-logs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+.nb-logcol{background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px;min-height:56px}
+.nb-logcol .hd{font-size:12px;font-weight:800;color:var(--dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:6px;word-break:keep-all}
+.nb-logrow{display:flex;align-items:center;gap:6px;padding:3px 2px}
+.nb-logrow b{font-size:17px;letter-spacing:2px;color:var(--milk);flex:1}
+.nb-logrow .sb{font-size:12px;font-weight:800;color:var(--steppe)}
+.nb-logempty{color:var(--dim);font-size:12px;text-align:center;padding:8px 0}
+.nb-reveal-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.nb-reveal-row b{font-size:22px;letter-spacing:3px;color:var(--fire)}`);
 /* ================= 숫자야구 (nb) ================= */
 /* ponytail: 1:1 대전만. 기획서의 팀전 2:2는 S/B 로직 동일 + 핸드오프만 복잡해져 생략 — 필요하면 nb.players를 팀 배열로 확장. */
 let nb = { digits: 3, sel: [], players: ["", ""], secret: ["", ""], logs: [[], []], turn: 0, solved: [0, 0], finalPending: false, entry: "" };
@@ -264,3 +317,4 @@ function nbGuestMsg(from, m){
     nbEnd(); /* 재사용: solved/secret 미러로 결과·리빌 렌더 (mpBroadcast는 게스트에서 no-op) */
   }
 }
+snRegisterGame("nb", nbReset);

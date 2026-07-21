@@ -1,4 +1,54 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("fruit", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 과일 종!</h2></div>
+    <div id="fruit-setup">
+      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판의 카드 더미</b>를 탭해서 한 장씩 뒤집어. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 자기 이름판을 먼저 탭(=종)! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
+      <div class="field">
+        <label>참여자 선택 (탭해서 켜고 끄기, 2~6명)</label>
+        <div class="seg" id="fruit-players"></div>
+      </div>
+      <button class="btn mt" id="fruit-start">카드 돌려! 시작!</button>
+    </div>
+    <div id="fruit-game" style="display:none">
+      <div class="fruit-arena" id="fruit-arena">
+        <div class="fcenter"><div class="fbell"><px-sprite name="bell" scale="3"></px-sprite></div></div>
+        <div class="fmsg" id="fruit-msg"></div>
+      </div>
+      <button class="btn ghost mt" id="fruit-stop">게임 끝내기 (카드 많은 순 정산)</button>
+    </div>
+    <div id="fruit-result" style="display:none" class="stage-center">
+      <span class="tag">최종 결과</span>
+      <div class="reveal-card" id="fruit-rank"></div>
+      <button class="btn" id="fruit-again">한 판 더!</button>
+    </div>
+  `);
+snAddCss(`/* ---------- 과일 종! (할리갈리) ---------- */
+  .fruit-arena{position:relative;flex:1;min-height:480px;border:1px solid var(--line);border-radius:20px;background:var(--night2);overflow:hidden;margin-top:4px}
+  .fzone{
+    position:absolute;width:112px;height:130px;border-radius:16px;border:2px solid var(--line);
+    background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    font-weight:800;font-size:13px;cursor:pointer;touch-action:manipulation;transition:background .1s;padding:4px;
+  }
+  .fzone.good{background:#1E4633;border-color:var(--steppe)}
+  .fzone.bad{background:#4A2230;border-color:var(--danger)}
+  .fzone .fzname{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fzone .fzcard{image-rendering:pixelated}
+  .fzone .fzflip{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim);border:1px solid var(--line);padding:2px 10px;white-space:nowrap}
+  .fzone.tl{top:10px;left:10px;transform:rotate(180deg)}
+  .fzone.tr{top:10px;right:10px;transform:rotate(180deg)}
+  .fzone.tc{top:10px;left:50%;transform:translateX(-50%) rotate(180deg)}
+  .fzone.bl{bottom:10px;left:10px}
+  .fzone.bc{bottom:10px;left:50%;transform:translateX(-50%)}
+  .fzone.lm{top:50%;left:10px;transform:translateY(-50%) rotate(90deg)}
+  .fzone.rm{top:50%;right:10px;transform:translateY(-50%) rotate(-90deg)}
+  .fcenter{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    display:flex;gap:8px;align-items:center;justify-content:center;
+  }
+  .fbell{font-size:42px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+  .fmsg{position:absolute;top:50%;left:50%;transform:translate(-50%,58px);font-size:14px;font-weight:800;color:var(--fire);text-align:center;width:150px}`);
 /* ================= 과일 종! (할리갈리) ================= */
 const FRUITS = ["strawberry","banana","kiwi","grape"]; /* SPR 스프라이트 키 */
 /* 정식 할리갈리 분포: 과일당 1개×5장, 2개×3장, 3개×3장, 4개×2장, 5개×1장 = 14장 × 4과일 = 56장 */
@@ -325,4 +375,4 @@ window.__guest_fruit = function(){
   fruitMpShow({ phase: "wait" });
   mp.game = { onMsg(from, m){ if (m && m.t === "st") fruitMpShow(m); } };
 };
-
+snRegisterGame("fruit", fruitReset);

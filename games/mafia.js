@@ -1,4 +1,42 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("mafia", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌙 마피아</h2></div>
+    <div id="mafia-setup">
+      <p class="hint">역할을 비밀리에 나눠드려요. 마피아끼리는 서로를 확인할 수 있어서 사회자 없이도 진행이 쉬워요.</p>
+      <div class="field">
+        <label>마피아 수</label>
+        <div class="stepper">
+          <button id="maf-minus">−</button><span id="maf-count">1</span><button id="maf-plus">＋</button>
+        </div>
+      </div>
+      <div id="maf-roles"></div>
+      <button class="btn ghost mt" id="maf-help-btn">📖 직업 설명 보기</button>
+      <div class="reveal-card" id="maf-help" style="display:none"></div>
+      <button class="btn mt" id="mafia-start">역할 나누기</button>
+    </div>
+    <div id="mafia-pass" style="display:none" class="pass-stage"></div>
+    <div id="mafia-play" style="display:none">
+      <div class="reveal-card">
+        <div class="lbl">밤 진행 순서 (한 명이 읽어주세요)</div>
+        <div class="val" id="mafia-order" style="font-size:15px;font-weight:600;line-height:1.9"></div>
+      </div>
+      <div class="reveal-card" id="mafia-rules" style="display:none">
+        <div class="lbl">특수 직업 규칙 (헷갈리면 여기 보기)</div>
+        <div class="val" id="mafia-rules-val" style="font-size:14px;font-weight:600;line-height:1.8"></div>
+      </div>
+      <button class="btn ghost mt" id="mafia-modview">🤫 마피아 명단 보기 (꾹 누르기)</button>
+      <div class="reveal-card" id="mafia-modlist" style="display:none"></div>
+      <button class="btn mt" id="mafia-again">역할 다시 섞기</button>
+    </div>
+  `);
+snAddCss(`.stepper{display:flex;align-items:center;gap:14px}
+  .stepper button{
+    width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+    background:var(--night2);color:var(--milk);font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;
+  }
+  .stepper span{font-size:20px;font-weight:800;min-width:34px;text-align:center}`);
 /* ================= 마피아 ================= */
 const MAF_ROLES = [
   { id: "police", icon: "👮", name: "경찰", team: "시민팀", n: 1,
@@ -216,4 +254,4 @@ holdReveal($("mafia-modview"),
   },
   () => { $("mafia-modlist").style.display = "none"; }
 );
-
+snRegisterGame("mafia", mafiaReset);

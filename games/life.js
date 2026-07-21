@@ -1,4 +1,54 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("life", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🐑 몽골 대장정 2.0</h2></div>
+    <div id="life-setup">
+      <p class="hint">부루마블+인생게임 스타일! 순환 보드를 돌며 <b style="color:var(--steppe)">초원을 사서 통행료</b>를 걷고, ⛺게르를 지어 2배로 뜯고, 🗝️황금열쇠와 ⚔️결투(실제 미니게임 현피!)로 양을 불리세요. 더블이 나오면 한 번 더! 정해진 턴이 끝나면 <b style="color:var(--fire)">총자산(양+초원+게르) 최다 팀이 승리.</b> 파산하면 탈락!</p>
+      <div class="field"><label>모드</label><div class="seg" id="mb-mode">
+        <button data-m="solo" class="sel">개인전</button><button data-m="team">팀전</button>
+      </div></div>
+      <div class="field" id="mb-teamrow" style="display:none"><label>팀 수</label><div class="seg" id="mb-teamn">
+        <button data-n="2" class="sel">2팀</button><button data-n="3">3팀</button>
+      </div></div>
+      <div class="field"><label>참여자 선택</label><div class="seg" id="life-players"></div></div>
+      <div class="field" id="mb-teamview-wrap" style="display:none">
+        <label>팀 배정</label>
+        <div id="mb-teamview"></div>
+        <button class="btn ghost" id="mb-reshuffle" style="margin-top:8px">🔀 팀 다시 섞기</button>
+      </div>
+      <div class="field"><label>게임 길이 (팀당 턴 수)</label><div class="seg" id="mb-len">
+        <button data-l="10">10턴</button><button data-l="14" class="sel">14턴</button><button data-l="18">18턴</button>
+      </div></div>
+      <button class="btn mt" id="life-start">대장정 출발!</button>
+    </div>
+    <div id="life-game" style="display:none">
+      <div class="mb-strip" id="mb-strip"></div>
+      <div class="mb-board" id="mb-board"></div>
+      <button class="btn" id="mb-roll">🎲 주사위 굴리기</button>
+    </div>
+    <div id="life-end" style="display:none" class="stage-center">
+      <span class="tag">대장정 완료!</span>
+      <div class="reveal-card" id="life-rank"></div>
+      <button class="btn" id="life-again">다시 출발!</button>
+    </div>
+  `);
+snAddCss(`.ltile .toks{position:absolute;bottom:2px;left:0;right:0;display:flex;justify-content:center;gap:2px;flex-wrap:wrap;padding:0 2px}
+  .ltile .toks i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.6)}
+  .mb-board{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin:4px 0 12px}
+  .mb-cell{aspect-ratio:1}
+  .mb-tile{aspect-ratio:1;background:var(--night2);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:8px;line-height:1.15;text-align:center;color:var(--dim);font-weight:700;padding:1px;word-break:keep-all}
+  .mb-tile .price{font-size:7.5px;opacity:.85}
+  .mb-tile.corner{background:#20294A;border-color:#3A4A7A;color:var(--milk)}
+  .mb-tile.owned{color:var(--milk)}
+  .mb-tile .own{position:absolute;left:0;right:0;bottom:0;height:3px}
+  .mb-toks{position:absolute;top:1px;right:1px;display:flex;gap:1px;flex-wrap:wrap;max-width:75%;justify-content:flex-end}
+  .mb-toks i{width:6px;height:6px;border-radius:50%;border:1px solid rgba(0,0,0,.45)}
+  .mb-center{position:absolute;left:13.5%;top:13.5%;right:13.5%;bottom:13.5%;background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;text-align:center}
+  .mb-center .whom{font-size:13px;font-weight:800}
+  .mb-center .roller{font-size:10.5px;color:var(--dim)}
+  .mb-toks i.mb-hop{animation:mbHopA .13s ease;box-shadow:0 0 0 2px var(--fire),0 2px 4px rgba(0,0,0,.5);position:relative;z-index:2}
+  .mb-tile.mb-built{animation:mbBuilt .5s ease;z-index:2}`);
 /* ================= 몽골 대장정 (인생게임 스타일) ================= */
 const LIFE_COLORS = ["#FF7A45","#8FBF9F","#6FA8DC","#E8B84D","#C98BD9","#F27B9B"];
 const MB_DICE = ["⚀","⚁","⚂","⚃","⚄","⚅"];
@@ -503,4 +553,4 @@ function lifeModal(em, tt, ds, onClose){
   document.body.appendChild(wrap);
 }
 $("life-again").addEventListener("click", lifeReset);
-
+snRegisterGame("life", lifeReset);

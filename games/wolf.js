@@ -1,4 +1,48 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("wolf", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🌕 한밤의 늑대인간</h2></div>
+    <div id="wf-setup">
+      <p class="hint">마피아 10분 압축판! 참가자 수 <b>+3장의 여분 카드</b>가 가운데에 깔려요. 각자 몰래 역할 확인 + 밤 능력 사용 → 토론 → 딱 한 번의 투표로 끝! <b style="color:var(--danger)">늑대가 처형되면 마을 승</b>, 아니면 늑대 승. 늑대가 가운데에만 있을 수도 있어서 추리가 두 배로 꼬입니다</p>
+      <div class="field"><label>참여자 선택 (4명 이상)</label><div class="seg" id="wf-players"></div></div>
+      <div class="field"><label>토론 시간</label><div class="seg" id="wf-times">
+        <button data-t="120">2분</button><button data-t="180" class="sel">3분</button><button data-t="300">5분</button>
+      </div></div>
+      <div class="field"><label>특수 역할 (끄면 주민으로 대체)</label><div id="wf-role-toggles"></div></div>
+      <button class="btn ghost" id="wf-help-btn">📖 역할 설명 · 마피아랑 뭐가 달라?</button>
+      <div class="reveal-card" id="wf-help" style="display:none;margin-bottom:14px"></div>
+      <div class="reveal-card" style="margin-bottom:14px"><div class="lbl">역할 구성 (자동)</div><div class="val" id="wf-roles" style="font-size:14px">-</div></div>
+      <button class="btn mt" id="wf-start">밤이 시작된다... 🌕</button>
+    </div>
+    <div id="wf-pass" style="display:none" class="pass-stage">
+      <div class="who-label" id="wf-pass-label">차례</div>
+      <div class="who" id="wf-pass-name">-</div>
+      <div class="hint" style="margin:0">폰을 전달하세요. 다른 사람은 절대 보지 않기!</div>
+      <button class="btn pass-next" id="wf-pass-go">나 왔어요 →</button>
+    </div>
+    <div id="wf-secret" style="display:none"></div>
+    <div id="wf-day" style="display:none" class="stage-center">
+      <span class="tag">☀️ 아침이 밝았다</span>
+      <div class="who" id="wf-day-timer">3:00</div>
+      <p class="hint" id="wf-day-hint">밤 사이 무슨 일이? 늑대를 찾아내세요!</p>
+      <button class="btn" id="wf-vote-start">🗳️ 투표 시작</button>
+    </div>
+    <div id="wf-vote" style="display:none">
+      <div class="pass-stage" id="wf-vote-pass">
+        <div class="who-label">투표 차례</div>
+        <div class="who" id="wf-vote-name">-</div>
+        <div class="hint" style="margin:0">몰래 투표하세요!</div>
+        <button class="btn pass-next" id="wf-vote-go">나 왔어요 →</button>
+      </div>
+      <div id="wf-vote-pick" style="display:none">
+        <p class="hint">처형할 사람을 고르세요</p>
+        <div class="name-grid" id="wf-vote-grid"></div>
+        <button class="btn ghost mt" id="wf-vote-peace">🕊️ 평화 투표 (아무도 처형하지 않기)</button>
+      </div>
+    </div>
+    <div id="wf-result" style="display:none"></div>
+  `);
 /* ================= 한밤의 늑대인간 ================= */
 const WF_ROLE_INFO = {
   "늑대인간": { em:"🐺", team:"늑대팀", tip:"들키지 마세요! 낮에는 다른 역할인 척 연기",
@@ -459,4 +503,4 @@ window.__guest_wolf = function(){
     }
   }};
 };
-
+snRegisterGame("wolf", wfReset);

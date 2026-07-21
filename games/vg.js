@@ -1,4 +1,45 @@
 "use strict";
+
+/* ---- 화면·CSS 자체 등록 (index.html 무수정 원칙: core.js snAddScreen/snAddCss) ---- */
+snAddScreen("vg", `
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🎰 라스베가스</h2></div>
+    <div id="vg-setup">
+      <p class="hint">카지노 6곳(1~6번)에 주사위 8개로 배팅! 굴려서 나온 눈 중 <b>하나를 골라 전부</b> 그 번호 카지노에 올려. 카지노마다 <b>주사위 최다 순서로 지폐를 나눠 갖는데</b>, <b style="color:var(--danger)">1등이 동률이면 그들끼리 상쇄(꽝)</b> — 다음 순서가 챙겨. 라운드 끝나면 💰 최다 부자 승!</p>
+      <div class="field"><label id="vg-players-label">참여자 선택 (2~6명)</label><div class="seg" id="vg-players"></div></div>
+      <div class="field"><label>라운드 수</label><div class="seg" id="vg-rounds">
+        <button data-r="3">3라운드</button><button data-r="4" class="sel">4라운드</button>
+      </div></div>
+      <button class="btn" id="vg-start">🎲 게임 시작!</button>
+    </div>
+    <div id="vg-turn" style="display:none">
+      <div class="mb-strip" id="vg-strip"></div>
+      <div class="vg-casinos" id="vg-casinos"></div>
+      <div class="stage-center" style="flex:0;gap:6px;margin:14px 0 10px">
+        <span class="tag" id="vg-round-tag">ROUND 1</span>
+        <div class="who" id="vg-turn-name" style="font-size:30px">-</div>
+        <div class="hint" id="vg-roll-msg" style="margin:0"></div>
+      </div>
+      <button class="btn" id="vg-roll">🎲 굴리기!</button>
+      <div class="lv-tray" id="vg-tray"></div>
+      <div class="lv-faces vg-faces" id="vg-faces" style="display:none"></div>
+      <div class="hint" id="vg-wait" style="display:none;text-align:center"></div>
+    </div>
+    <div id="vg-settle" style="display:none">
+      <div class="stage-center" style="flex:0;gap:6px;margin-bottom:10px"><span class="tag" id="vg-settle-tag">정산!</span></div>
+      <div id="vg-settle-list"></div>
+      <div class="mb-strip" id="vg-settle-strip" style="margin-top:12px"></div>
+      <button class="btn mt" id="vg-next-round">다음 라운드 →</button>
+      <p class="hint" id="vg-settle-wait" style="display:none;text-align:center">호스트가 다음 라운드를 시작하길 기다리는 중…</p>
+    </div>
+    <div id="vg-end" style="display:none" class="stage-center">
+      <span class="tag">최종 결과</span>
+      <div class="reveal-card" id="vg-rank"></div>
+      <button class="btn" id="vg-again">다시 하기</button>
+    </div>
+  `);
+snAddCss(`/* 라스베가스: 카지노 6곳·눈 6면 → 3열 그리드 (lv-slot·lv-faces 재사용) */
+  .vg-casinos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:4px 0 8px}
+  .vg-faces{grid-template-columns:repeat(3,1fr)}`);
 /* ================= 라스베가스 (vg) =================
    카지노 6곳(눈 1~6)에 주사위 8개로 배팅. 굴려서 나온 눈 하나를 골라 전부 그 카지노에 배치.
    카지노마다 주사위 최다 순서로 지폐 스택을 나눠 갖되, 1위 동률이면 그들끼리 상쇄(꽝) 후 차순위가 챙긴다.
@@ -335,3 +376,4 @@ if (typeof document !== "undefined"){
 
 /* node 단위 테스트용 — 순수 로직만 노출 */
 if (typeof module !== "undefined") module.exports = { vgWinnerOrder, vgDeal };
+snRegisterGame("vg", vgReset);
