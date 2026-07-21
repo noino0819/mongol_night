@@ -121,6 +121,7 @@ function resetGame(name){
   if (name === "bomb"){ bombReset(); }
   if (name === "tele"){ teReset(); }
   if (name === "lv"){ lvReset(); }
+  if (name === "vg"){ vgReset(); }
   if (name === "bz"){ bzReset(); }
   if (name === "um"){ umReset(); }
   if (name === "gq"){ gqReset(); }
