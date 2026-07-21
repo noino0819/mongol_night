@@ -39,7 +39,7 @@ const MAF_BASE = [
   { icon: "👤", name: "시민", team: "시민팀", help: "특별한 능력은 없지만 추리와 투표가 무기! 마피아를 전부 찾아내면 시민팀 승리." }
 ];
 let maf = { count: 1, on: {}, list: [] };
-let mafMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
+let mafMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(mafMode) */
 $("maf-minus").addEventListener("click", () => { if (maf.count > 1) maf.count--; $("maf-count").textContent = maf.count; });
 $("maf-plus").addEventListener("click", () => { if (maf.count < 3) maf.count++; $("maf-count").textContent = maf.count; });
 (function initMafRoles(){
@@ -117,16 +117,15 @@ function mafRoleHtml(sec){
 
 /* core.js resetGame("mafia") 진입점 — 셋업 화면 + 모드 토글 */
 function mafiaReset(){
-  if (mafMode === "multi" && !mpLive()) mafMode = "solo"; /* 연결 끊기면 폰 하나로 */
   $("mafia-setup").style.display = "";
   $("mafia-pass").style.display = "none";
   $("mafia-play").style.display = "none";
   const my = $("maf-myrole"); if (my) my.style.display = "none";
-  snModeBar($("mafia-setup"), mafMode, (m) => { mafMode = m; mafiaReset(); });
+  snModeBar($("mafia-setup"), snMode(mafMode), (m) => { mafMode = m; mafiaReset(); });
 }
 
 function startMafia(){
-  if (mafMode === "multi") return startMafiaMulti();
+  if (snMode(mafMode) === "multi") return startMafiaMulti();
   return startMafiaSolo();
 }
 

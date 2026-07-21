@@ -4,7 +4,7 @@
    여러 폰 모드: 각자 폰에 자기 역할만 뜸 → 안 돌려도 됨. 호스트가 역할 배분·공개.
    (net.js 브릿지 레퍼런스 — 다른 개인정보형 게임은 이 패턴을 따른다.) */
 let liarState = null;
-let liarMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
+let liarMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(liarMode) */
 const liarEsc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); /* 원격 이름 → innerHTML 경로 이스케이프 */
 
 (function initLiar(){
@@ -27,15 +27,14 @@ const liarEsc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").re
 
 /* core.js resetGame("liar") 진입점 — 셋업 화면 + 모드 토글 */
 function liarReset(){
-  if (liarMode === "multi" && !mpLive()) liarMode = "solo"; /* 연결 끊기면 폰 하나로 */
   $("liar-setup").style.display = "";
   $("liar-pass").style.display = "none";
   $("liar-play").style.display = "none";
-  snModeBar($("liar-setup"), liarMode, (m) => { liarMode = m; liarReset(); });
+  snModeBar($("liar-setup"), snMode(liarMode), (m) => { liarMode = m; liarReset(); });
 }
 
 function startLiar(cat){
-  if (liarMode === "multi") return startLiarMulti(cat);
+  if (snMode(liarMode) === "multi") return startLiarMulti(cat);
   return startLiarSolo(cat);
 }
 

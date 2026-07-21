@@ -9,7 +9,7 @@
 
 const VG_COLORS = ["var(--fire)", "var(--steppe)", "var(--danger)", "var(--dim)", "var(--milk)", "var(--ember)"];
 const VG_FACE = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
-let vgMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
+let vgMode = null; /* 유저 토글 선택(null=자동) — 셋업의 실제 모드는 snMode(vgMode). 게임 중엔 vgStartMulti/__guest_vg가 "multi"로 확정 */
 let vg = { phase: "setup", players: [], casinos: [], rounds: 4, round: 1, turn: 0, starter: 0, roll: null, rollSeq: 0, settleInfo: null, net: null, sel: [] };
 let vgAnim = { seq: 0, iv: 0, timers: [] }; /* 주사위 굴림 연출 — seq는 이미 재생한 굴림 번호(상태 재동기화 때 재재생 방지), 로컬 전용 */
 
@@ -107,6 +107,7 @@ function vgStartMulti(){
   const names = mpNames();
   if (names.length < 2){ alert("여러 폰 라스베가스는 2명 이상 연결돼야 해 (지금 " + names.length + "명)"); return; }
   if (names.length > 6){ alert("최대 6명까지야 — 지금 " + names.length + "명 연결됨"); return; }
+  vgMode = "multi";                            /* 게임 중 비교(vgMyTurn·브로드캐스트)가 이 값을 본다 */
   vg.players = names.map((n, i) => ({ name: String(n).slice(0, 8), color: VG_COLORS[i % 6], dice: 8, money: 0 }));
   vg.round = 1; vg.starter = 0; vg.rollSeq = 0; vg.net = { me: 0 }; vgAnim.seq = 0;
   mpNav("vg");                                 /* 게스트들 라스베가스 화면으로 (게스트: __guest_vg 실행 → 대기) */
@@ -272,13 +273,14 @@ function vgEnd(){
 
 /* ---------- 셋업 · core.js resetGame("vg") 진입점 ---------- */
 function vgReset(){
-  if (vgMode === "multi" && !mpLive()) vgMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  const vgM = snMode(vgMode);
+  if (vgMode === "multi" && !mpLive()) vgMode = null;   /* 게임 중 확정된 multi는 연결 끊기면 자동으로 되돌림 */
   vgClearDiceAnim(); vgAnim.seq = 0;
   vg.net = null; vg.phase = "setup";
   vgShow("vg-setup");
-  snModeBar($("vg-setup"), vgMode, (m) => { vgMode = m; vgReset(); });
+  snModeBar($("vg-setup"), vgM, (m) => { vgMode = m; vgReset(); });
   const box = $("vg-players");
-  if (vgMode === "multi"){
+  if (vgM === "multi"){
     const names = mpNames();
     $("vg-players-label").textContent = "이 방 참가자 (" + names.length + "명)";
     box.innerHTML = names.map((n) => '<button class="sel" disabled>' + escHtml(n) + "</button>").join("");
@@ -313,7 +315,7 @@ if (typeof document !== "undefined"){
     $("vg-rounds").querySelectorAll("button").forEach((x) => x.classList.remove("sel"));
     b.classList.add("sel"); vg.rounds = +b.dataset.r;
   }));
-  $("vg-start").addEventListener("click", () => { if (vgMode === "multi") vgStartMulti(); else vgStartSolo(); });
+  $("vg-start").addEventListener("click", () => { if (snMode(vgMode) === "multi") vgStartMulti(); else vgStartSolo(); });
   $("vg-again").addEventListener("click", vgReset);
 }
 

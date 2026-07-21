@@ -33,7 +33,7 @@ const WF_TOGGLES = [
   { id:"hunter",  role:"사냥꾼",    n:1, desc:"처형되면 지목자 동반" }
 ];
 let wf = { sel: [], time: 180, on: { seer: true, robber: true, trouble: true }, cards: [], final: [], order: [], i: 0, robber: null, tmSwap: null, drunk: null, votes: [], dayTid: null, multi: false };
-let wfMode = "solo"; /* "solo"=폰 하나 · "multi"=여러 폰 */
+let wfMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(wfMode) */
 /* ponytail: 원격 이름의 HTML특수문자 제거 — 재사용하는 기존 렌더(wfSecret/wfResult 등)에 일일이 escHtml 넣는 대신 경계 1곳에서 정화 */
 const wfSafeName = (s) => String(s).replace(/[<>&"']/g, "");
 function wfSpecialCount(){
@@ -78,11 +78,10 @@ $("wf-help-btn").addEventListener("click", () => {
 });
 function wfReset(){
   clearInterval(wf.dayTid); wf.dayTid = null;
-  if (wfMode === "multi" && !mpLive()) wfMode = "solo"; /* 연결 끊기면 폰 하나로 */
   wf.multi = false;
   ["wf-setup","wf-pass","wf-secret","wf-day","wf-vote","wf-result"].forEach(id => $(id).style.display = "none");
   $("wf-setup").style.display = "";
-  snModeBar($("wf-setup"), wfMode, (m) => { wfMode = m; wfReset(); });
+  snModeBar($("wf-setup"), snMode(wfMode), (m) => { wfMode = m; wfReset(); });
   const box = $("wf-players");
   box.innerHTML = "";
   wf.sel = roster.slice();
@@ -119,7 +118,7 @@ function wfPreview(){
   }));
 })();
 $("wf-start").addEventListener("click", () => {
-  if (wfMode === "multi") return wfStartMulti();
+  if (snMode(wfMode) === "multi") return wfStartMulti();
   if (wf.sel.length < 4) return alert("4명 이상 필요해요!");
   if (wfSpecialCount() > wf.sel.length + 3) return alert("특수 역할이 카드 수(인원+3장)보다 많아요! 역할을 몇 개 꺼주세요");
   wf.order = shuffle(wf.sel);

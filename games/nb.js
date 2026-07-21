@@ -2,7 +2,7 @@
 /* ================= 숫자야구 (nb) ================= */
 /* ponytail: 1:1 대전만. 기획서의 팀전 2:2는 S/B 로직 동일 + 핸드오프만 복잡해져 생략 — 필요하면 nb.players를 팀 배열로 확장. */
 let nb = { digits: 3, sel: [], players: ["", ""], secret: ["", ""], logs: [[], []], turn: 0, solved: [0, 0], finalPending: false, entry: "" };
-let nbMode = "solo"; /* "solo"=폰 하나(패스앤플레이) · "multi"=여러 폰(호스트=심판) */
+let nbMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(nbMode). solo=패스앤플레이 · multi=호스트 심판 */
 
 /* --- 순수 판정: 중복 없는 숫자 문자열 → {s,b}. 0S0B = OUT --- */
 function nbJudge(secret, guess){
@@ -22,13 +22,13 @@ function nbShow(id){
   ["nb-setup", "nb-set", "nb-play", "nb-end"].forEach(x => $(x).style.display = (x === id ? (id === "nb-setup" ? "" : "flex") : "none"));
 }
 function nbReset(){
-  if (nbMode === "multi" && !mpLive()) nbMode = "solo"; /* 연결 끊기면 폰 하나로 */
+  const nbM = snMode(nbMode);
   nb = { digits: nb.digits || 3, sel: roster.slice(0, 2), players: ["", ""], secret: ["", ""], logs: [[], []], turn: 0, solved: [0, 0], finalPending: false, entry: "", multi: false };
   nbShow("nb-setup");
   nbRenderPlayers();
   $("nb-digits").querySelectorAll("button").forEach(x => x.classList.toggle("sel", +x.dataset.d === nb.digits));
-  snModeBar($("nb-setup"), nbMode, (m) => { nbMode = m; nbReset(); });
-  $("nb-players").closest(".field").style.display = (nbMode === "multi" ? "none" : ""); /* 여러 폰은 호스트+게스트가 자동 대전 → 명단 선택 숨김 */
+  snModeBar($("nb-setup"), nbM, (m) => { nbMode = m; nbReset(); });
+  $("nb-players").closest(".field").style.display = (nbM === "multi" ? "none" : ""); /* 여러 폰은 호스트+게스트가 자동 대전 → 명단 선택 숨김 */
 }
 function nbRenderPlayers(){
   const box = $("nb-players");
@@ -52,7 +52,7 @@ $("nb-digits").querySelectorAll("button").forEach(b => b.addEventListener("click
   nb.digits = +b.dataset.d;
 }));
 $("nb-start").addEventListener("click", () => {
-  if (nbMode === "multi") return startNbMulti();
+  if (snMode(nbMode) === "multi") return startNbMulti();
   if (nb.sel.length !== 2) return alert("대결할 2명을 골라줘!");
   nb.players = nb.sel.slice();
   nb.secret = ["", ""]; nb.logs = [[], []]; nb.solved = [0, 0]; nb.turn = 0; nb.finalPending = false;

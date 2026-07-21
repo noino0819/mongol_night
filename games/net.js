@@ -67,6 +67,10 @@ function mpGuestNav(game){
   if (typeof init === "function") init();                          /* 게스트 진입 훅 */
 }
 
+/* 모드 결정: saved = 유저가 토글로 고른 값(null=미선택).
+   방에 연결돼 있으면 기본 여러 폰, 미연결이면 무조건 폰 하나(선택은 보존 → 재연결 시 복귀). */
+function snMode(saved){ return mpLive() ? (saved || "multi") : "solo"; }
+
 /* ---------- 모드 토글 UI ---------- */
 /* 게임 셋업 상단에 [📱 폰 하나 | 📡 여러 폰] 토글을 꽂는다(idempotent).
    여러 폰인데 미연결이면 연결 화면으로 유도. onPick(mode)로 선택 통지. */

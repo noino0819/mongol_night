@@ -543,7 +543,7 @@ const GQ_GROUPS = {
 const GQ_DLABEL = { 1: "쉬움", 2: "보통", 3: "도전" };
 let gq = { sel: [], groups: ["hist","geo","sci","cult","soc"], limit: 45,
            p: [], turn: 0, queue: [], qi: 0, cur: null, end: 0, tid: null, qtid: null, phase: "setup" };
-let gqMode = "solo"; /* "solo"=폰 하나(턴제 스피드전) · "multi"=여러 폰 골든벨(동시 출제·탈락전) */
+let gqMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(gqMode). solo=턴제 스피드전 · multi=골든벨 */
 
 function gqShow(id){
   ["gq-setup","gq-pass","gq-play","gq-between","gq-end"].forEach(x => $(x).style.display = "none");
@@ -569,8 +569,7 @@ function gqReset(){
     });
     box.appendChild(b);
   });
-  if (gqMode === "multi" && !mpLive()) gqMode = "solo"; /* 연결 끊기면 폰 하나로 */
-  const multi = gqMode === "multi";
+  const multi = snMode(gqMode) === "multi";
   $("gq-players").closest(".field").style.display = multi ? "none" : ""; /* 멀티는 연결된 게스트가 참가자 */
   $("gq-time").closest(".field").style.display = multi ? "none" : "";     /* 멀티는 문제별 진행이라 개인 제한시간 불필요 */
   const hint = $("gq-setup").querySelector("p.hint");
@@ -581,7 +580,7 @@ function gqReset(){
       : hint.dataset.solo;
   }
   $("gq-start").textContent = multi ? "🦉 골든벨 열기" : "🦉 골든벨 시작!";
-  snModeBar($("gq-setup"), gqMode, (m) => { gqMode = m; gqReset(); });
+  snModeBar($("gq-setup"), multi ? "multi" : "solo", (m) => { gqMode = m; gqReset(); });
 }
 $("gq-groups").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
   const g = b.dataset.g;
@@ -597,7 +596,7 @@ $("gq-time").querySelectorAll("button").forEach(b => b.addEventListener("click",
   gq.limit = +b.dataset.s;
 }));
 $("gq-start").addEventListener("click", () => {
-  if (gqMode === "multi") return startGqMulti();
+  if (snMode(gqMode) === "multi") return startGqMulti();
   if (gq.sel.length < 2) return alert("2명 이상 선택!");
   const cats = new Set();
   gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
