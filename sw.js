@@ -27,6 +27,7 @@ const ASSETS = [
   "./games/gq.js",
   "./games/ta.js",
   "./games/nb.js",
+  "./games/gm.js",
   "./games/mp.js",
   "./lib/qrcode-gen.js",
   "./lib/jsqr.js",

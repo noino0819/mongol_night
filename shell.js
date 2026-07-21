@@ -301,7 +301,8 @@ const SN_CATS = [
     { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려",            p:[2,10], t:5 },
     { id:"quiz",     go:"gq",        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
   { id:"story", emoji:"📜", name:"스토리", spr:"tengri", games:[
-    { id:"gobi",     go:"ta",        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 } ] }
+    { id:"gobi",     go:"ta",        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 },
+    { id:"teller",   go:"gm",        need:2, name:"이야기꾼의 밤", spr:"wolf",     desc:"네가 GM, 앱은 상황과 주사위만",  p:[2,8],  t:25 } ] }
 ];
 const SN_GAME_BY_ID = {};
 SN_CATS.forEach((c) => c.games.forEach((g) => { SN_GAME_BY_ID[g.id] = g; }));
