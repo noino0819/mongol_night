@@ -68,14 +68,20 @@ $("maf-help-btn").addEventListener("click", () => {
 $("mafia-start").addEventListener("click", startMafia);
 $("mafia-again").addEventListener("click", startMafia);
 
-function mafDeal(names, count, on){
+/* 역할 풀 생성 (N슬롯: 마피아 count + 특수 + 시민 채움). 특수가 너무 많으면 null. 폰하나·여러폰 공용 */
+function mafRolePool(n, count, on){
   const picked = MAF_ROLES.filter(r => on[r.id]);
   const special = count + picked.reduce((s, r) => s + r.n, 0);
-  if (special >= names.length) return null;
+  if (special >= n) return null;
   const roles = [];
   for (let i = 0; i < count; i++) roles.push("마피아");
   picked.forEach(r => { for (let i = 0; i < r.n; i++) roles.push(r.name); });
-  while (roles.length < names.length) roles.push("시민");
+  while (roles.length < n) roles.push("시민");
+  return roles;
+}
+function mafDeal(names, count, on){
+  const roles = mafRolePool(names.length, count, on);
+  if (!roles) return null;
   const order = shuffle(names.slice());
   const dealt = shuffle(roles);
   return order.map((n, i) => ({ name: n, role: dealt[i] }));
@@ -167,20 +173,21 @@ function startMafiaSolo(){
 
 /* ---------- 여러 폰 (호스트) ---------- */
 function startMafiaMulti(){
-  const names = mpNames();
-  if (names.length < 4){ alert("여러 폰 마피아는 4명 이상 연결돼야 해 (지금 " + names.length + "명)"); return; }
-  const list = mafDeal(names, maf.count, maf.on);
-  if (!list){ alert("특수 역할이 너무 많아요! 시민이 최소 1명은 있어야 해요."); return; }
+  const party = mpParty();
+  if (party.length < 4){ alert("여러 폰 마피아는 4명 이상 연결돼야 해 (지금 " + party.length + "명)"); return; }
+  const roles = mafRolePool(party.length, maf.count, maf.on);
+  if (!roles){ alert("특수 역할이 너무 많아요! 시민이 최소 1명은 있어야 해요."); return; }
+  /* 역할만 섞어 party 슬롯에 인덱스로 배정 — 이름으로 안 찾으니 동명이인이어도 오배달 없음 */
+  const dealt = shuffle(roles);
+  const list = party.map((pl, i) => ({ name: pl.name, role: dealt[i] }));
   maf.list = list;
   const mafiaNames = list.filter(p => p.role === "마피아").map(p => p.name);
   const loverNames = list.filter(p => p.role === "연인").map(p => p.name);
 
   mpNav("mafia");                        /* 게스트들 마피아 화면으로 (__guest_mafia 실행 → 대기) */
   mp.game = { onMsg(){}, onPeers(){} };  /* 호스트도 게임 활성 */
-  /* 개인 역할 배달 — mafDeal이 이름을 섞으므로 party는 이름으로 매칭(인덱스 아님) */
-  mpParty().forEach((pl) => {
-    const p = list.find(x => x.name === pl.name);
-    const sec = mafSecret(p, mafiaNames, loverNames);
+  party.forEach((pl, i) => {             /* party[i] ↔ list[i] 인덱스 정합 — 이름 매칭 제거 */
+    const sec = mafSecret(list[i], mafiaNames, loverNames);
     const payload = { t: "role", main: sec.main, sub: sec.sub, liar: sec.liar };
     if (pl.self) maf.myRole = payload; else pl.send(payload);
   });
