@@ -108,7 +108,7 @@ function cfLobby(){
     cfRoot().innerHTML =
       '<div class="stage-center" style="gap:10px"><span class="tag">색찾기 · ' + mpNames().length + '명</span>' +
       '<div style="font-size:56px">🌈</div><div class="who">주변에서 색을 찾아라</div>' +
-      '<p class="hint" style="margin:0">라운드를 시작하면 모두의 폰에 목표 색이 떠. 카메라로 가장 비슷한 색을 찾아 제출 — 가까운 순서대로 3·2·1점!</p></div>' +
+      '<p class="hint" style="margin:0">라운드를 시작하면 모두의 폰에 목표 색이 떠. 카메라로 가장 비슷한 색을 찾아 제출 — 제일 가까운 사람이 1점!</p></div>' +
       cfBoardHtml(cf.scores) +
       '<button class="btn mt" id="cf-start">' + (cf.round ? "다음 라운드 시작" : "라운드 시작") + '</button>' +
       (cf.round ? '<button class="btn ghost mt" id="cf-end2">게임 끝내기 · 순위</button>' : '');
@@ -197,8 +197,8 @@ function cfHostReveal(){
   const scored = cf.players.filter(p => cf.subs[p]).map(p => { const dist = cfDE(cf.subs[p], tRgb); return { name:p, rgb:cf.subs[p], dist, acc:cfAcc(dist) }; });
   if (!scored.length){ alert("아직 아무도 제출 안 했어"); return; }
   scored.sort((a, b) => a.dist - b.dist);
-  const pts = [3, 2, 1];
-  scored.forEach((r, i) => { r.pts = pts[i] || 0; r.rank = i + 1; cf.scores[r.name] = (cf.scores[r.name] || 0) + r.pts; });
+  const best = scored[0].dist; /* 가장 가까운 사람만 1점 (동률이면 나눠 가짐) */
+  scored.forEach((r, i) => { r.rank = i + 1; r.pts = r.dist === best ? 1 : 0; if (r.pts) cf.scores[r.name] = (cf.scores[r.name] || 0) + 1; });
   const missing = cf.players.filter(p => !cf.subs[p]).map(p => ({ name:p, rgb:null, acc:0, pts:0, rank:0 }));
   const rows = scored.map(r => ({ name:r.name, rgb:r.rgb, acc:r.acc, pts:r.pts, rank:r.rank })).concat(missing);
   cf.phase = "reveal";
