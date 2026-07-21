@@ -94,7 +94,7 @@ function fruitRenderZone(i, pop){
   z.innerHTML =
     '<div class="fzname">' + escHtml(fr.players[i]) + '</div>' +
     (top ? '' : '<div class="fzcard none">비었음</div>') +
-    '<div class="fzflip">🃏 ' + fr.decks[i].length + '</div>';
+    '<div class="fzflip"><px-sprite name="cardback" scale="1"></px-sprite>' + fr.decks[i].length + '</div>';
   if (top) z.insertBefore(fruitCardCv(top.f, top.n, pop), z.lastElementChild);
 }
 function fruitRenderTurn(){
@@ -169,9 +169,9 @@ function fruitEnd(){
   clearTimeout(fr.toId); fr.toId = null; fr.running = false;
   $("fruit-game").style.display = "none"; $("fruit-result").style.display = "flex";
   const rank = fr.players.map((n, i) => ({ n, s: fr.decks[i].length + fr.faceup[i].length })).sort((a, b) => b.s - a.s);
-  const medals = ["🥇","🥈","🥉"];
+  const medal = (i) => i < 3 ? '<px-sprite name="medal' + (i + 1) + '" scale="2" style="display:inline-block;vertical-align:middle"></px-sprite> ' : '· ';
   $("fruit-rank").innerHTML = '<div class="lbl">최종 카드</div><div class="val" style="font-size:19px;line-height:2">' +
-    rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — " + r.s + "장").join("<br>") + '</div>';
+    rank.map((r, i) => medal(i) + escHtml(r.n) + " — " + r.s + "장").join("<br>") + '</div>';
 }
 $("fruit-stop").addEventListener("click", () => { if (confirm("게임을 끝낼까요? 카드 많은 사람이 승리!")) fruitEnd(); });
 $("fruit-again").addEventListener("click", () => { fruitReset(); });
