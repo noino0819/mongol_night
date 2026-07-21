@@ -10,8 +10,8 @@ let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: 
 /* 아바타로 쓸 캐릭터 스프라이트 (오브젝트 제외, 동물·텡그리 20종) */
 const MP_AVATARS = ["bor", "fox", "wolf", "crow", "hawk", "hedgehog", "mole", "rooster", "goat", "squirrel", "rabbit", "otter", "turtle", "badger", "crane", "camel", "owl2", "marmot", "owlprof", "tengri"];
 const MP_DEF_SPR = "bor";
-/* 대기방에서 날릴 수 있는 이모지 — 원격에서 온 값은 이 목록 밖이면 👋 (신뢰경계) */
-const MP_EMOJIS = ["👋", "❤️", "😂", "😱", "🎉", "🐴"];
+/* 대기방에서 날릴 수 있는 감정 스프라이트(몽골 테마) — 원격 값은 목록 밖이면 하닥 (신뢰경계) */
+const MP_EMOTES = ["khadag", "heart", "fire", "horse", "morin", "airag"];
 /* 원격에서 온 캐릭터 값은 허용목록 밖이면 기본값으로 (px-sprite name 속성 신뢰경계) */
 function mpSprOk(s){ return MP_AVATARS.includes(s) ? s : MP_DEF_SPR; }
 /* 캐릭터 선택 UI — mp-role 진입 시 그림 */
@@ -183,7 +183,19 @@ function mpFlash(txt){
   const t = setTimeout(() => d.remove(), 1100);
   mp.timers.push(t);
 }
-function mpPoke(from, emo){ mpFlash((MP_EMOJIS.includes(emo) ? emo : "👋") + " " + from); }
+/* 감정 스프라이트 + 보낸 사람 이름을 화면 가운데 뿅 */
+function mpPoke(from, emo){
+  const d = document.createElement("div");
+  d.className = "mp-poke";
+  d.innerHTML = '<px-sprite name="' + (MP_EMOTES.includes(emo) ? emo : "khadag") + '" scale="6"></px-sprite>'; /* 허용목록 값만 삽입 */
+  const nm = document.createElement("span");
+  nm.textContent = from; /* 원격 입력 → textContent */
+  d.append(nm);
+  document.body.appendChild(d);
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+  const t = setTimeout(() => d.remove(), 1100);
+  mp.timers.push(t);
+}
 
 /* ---------- 연결 붙잡아두기 ---------- */
 /* 화면 꺼짐이 연결 사망의 주범 — 연결 중엔 화면을 깨워둔다 (미지원 브라우저는 조용히 무시) */
@@ -444,11 +456,11 @@ $("mp-ping").addEventListener("click", () => {
 $("mp-install-btn").addEventListener("click", () => {
   if (typeof pwa !== "undefined" && pwa.installAction) pwa.installAction(); /* shell.js 설치 플로우 재사용 (인앱 탈출·iOS 안내 포함) */
 });
-/* 이모지 날리기 — 내 화면에 뿅 + 전원에게 전송 (호스트가 중계) */
-MP_EMOJIS.forEach((emo) => {
+/* 감정 날리기 — 내 화면에 뿅 + 전원에게 전송 (호스트가 중계) */
+MP_EMOTES.forEach((emo) => {
   const b = document.createElement("button");
   b.type = "button";
-  b.textContent = emo;
+  b.innerHTML = '<px-sprite name="' + emo + '" scale="2"></px-sprite>'; /* emo는 상수 목록에서만 옴 */
   b.addEventListener("click", () => {
     mpPoke(mp.name, emo);
     if (mp.role === "host") mp.peers.forEach((p) => mpSend(p.chan, { t: "poke", from: mp.name, emo }));
