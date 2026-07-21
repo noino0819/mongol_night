@@ -221,28 +221,10 @@ function mpRoster(){
   mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
   if (typeof mpGamePeers === "function") mpGamePeers(); /* 여러 폰 게임에 참가자 변동 통지 (net.js) */
 }
-/* 방 만들기 전 프리플라이트: 이 폰이 핫스팟·Wi-Fi(LAN)에 붙어 있나?
-   카메라 권한 없이 mDNS 후보로도 LAN 대역을 판별 — 셀룰러만이면 막는다.
-   (권한 전엔 사설 IP가 .local로 가려지므로 mDNS는 통과, 실제 판별은 카메라 뒤 실 IP로 재확인) */
-async function mpProbeLan(){
-  const pc = mpNewPc();
-  try {
-    pc.createDataChannel("probe"); /* 후보 수집 트리거 */
-    await pc.setLocalDescription(await pc.createOffer());
-    await mpGather(pc);
-    return mpHasLan(pc.localDescription.sdp);
-  } catch (e) { return false; }
-  finally { try { pc.close(); } catch (e) { /* 무시 */ } }
-}
 async function mpInvite(){
   try {
-    /* 핫스팟(Wi-Fi) 없으면 카메라 요청·초대장 만들기 전에 여기서 바로 막는다 */
-    mpFlow("Wi-Fi 확인 중", "핫스팟에 붙어 있는지 확인하는 중…");
-    if (!(await mpProbeLan())){
-      alert("핫스팟이나 Wi-Fi에 먼저 붙어야 해 — 셀룰러(데이터)만으론 다른 폰이 못 붙어.\n핫스팟을 켜고(안드로이드는 유심 없이도 켜져) 다시 [호스트 하기]를 눌러줘");
-      mp.peers.length ? mpRoom() : mpView("mp-role");
-      return;
-    }
+    /* 카메라 권한을 '먼저' 받는다 — 그래야 SDP에 핫스팟 인터페이스의 실제 IP(192.168.x 등)가 실림.
+       권한 전엔 핫스팟 인터페이스가 안 보여(셀룰러만 보임) LAN 판별이 오판되므로, LAN 검사는 아래 실제 오퍼에서만. */
     mpFlow("카메라 준비", "게스트 답장을 스캔해야 해서 카메라 허용이 필요해");
     await mpCam(); /* 권한을 먼저 받아야 SDP에 mDNS 대신 실제 IP가 실림 (핫스팟 멀티캐스트 이슈 회피) */
     mpCamOff();
