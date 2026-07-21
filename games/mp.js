@@ -204,8 +204,27 @@ function mpRoster(){
   mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
   if (typeof mpGamePeers === "function") mpGamePeers(); /* 여러 폰 게임에 참가자 변동 통지 (net.js) */
 }
+/* 방 만들기 전 프리플라이트: 이 폰이 Wi-Fi(핫스팟·LAN)에 붙어 있나?
+   카메라 권한 없이도 host 후보 유무로 감지된다 (없으면 방 생성을 아예 막음). */
+async function mpProbeLan(){
+  const pc = mpNewPc();
+  try {
+    pc.createDataChannel("probe"); /* 후보 수집 트리거 */
+    await pc.setLocalDescription(await pc.createOffer());
+    await mpGather(pc);
+    return mpHasLan(pc.localDescription.sdp);
+  } catch (e) { return false; }
+  finally { try { pc.close(); } catch (e) { /* 무시 */ } }
+}
 async function mpInvite(){
   try {
+    /* 핫스팟(Wi-Fi) 없으면 카메라 요청·초대장 만들기 전에 여기서 바로 막는다 */
+    mpFlow("Wi-Fi 확인 중", "핫스팟에 붙어 있는지 확인하는 중…");
+    if (!(await mpProbeLan())){
+      alert("이 폰이 Wi-Fi(핫스팟)에 안 붙어 있어 — 핫스팟부터 켜고(안드로이드는 유심 없이도 켜져) 다시 [호스트 하기]를 눌러줘");
+      mp.peers.length ? mpRoom() : mpView("mp-role");
+      return;
+    }
     mpFlow("카메라 준비", "게스트 답장을 스캔해야 해서 카메라 허용이 필요해");
     await mpCam(); /* 권한을 먼저 받아야 SDP에 mDNS 대신 실제 IP가 실림 (핫스팟 멀티캐스트 이슈 회피) */
     mpCamOff();
