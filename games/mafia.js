@@ -241,6 +241,7 @@ window.__guest_mafia = function(){
   pass.innerHTML = '<div class="who-label">여러 폰 마피아</div><div class="who">대기 중…</div><div class="hint" style="margin:0">호스트가 역할을 나누면 네 역할이 여기 떠</div>';
   mp.game = { onMsg(from, m){
     if (m.t === "role"){
+      snSfx("reveal");
       pass.style.display = "flex";
       pass.innerHTML = mafRoleHtml(m) + '<div class="hint" style="margin-top:14px">네 폰만 확인해. 밤/낮 진행은 호스트 폰 보고 따라가</div>';
     }
@@ -250,6 +251,7 @@ holdReveal($("mafia-modview"),
   () => {
     const ml = $("mafia-modlist");
     ml.style.display = "";
+    snSfx("reveal");
     ml.innerHTML = '<div class="lbl">사회자 전용 · 손 떼면 사라짐</div><div class="val">' + maf.list.map(p => escHtml(p.name) + " — " + p.role).join("<br>") + '</div>';
   },
   () => { $("mafia-modlist").style.display = "none"; }

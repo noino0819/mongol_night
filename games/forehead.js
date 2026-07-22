@@ -113,13 +113,14 @@ $("fh-start").addEventListener("click", () => {
   $("fh-word").textContent = cd; fhFit();
   fh.cdId = setInterval(() => {
     cd--;
-    if (cd > 0){ $("fh-word").textContent = cd; fhFit(); }
+    if (cd > 0){ $("fh-word").textContent = cd; fhFit(); snSfx("tick"); }
     else {
       clearInterval(fh.cdId); fh.cdId = null;
       fhNextWord();
       fh.tid = setInterval(() => {
         fh.left--;
         $("fh-timer").textContent = fh.left;
+        if (fh.left === 10) snSfx("alarm");
         if (fh.left <= 0) fhEnd();
       }, 1000);
     }
@@ -134,6 +135,7 @@ function fhNextWord(){
 function fhMark(ok){
   if (!fh.tid || !fh.cur) return;
   fh.history.push({ w: fh.cur, ok });
+  snSfx(ok ? "correct" : "wrong");
   if (ok){ fh.score++; $("fh-score").textContent = fh.score + "개 정답"; }
   const area = $("fh-area");
   area.classList.remove("fh-flash-ok", "fh-flash-pass");

@@ -158,6 +158,9 @@ function nbSubmitGuess(){
   const r = nbJudge(nb.secret[opp], nb.entry);
   nb.logs[p].push({ guess: nb.entry, s: r.s, b: r.b });
   haptic(r.s === nb.digits ? [30, 40, 30] : 20);
+  if (r.s === nb.digits) snSfx("win");
+  else if (r.s > 0) snSfx("correct");
+  else if (r.b === 0) snSfx("wrong");
   nb.entry = "";
   if (r.s === nb.digits) nb.solved[p] = nb.logs[p].length;
   nbRenderLogs();

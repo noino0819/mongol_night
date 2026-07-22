@@ -112,11 +112,12 @@ function vgSettle(){
     order.forEach((pi, k) => { if (k < cas.stack.length){ vg.players[pi].money += cas.stack[k]; pays.push({ pi, amt: cas.stack[k] }); } });
     return { face: ci + 1, stack: cas.stack.slice(), placed: Object.assign({}, cas.placed), pays };
   });
+  if (vg.settleInfo.some((info) => info.pays.length)) snSfx("coin");
   vg.phase = "settle";
 }
 function vgNext(){
   if (vg.round < vg.rounds){ vg.round++; vg.starter = (vg.starter + 1) % vg.players.length; vgNewRound(); }
-  else vg.phase = "end";
+  else { snSfx("win"); vg.phase = "end"; }
 }
 
 /* ---------- 액션 라우팅 ---------- */
@@ -225,6 +226,7 @@ function vgPlayRoll(counts, mine, actor){
     vgAnim.timers.push(setTimeout(() => land(i + 1), 90));
   }
   function done(){
+    snSfx("pop");
     if (mine){
       $("vg-roll-msg").innerHTML = "한 눈만 골라 <b>전부</b> 그 카지노에 배치!";
       vgRenderFaces(); $("vg-faces").style.display = "";
@@ -241,7 +243,7 @@ function vgRenderFaces(){
     const b = document.createElement("button");
     b.innerHTML = VG_FACE[f - 1] + '<div class="fl">' + f + '번</div>' + (c ? '<span class="cnt">' + c + "</span>" : "");
     b.disabled = !c;
-    if (c) b.addEventListener("click", () => { haptic(12); vgAct({ act: "place", face: f }); });
+    if (c) b.addEventListener("click", () => { haptic(12); snSfx("select"); vgAct({ act: "place", face: f }); });
     box.appendChild(b);
   }
 }

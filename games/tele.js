@@ -138,6 +138,10 @@ function teReveal(){
     groups[k].members.push(i);
   });
   const sorted = Object.values(groups).sort((a, b) => b.members.length - a.members.length);
+  const teN = te.players.length, teTop = sorted[0].members.length;
+  if (teN >= 2 && teTop === teN) snSfx("correct");       /* 전원 일치 */
+  else if (teN >= 2 && teTop === 1) snSfx("wrong");      /* 전원 제각각 */
+  else snSfx("reveal");                                  /* 일반 공개 */
   $("te-groups").innerHTML = sorted.map(g => {
     const pts = g.members.length >= 2 ? g.members.length : 0;
     g.members.forEach(i => te.scores[i] += pts);

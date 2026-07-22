@@ -246,6 +246,7 @@ function wfSecret(){
       if (role === "예언자"){
         if (used) return;
         used = true;
+        snSfx("reveal");
         if (b.dataset.center){
           res.innerHTML = '<div class="reveal-card"><div class="lbl">가운데 2장</div><div class="val">' +
             WF_ROLE_INFO[wf.cards[wf.order.length]].em + wf.cards[wf.order.length] + " · " +
@@ -260,6 +261,7 @@ function wfSecret(){
       else if (role === "강도"){
         if (used) return;
         used = true;
+        snSfx("reveal");
         const p = +b.dataset.p;
         wf.robber = { from: idx, to: p };
         res.innerHTML = '<div class="reveal-card"><div class="lbl">' + wf.order[p] + '에게서 훔친 새 역할</div><div class="val">' +
@@ -288,6 +290,7 @@ function wfSecret(){
       else if (role === "늑대인간" && b.dataset.k !== undefined){
         if (used) return;
         used = true;
+        snSfx("reveal");
         const k = +b.dataset.k;
         res.innerHTML = '<div class="reveal-card"><div class="lbl">가운데 ' + (k+1) + '번 카드</div><div class="val">' +
           WF_ROLE_INFO[wf.cards[wf.order.length + k]].em + wf.cards[wf.order.length + k] + '</div></div>';
@@ -331,7 +334,7 @@ function wfNightResolve(){
   wf.dayTid = setInterval(() => {
     left--;
     $("wf-day-timer").textContent = left > 0 ? fmt(left) : "⏰ 투표하세요!";
-    if (left <= 0){ clearInterval(wf.dayTid); wf.dayTid = null; }
+    if (left <= 0){ clearInterval(wf.dayTid); wf.dayTid = null; snSfx("alarm"); }
   }, 1000);
 }
 $("wf-vote-start").addEventListener("click", () => {
@@ -397,6 +400,7 @@ function wfResult(){
   const n = wf.order.length;
   const finals = wf.final.slice(0, n);
   const jd = wfJudge(finals, wf.votes);
+  snSfx((jd.win === "nobody" || jd.win === "lose") ? "lose" : "win");
   const V = {
     tanner:  { em:"🪓", txt:"무두장이 승리!", color:"var(--fire)",   sub:"처형이 소원이었던 무두장이의 큰 그림. 늑대팀은 무조건 패배!" + (jd.deadWolf ? " 늑대도 잡혔으니 마을팀도 같이 승리!" : "") },
     village: { em:"🌞", txt:"마을 승리!",     color:"var(--steppe)", sub: jd.executed.length ? "늑대를 잡아냈다!" : "늑대는 없었다. 평화 투표 정답! 👏" },
@@ -491,6 +495,7 @@ window.__guest_wolf = function(){
         '<p class="hint" style="margin-top:16px;text-align:center">네 폰에서 역할·팀 확인!<br>밤 능력·투표·공개는 호스트 폰을 돌려가며 진행해</p>';
     }
     if (m.t === "reveal"){
+      snSfx("reveal");
       wfShow("wf-secret");
       const rows = m.table.map(r => '<div class="mb-teamcard"><b>' + escHtml(r.nm) + (r.dead ? " ⚰️" : "") + '</b><span>' +
         (WF_ROLE_INFO[r.role] ? WF_ROLE_INFO[r.role].em : "") + " " + escHtml(r.role) +

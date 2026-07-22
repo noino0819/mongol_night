@@ -135,6 +135,7 @@ window.__guest_liar = function(){
       pass.innerHTML = liarRoleHtml(m) + '<div class="hint" style="margin-top:14px">네 폰만 보고, 돌아가며 한 마디씩!<br>호스트 폰의 타이머를 봐</div>';
     }
     if (m.t === "reveal"){
+      snSfx("reveal");
       pass.innerHTML = '<div class="who-label">결과</div><div class="reveal-card" style="display:block"><div class="lbl">라이어는…</div><div class="val" style="color:var(--danger)">' + liarEsc(m.liarName) + '</div><div class="lbl" style="margin-top:14px">제시어</div><div class="val">' + liarEsc(m.word) + '</div></div>';
     }
   }};
@@ -151,7 +152,7 @@ $("liar-timer-btn").addEventListener("click", () => {
     const t = $("liar-timer");
     t.textContent = fmt(Math.max(0, st.timeLeft));
     if (st.timeLeft <= 30) t.classList.add("low");
-    if (st.timeLeft <= 0){ clearInterval(st.timerId); st.timerId = null; t.textContent = "투표!"; $("liar-timer-btn").textContent = "타이머 재시작"; st.timeLeft = 180; }
+    if (st.timeLeft <= 0){ clearInterval(st.timerId); st.timerId = null; snSfx("alarm"); t.textContent = "투표!"; $("liar-timer-btn").textContent = "타이머 재시작"; st.timeLeft = 180; }
   }, 1000);
 });
 
@@ -161,6 +162,7 @@ $("liar-reveal-btn").addEventListener("click", () => {
   if (liarState.timerId){ clearInterval(liarState.timerId); liarState.timerId = null; }
   const r = $("liar-result");
   r.style.display = "";
+  snSfx("reveal");
   r.innerHTML = '<div class="lbl">라이어는...</div><div class="val" style="color:var(--danger)">' + liarEsc(liarState.liarName) + '</div><div class="lbl" style="margin-top:14px">제시어</div><div class="val">' + liarEsc(liarState.word) + '</div>';
   $("liar-again").style.display = "";
   if (liarState.multi) mpBroadcast({ t: "reveal", liarName: liarState.liarName, word: liarState.word });

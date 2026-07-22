@@ -324,6 +324,7 @@ $("mb-roll").addEventListener("click", () => {
     ticks++;
     if (ticks >= 10){
       clearInterval(anim);
+      snSfx("pop");
       const dbl = d1 === d2;
       const d2el = $("mb-dice");
       if (d2el){ d2el.classList.remove("mb-rolling"); d2el.textContent = MB_DICE[d1 - 1] + MB_DICE[d2 - 1] + (dbl ? " 🔥" : ""); }
@@ -365,7 +366,7 @@ function mbMove(cur, steps, dbl){
   const hop = () => {
     if (remaining === 0){
       const go = () => mbResolveTile(cur, dbl);
-      if (salary){ cur.sheep += 5; mbRender(""); lifeModal("💵", "월급날!", "울란바토르를 지나며 양 +5", go); }
+      if (salary){ cur.sheep += 5; snSfx("coin"); mbRender(""); lifeModal("💵", "월급날!", "울란바토르를 지나며 양 +5", go); }
       else go();
       return;
     }
@@ -495,7 +496,7 @@ function mbDuel(cur, dbl){
   mbAsk("⚔️", cur.label + " vs " + rival.label,
     "대표 선수: <b>" + a + "</b> vs <b>" + b + "</b><br><br>" + game + "<br><br>판돈: 🐑 3마리 — 지금 실제로 대결하세요!",
     cur.label.slice(0, 8) + " 승!", rival.label.slice(0, 8) + " 승!",
-    () => { const t = Math.min(3, rival.sheep); rival.sheep -= t; cur.sheep += t; lifeModal("🏆", cur.label + " 승리!", "양 " + t + "마리 획득!", () => mbEndTurn(dbl)); },
+    () => { const t = Math.min(3, rival.sheep); rival.sheep -= t; cur.sheep += t; snSfx("coin"); lifeModal("🏆", cur.label + " 승리!", "양 " + t + "마리 획득!", () => mbEndTurn(dbl)); },
     () => { const t = Math.min(3, cur.sheep); cur.sheep -= t; rival.sheep += t; lifeModal("😭", rival.label + " 승리!", "양 " + t + "마리 강탈당함...", () => mbEndTurn(dbl)); });
 }
 function mbPay(cur, owner, toll, landName, dbl){
@@ -532,6 +533,7 @@ function mbAsk(em, tt, ds, aLabel, bLabel, onA, onB){
   document.body.appendChild(wrap);
 }
 function mbSettle(){
+  snSfx("win");
   $("life-game").style.display = "none"; $("life-end").style.display = "flex";
   const rank = mb.units.slice().sort((a, b) => {
     if (a.alive !== b.alive) return a.alive ? -1 : 1;

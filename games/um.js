@@ -218,12 +218,12 @@ function umPick(i){
     $("um-play-score").textContent = um.p[um.turn].score + "점";
     fl.textContent = "정답! 😎";
     fl.className = "um-flash ok";
-    haptic(15);
+    haptic(15); snSfx("correct");
   } else {
     $("um-c" + i).classList.add("no");
     fl.textContent = "땡! 정답은 「" + um.cur.a + "」";
     fl.className = "um-flash no";
-    haptic([30, 40, 30]);
+    haptic([30, 40, 30]); snSfx("wrong");
   }
   um.qtid = setTimeout(umNextQ, hit ? 550 : 1100);
 }
@@ -251,6 +251,7 @@ $("um-next-player").addEventListener("click", () => {
 function umEnd(){
   um.phase = "end";
   umShow("um-end");
+  snSfx("win");
   const rank = um.p.slice().sort((a, b) => b.score - a.score);
   const medals = ["🥇","🥈","🥉"];
   let mi = 0;

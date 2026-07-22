@@ -707,12 +707,12 @@ function gqPick(i){
     $("gq-play-score").textContent = gq.p[gq.turn].score + "점";
     fl.textContent = "정답! 😎";
     fl.className = "um-flash ok";
-    haptic(15);
+    haptic(15); snSfx("correct");
   } else {
     $("gq-c" + i).classList.add("no");
     fl.textContent = "땡! 정답은 「" + gq.cur.ans + "」";
     fl.className = "um-flash no";
-    haptic([30, 40, 30]);
+    haptic([30, 40, 30]); snSfx("wrong");
   }
   gq.qtid = setTimeout(gqNextQ, hit ? 600 : 1300); /* 상식은 정답 곱씹을 시간 살짝 더 */
 }
@@ -742,6 +742,7 @@ $("gq-next-player").addEventListener("click", () => {
 function gqEnd(){
   gq.phase = "end";
   gqShow("gq-end");
+  snSfx("win");
   const rank = gq.p.slice().sort((a, b) => b.score - a.score);
   const medals = ["🥇","🥈","🥉"];
   let mi = 0;
@@ -815,6 +816,7 @@ function gqHostReveal(){
     gq.alive = gq.roundAlive.filter(n => result[n]);
   }
   mpBroadcast({ t: "r", ci, ans: gq.cur.ans, result, alive: gq.alive.slice(), elim });
+  snSfx("reveal");
   gqHostRender();
 }
 function gqHostRender(){
@@ -865,6 +867,7 @@ function gqMpEnd(){
 }
 function gqMpEndRender(rank, winner, meName){
   gqShowMp();
+  snSfx(meName == null || winner.includes(meName) ? "win" : "reveal");
   const rows = rank.map((r, i) => {
     const crown = winner.includes(r.name) ? "👑" : (i + 1) + ".";
     const mine = meName && r.name === meName ? ' style="color:var(--fire)"' : '';
@@ -933,8 +936,8 @@ function gqGuestR(m){
   const fl = $("gq-g-fl"); if (!fl) return;
   if (!gq.gAlive){ fl.textContent = "💀 구경 중"; return; }
   const ok = !!m.result[mp.name], alive = m.alive.includes(mp.name);
-  if (ok){ fl.textContent = "⭕ 정답!" + (alive ? " 생존!" : ""); fl.className = "um-flash ok"; haptic(15); }
+  if (ok){ fl.textContent = "⭕ 정답!" + (alive ? " 생존!" : ""); fl.className = "um-flash ok"; haptic(15); snSfx("correct"); }
   else if (alive){ fl.textContent = "❌ 오답… 근데 아무도 못 맞혀서 생존!"; fl.className = "um-flash"; }
-  else { fl.textContent = "❌ 땡! 정답은 「" + escHtml(m.ans) + "」 — 탈락"; fl.className = "um-flash no"; haptic([30, 40, 30]); }
+  else { fl.textContent = "❌ 땡! 정답은 「" + escHtml(m.ans) + "」 — 탈락"; fl.className = "um-flash no"; haptic([30, 40, 30]); snSfx("wrong"); }
 }
 snRegisterGame("gq", gqReset);

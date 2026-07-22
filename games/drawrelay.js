@@ -161,9 +161,11 @@ function drSubmit(type, v){
   dr.chain.push({ type, v, by: drPlayerAt(dr.step) });
   dr.step++;
   if (dr.step >= dr.order.length) return drReveal();
+  snSfx("pop");                                  /* 제출 완료 → 다음 사람에게 넘김 */
   drHandoff();
 }
 function drReveal(){
+  snSfx("reveal");                               /* 변천사 대공개 */
   drShow("dr-reveal");
   $("dr-reveal-title").textContent = "시작: \u201C" + dr.chain[0].v + "\u201D";
   $("dr-chain").innerHTML = dr.chain.map((c, i) => {
@@ -333,7 +335,7 @@ function drStartDrawTimer(){
   dr.drawTimerId = setInterval(() => {
     dr.drawLeft--;
     $("dr-timer").textContent = dr.drawLeft > 0 ? dr.drawLeft : "시간 초과! (그래도 마저 그리세요)";
-    if (dr.drawLeft <= 0){ clearInterval(dr.drawTimerId); dr.drawTimerId = null; }
+    if (dr.drawLeft <= 0){ snSfx("alarm"); clearInterval(dr.drawTimerId); dr.drawTimerId = null; }
   }, 1000);
 }
 snRegisterGame("drawrelay", drReset);

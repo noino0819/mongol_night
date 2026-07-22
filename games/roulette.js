@@ -73,7 +73,7 @@ $("rou-spin").addEventListener("click", () => {
   (function tick(){
     el.textContent = roster[ticks % roster.length];
     ticks++;
-    if (ticks < total){ delay *= 1.09; setTimeout(tick, delay); }
+    if (ticks < total){ delay *= 1.09; if (delay > 110) snSfx("spin"); setTimeout(tick, delay); } // ponytail: 초반 빠른 구간은 스킵, 감속(느려지는) 구간만 틱 — 남발 방지
     else {
       const r = ROU_HITS[Math.floor(Math.random() * ROU_HITS.length)];
       $("rou-tag").textContent = r.q;
@@ -81,6 +81,7 @@ $("rou-spin").addEventListener("click", () => {
       void el.offsetWidth;                      // 애니메이션 재시작 강제
       el.classList.add(ROU_ANIMS[Math.floor(Math.random() * ROU_ANIMS.length)]);
       rouBurst(r.e);
+      snSfx("reveal");
       spinning = false;
     }
   })();

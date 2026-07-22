@@ -49,7 +49,7 @@ $("cho-next").addEventListener("click", choNext);
 $("cho-show").addEventListener("click", () => {
   const a = $("cho-answer");
   const show = a.style.display === "none";
-  if (show) a.innerHTML = '<div class="lbl">정답</div><div class="val">' + cho.cur + '</div>';
+  if (show){ a.innerHTML = '<div class="lbl">정답</div><div class="val">' + cho.cur + '</div>'; snSfx("reveal"); }
   a.style.display = show ? "" : "none";
   $("cho-show").textContent = show ? "정답 숨기기" : "정답 보기";
 });

@@ -133,6 +133,7 @@ async function mpScan(expect, onOk){
     if (r.data.startsWith(expect)){
       mpStopScan();
       if (navigator.vibrate) navigator.vibrate(80);
+      snSfx("select");   /* QR 스캔 성공 */
       onOk(r.data);
     } else if (r.data.startsWith("SN1") && ts - mp.warnTs > 2500){
       mp.warnTs = ts;
@@ -193,6 +194,7 @@ function mpPoke(from, emo){
   d.append(nm);
   document.body.appendChild(d);
   if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+  snSfx("pop");   /* 감정(이모지) 날리기 — 보낼 때·받을 때 */
   const t = setTimeout(() => d.remove(), 1100);
   mp.timers.push(t);
 }
@@ -232,6 +234,7 @@ function mpWireHostPeer(peer){
     localStorage.setItem("snMpWas", "host:" + Date.now()); /* 앱이 죽었다 켜지면 "연결 끊김" 안내용 */
     mpWake(true);
     mpKeepalive();
+    snSfx("coin");   /* 게스트 폰 입장 성공 */
     mpFlash("🔗 폰 연결됨!");
     mpRoom();
     mpRoster();
@@ -318,7 +321,7 @@ async function mpJoin(){
       };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); mpFlash("🔗 연결 완료!"); mpRoom(); };
+        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); snSfx("coin"); mpFlash("🔗 연결 완료!"); mpRoom(); };   /* 호스트 연결 성공 */
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }

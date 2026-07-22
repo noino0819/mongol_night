@@ -434,6 +434,7 @@ function taStart(fresh){
   ta.ckpt = null;
   $("ta-setup").style.display = "none";
   $("ta-play").style.display = "";
+  snBgm("story");
   taGo(TA_META.start);
 }
 function taContinue(){
@@ -445,6 +446,7 @@ function taContinue(){
   ta.nodeId = s.node;
   $("ta-setup").style.display = "none";
   $("ta-play").style.display = "";
+  snBgm("story");
   taRender(); /* 세이브 시점에 set 적용 완료 상태이므로 재적용 없이 렌더만 */
 }
 
@@ -453,6 +455,10 @@ function taGo(id){
   if (!node) return;
   ta.nodeId = id;
   taApply(node.set);
+  if (node.set){
+    if (node.set.star > 0) snSfx("reveal");                                 /* 별조각 — 극적 공개 */
+    else if ((node.set.sheep || 0) > 0 || node.set.charm) snSfx("coin");    /* 양·부적 획득 */
+  }
   if (node.auto){
     const hit = node.auto.find((a) => !a.if || taCond(a.if, ta.vars));
     if (hit){ taGo(hit.goto); return; }
@@ -475,6 +481,10 @@ function taRender(){
   const box = $("ta-choices");
   box.innerHTML = "";
   const isEnd = TA_META.endings.includes(ta.nodeId);
+  if (isEnd){
+    snBgmStop();                                                            /* 결말 화면 — 배경음 정리 */
+    snSfx(ta.nodeId === "end_star" || ta.nodeId === "end_sheep" ? "win" : "lose");
+  }
   const bar = $("ta-turnbar");
   bar.style.display = "none";
 
@@ -516,6 +526,7 @@ function taChoose(c){
       return;
     }
   }
+  snSfx("select");                                                          /* 스토리 선택 확정 큐 */
   taApply(c.cost, -1);
   taApply(c.set);
   ta.turnIdx++;
@@ -543,6 +554,7 @@ function taRoll(c){
       rs.textContent = sv + " + " + d6 + " = " + (sv + d6) + (ok ? " ≥ " + dc + " 성공!" : " < " + dc + " 실패…");
       rs.className = "ta-roll-rs " + (ok ? "ok" : "no");
       haptic(ok ? 20 : [40, 40, 40]);
+      snSfx("pop");                                                         /* 주사위 판정 결과 */
       ta.timers.push(setTimeout(() => {
         $("ta-roll").style.display = "none";
         ta.rolling = false;
@@ -566,6 +578,7 @@ function taReset(){
   ta.timers.forEach((t) => { clearTimeout(t); clearInterval(t); });
   ta.timers = [];
   ta.rolling = false;
+  snBgmStop();
   $("ta-roll").style.display = "none";
   $("ta-play").style.display = "none";
   $("ta-setup").style.display = "";

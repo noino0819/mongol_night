@@ -92,10 +92,11 @@ function omApply(r, c){
   om.history.push([r, c]);
   omokDraw();
   const won = (om.rule === "renju" && om.turn === 1) ? omExactFive(r, c) : omokWin(r, c);
-  if (won){ om.over = true; omWinLabel(); return true; }
+  if (won){ om.over = true; omWinLabel(); snSfx("win"); return true; }
   om.turn = om.turn === 1 ? 2 : 1;
   omokTurnLabel();
   omokDraw();
+  snSfx("pop");                                    /* 착수 */
   return true;
 }
 function omFoulToast(foul){
@@ -353,7 +354,8 @@ function omApplyState(m){
   om.history = m.last ? [m.last] : [];
   omSizeCanvas();
   omokDraw();
-  if (om.over) omWinLabel(); else omokTurnLabel();
+  if (om.over){ omWinLabel(); snSfx("win"); }      /* 게스트 폰: 호스트 판정 반영 */
+  else { omokTurnLabel(); if (m.last) snSfx("pop"); }
 }
 /* 게스트 진입 훅 — 호스트가 mpNav("omok")로 끌고 오면 실행됨 */
 window.__guest_omok = function(){

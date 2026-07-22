@@ -165,6 +165,7 @@ function lvRevealRoll(x, rolls){
   lv.lastRoll = { counts, junk };
   x.dice -= junk; /* 꽝 자동 소각 */
   haptic(25);
+  snSfx("pop");
   lvRenderStrip();
   let html = [3,4,5,6].filter(f => counts[f]).map(f => "<b>" + LV_FACE_EM[f] + f + "</b>×" + counts[f]).join(" · ");
   if (junk) html += (html ? " · " : "") + '<span class="lv-junk">꽝×' + junk + ' 소각 💨</span>';
@@ -188,6 +189,7 @@ function lvRevealRoll(x, rolls){
 function lvPlace(face){
   const c = lv.lastRoll && lv.lastRoll.counts[face];
   if (!c) return;
+  snSfx("select");
   const slot = lv.slots[face - 3];
   slot.placed[lv.turn] = (slot.placed[lv.turn] || 0) + c;
   lv.p[lv.turn].dice -= c;
@@ -216,10 +218,11 @@ function lvSettleRound(){
   $("lv-settle-tag").textContent = "ROUND " + lv.round + " 정산!";
   const list = $("lv-settle-list");
   list.innerHTML = "";
+  let paid = false;
   lv.slots.forEach((slot, si) => {
     const face = si + 3;
     const w = lvSlotWinner(slot.placed);
-    if (w >= 0) lv.p[w].sheep += slot.prize;
+    if (w >= 0){ lv.p[w].sheep += slot.prize; paid = true; }
     const detail = lv.p.map((x, i) => slot.placed[i] ? escHtml(x.name) + " " + slot.placed[i] + "개" : null).filter(Boolean).join(" · ") || "배치 없음";
     const anyone = Object.keys(slot.placed).some(k => slot.placed[k] > 0);
     const line = w >= 0
@@ -229,6 +232,7 @@ function lvSettleRound(){
         : '<span style="color:var(--dim)">아무도 안 와서 상금 소멸</span>';
     list.innerHTML += '<div class="mb-teamcard"><b>' + LV_FACE_EM[face] + " " + face + "의 더미 — 🐑" + slot.prize + "</b><span>" + detail + "<br>" + line + "</span></div>";
   });
+  if (paid) snSfx("coin");
   lvRenderStrip("lv-settle-strip");
   $("lv-next-round").textContent = lv.round < lv.rounds ? "다음 라운드 →" : "최종 결과 →";
 }
@@ -238,6 +242,7 @@ $("lv-next-round").addEventListener("click", () => {
 });
 function lvEnd(){
   lvShow("lv-end");
+  snSfx("win");
   const rank = lv.p.map(x => ({ n: x.name, s: x.sheep })).sort((a, b) => b.s - a.s);
   const medals = ["🥇","🥈","🥉"];
   $("lv-rank").innerHTML = '<div class="lbl">양 부자 랭킹</div><div class="val" style="font-size:18px;line-height:2">' +

@@ -157,6 +157,7 @@ $("cm-godraw").addEventListener("click", () => {
   cm.timerId = setInterval(() => {
     cm.left--;
     $("cm-timer").textContent = cm.left;
+    if (cm.left === 5) snSfx("alarm");             /* 시간 경고 (한 번만) */
     if (cm.left <= 0){
       clearInterval(cm.timerId); cm.timerId = null;
       lifeModal("⏰", "시간 초과!", "정답은 \u201C" + cm.word + "\u201D 였습니다!", cmNextTurn);
@@ -185,6 +186,7 @@ $("cm-correct").addEventListener("click", () => {
     b.addEventListener("click", () => {
       cm.scores[i] += 2;
       cm.scores[drawerIdx] += 1;
+      snSfx("correct");                            /* 정답자 확정 */
       lifeModal("🎉", n + " 정답!", "\u201C" + cm.word + "\u201D — " + n + " +2점, 그린 " + cm.players[drawerIdx] + " +1점", cmNextTurn);
     });
     grid.appendChild(b);
@@ -204,6 +206,7 @@ function cmNextTurn(){
   cmSecret();
 }
 function cmEnd(){
+  snSfx("win");                                    /* 최종 순위 발표 */
   cmShow("cm-end");
   const rank = cm.players.map((n, i) => ({ n, s: cm.scores[i] })).sort((a, b) => b.s - a.s);
   const medals = ["🥇","🥈","🥉"];

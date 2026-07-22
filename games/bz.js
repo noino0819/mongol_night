@@ -897,6 +897,7 @@ function bzResolveTap(){
   bz.winner = w;
   bz.phase = "answer";
   haptic([30, 40, 30]);
+  snSfx("buzz");
   bzRenderZones();
   bzAnswerUI();
   bzBeam({ t: "st", phase: "won", win: bz.sel[w], qtype: bz.cur.type });
@@ -943,6 +944,7 @@ function bzJudge(correct){
     const pts = bz.cur.pts || 1;
     bz.scores[w] += pts;
     haptic(60);
+    snSfx("correct");
     if (bz.scores[w] >= bz.goal) return bzEnd(w);
     bz.phase = "gap";
     $("bz-mid").innerHTML = '<div class="bz-ans" style="color:var(--steppe)">⭕ 정답! +' + pts + "</div>";
@@ -953,6 +955,7 @@ function bzJudge(correct){
     bz.scores[w] = Math.max(0, bz.scores[w] - 1);
     bz.locked.push(w);
     haptic([40, 60, 40]);
+    snSfx("wrong");
     if (bz.locked.length >= bz.sel.length){
       bz.phase = "reveal";
       bzRenderZones();
@@ -973,6 +976,7 @@ function bzEnd(w){
   clearInterval(bz.tid); bz.tid = null;
   clearTimeout(bz.tapTid); bz.tapTid = null;
   bz.phase = "end";
+  snSfx("win");
   ["bz-setup","bz-play"].forEach(id => $(id).style.display = "none");
   $("bz-end").style.display = "flex";
   $("bz-champ").textContent = "🏆 " + bz.sel[w];
@@ -1004,6 +1008,7 @@ function bzGuestBuzz(e){
   btn.classList.remove("live"); btn.classList.add("win");
   btn.innerHTML = '🔔<span class="sc" style="font-size:14px">전송됨! 결과 대기…</span>';
   haptic(30);
+  snSfx("buzz");
   mpToHost({ t: "buzz" });
 }
 /* 호스트가 보낸 상태(st)로 게스트 화면 그리기 — 답 입력·타이머·점수판·순위까지 자기 폰에서 */

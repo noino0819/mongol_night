@@ -166,7 +166,7 @@ function cfSubmit(isHost){
   const rgb = cf.cur.slice();
   cfCamStop();
   const b = $("cf-submit"); if (b){ b.disabled = true; b.textContent = "제출 완료 ✓"; }
-  haptic(20);
+  haptic(20); snSfx("select");
   if (isHost){ cf.subs[mp.name] = rgb; cfHostStat(); cfCheckAll(); }
   else { mpToHost({ t:"submit", rgb }); const h = $("cf-hint"); if (h) h.textContent = "제출 완료! 결과 기다리는 중…"; }
 }
@@ -216,6 +216,8 @@ function cfHostReveal(){
 function cfResultUI(rows, target, scores, isHost){
   cfCamStop();
   cf.phase = "reveal";
+  if (isHost) snSfx("reveal");
+  else { const me = (Array.isArray(rows) ? rows : []).find(r => r.name === mp.name); snSfx(me && (me.pts | 0) > 0 ? "correct" : "wrong"); }
   const body = (Array.isArray(rows) ? rows : []).map((r) => {
     const rgb = cfCleanRgb(r.rgb);
     const medal = r.rank === 1 ? "🥇" : r.rank === 2 ? "🥈" : r.rank === 3 ? "🥉" : rgb ? "·" : "—";
@@ -242,6 +244,7 @@ function cfResultUI(rows, target, scores, isHost){
 function cfEnd(){ cf.phase = "end"; mpBroadcast({ t:"end", scores: cf.scores }); cfEndUI(cf.scores, true); }
 function cfEndUI(scores, isHost){
   cfCamStop(); cf.phase = "end";
+  snSfx("win");
   const rank = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
   const champ = rank.length ? rank.filter(n => scores[n] === scores[rank[0]]) : [];
   cfRoot().innerHTML =

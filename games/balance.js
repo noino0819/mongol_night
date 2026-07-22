@@ -27,8 +27,8 @@ function balNext(){
   $("bal-a").textContent = a; $("bal-b").textContent = b;
   $("bal-a").classList.remove("picked"); $("bal-b").classList.remove("picked");
 }
-$("bal-a").addEventListener("click", () => { $("bal-a").classList.toggle("picked"); $("bal-b").classList.remove("picked"); });
-$("bal-b").addEventListener("click", () => { $("bal-b").classList.toggle("picked"); $("bal-a").classList.remove("picked"); });
+$("bal-a").addEventListener("click", () => { $("bal-a").classList.toggle("picked"); $("bal-b").classList.remove("picked"); if ($("bal-a").classList.contains("picked")) snSfx("select"); });
+$("bal-b").addEventListener("click", () => { $("bal-b").classList.toggle("picked"); $("bal-a").classList.remove("picked"); if ($("bal-b").classList.contains("picked")) snSfx("select"); });
 $("bal-next").addEventListener("click", balNext);
 balNext();
 snRegisterGame("balance", balNext);

@@ -207,6 +207,7 @@ function fruitFlipTurn(i){
   if (!fr.decks[i].length) return fruitNextTurn();
   fr.faceup[i].push(fr.decks[i].pop());
   fruitRenderZone(i, true);
+  snSfx("pop");
   $("fruit-msg").textContent = "";
   /* 카드 확인할 틈: 잠깐 뒤집기 잠금 */
   fr.flipLock = true;
@@ -232,10 +233,12 @@ function fruitBell(i, zone){
       fr.faceup[j] = [];
     });
     if (zone) zone.classList.add("good");
+    snSfx("coin");
     $("fruit-msg").textContent = "🔔 " + fr.players[i] + " 싹쓸이! +" + gain + "장";
     fr.turn = i; /* 종 친 사람이 다음 선 */
   } else {
     if (zone) zone.classList.add("bad");
+    snSfx("wrong");
     fr.players.forEach((_, j) => {
       if (j !== i && fruitAlive(j) && fr.decks[i].length) fr.decks[j].unshift(fr.decks[i].shift());
     });
@@ -256,6 +259,7 @@ function fruitBell(i, zone){
 function fruitEnd(){
   clearTimeout(fr.toId); fr.toId = null; fr.running = false;
   $("fruit-game").style.display = "none"; $("fruit-result").style.display = "flex";
+  snSfx("win");
   const rank = fr.players.map((n, i) => ({ n, s: fr.decks[i].length + fr.faceup[i].length })).sort((a, b) => b.s - a.s);
   const medal = (i) => i < 3 ? '<px-sprite name="medal' + (i + 1) + '" scale="2" style="display:inline-block;vertical-align:middle"></px-sprite> ' : '· ';
   $("fruit-rank").innerHTML = '<div class="lbl">최종 카드</div><div class="val" style="font-size:19px;line-height:2">' +

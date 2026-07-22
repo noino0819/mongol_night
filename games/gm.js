@@ -190,6 +190,7 @@ function gmPick(table, key){
 
 function gmReset(){
   clearInterval(gm.tumble);
+  snBgmStop();
   gm = { last: {}, tumble: 0 };
   $("gm-intro").style.display = "";
   $("gm-play").style.display = "none";
@@ -203,11 +204,13 @@ function gmShowCard(kind, text){
   $("gm-kind").textContent = kind;
   $("gm-card-txt").textContent = text;   /* textContent → 정적 데이터라도 안전하게 */
   haptic(10);
+  snSfx("reveal");                       /* 상황 카드 공개 */
 }
 
 $("gm-begin").addEventListener("click", () => {
   $("gm-intro").style.display = "none";
   $("gm-play").style.display = "";
+  snBgm("story");
   gmShowCard("여정의 시작", gmPick(GM_OPEN, "open"));
 });
 $("gm-restart").addEventListener("click", gmReset);
@@ -239,6 +242,7 @@ function gmRoll(dc, label){
   $("gm-roll-res").innerHTML = "";
   clearInterval(gm.tumble);
   haptic(15);
+  snSfx("spin");                                                            /* 주사위 굴러가는 소리 */
   let n = 0;
   gm.tumble = setInterval(() => {
     face.setAttribute("name", "die" + (1 + Math.floor(Math.random() * 6)));
@@ -247,6 +251,7 @@ function gmRoll(dc, label){
       const roll = 1 + Math.floor(Math.random() * 6);
       face.setAttribute("name", "die" + roll);
       const t = gmTier(roll, dc);
+      snSfx(t.cls === "crit" ? "coin" : t.cls === "fumble" ? "boom" : "pop");  /* 대성공/대실패/그외 */
       const color = t.cls === "crit" ? "var(--steppe)" : t.cls === "fumble" ? "var(--danger)" : t.cls === "ok" ? "var(--milk)" : "var(--dim)";
       $("gm-roll-res").innerHTML =
         '<div class="lbl">' + escHtml(label) + ' · 주사위 ' + roll + '</div>' +
