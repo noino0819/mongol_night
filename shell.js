@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.8.1";
+  const VER = "v2.9.0";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -95,12 +95,31 @@ function snConfirm(em, tt, ds, okLabel, onOk){
       badgeOk("✅ 오프라인 준비 완료");
     }
     const promptUpdate = (w) => {
+      /* 설정에서 '최신 버전 받아오기'를 누른 경우엔 토스트 없이 바로 적용 */
+      if (pwa.autoApply){
+        pwa.wantReload = true;
+        w.postMessage("SKIP_WAITING");
+        return;
+      }
       pwaToast("🌙 새 버전 도착!", "새로고침", () => {
         pwa.wantReload = true;
         w.postMessage("SKIP_WAITING");
       });
     };
+    /* 설정 버튼용 수동 업데이트 — 토스트가 아직 안 떴어도 강제로 최신 확인 */
+    pwa.manualUpdate = async (reg) => {
+      if (!navigator.onLine){ pwaToast("새 버전을 받으려면 인터넷에 연결해줘", null, null, { warn: true }); return; }
+      pwa.autoApply = true;
+      if (reg.waiting){ promptUpdate(reg.waiting); return; } /* 이미 대기 중 → 즉시 적용 */
+      pwaToast("최신 버전 확인 중…");
+      try { await reg.update(); }
+      catch (e){ pwa.autoApply = false; pwaToast("확인 실패 — 잠깐 뒤 다시 해줘", null, null, { warn: true }); return; }
+      /* update() 후 새 워커가 있으면 updatefound→promptUpdate가 자동 적용. 없으면 최신 */
+      if (reg.installing || reg.waiting){ pwaToast("새 버전 받는 중…"); }
+      else { pwa.autoApply = false; pwaToast("이미 최신 버전이야 🌙"); }
+    };
     navigator.serviceWorker.register("sw.js").then((reg) => {
+      pwa.reg = reg;
       /* 지난 방문에서 토스트를 못 누르고 닫았어도, 대기 중인 워커가 있으면 다시 안내 */
       if (reg.waiting && navigator.serviceWorker.controller) promptUpdate(reg.waiting);
       reg.addEventListener("updatefound", () => {
@@ -232,6 +251,10 @@ $("ob-skip").addEventListener("click", obDone);
 $("ob-later").addEventListener("click", obDone);
 $("ob-install").addEventListener("click", () => { obDone(); if (pwa.installAction) pwa.installAction(); });
 $("set-install").addEventListener("click", () => { if (pwa.installAction) pwa.installAction(); });
+$("set-update").addEventListener("click", () => {
+  if (pwa.manualUpdate && pwa.reg) pwa.manualUpdate(pwa.reg);
+  else pwaToast("이 브라우저에선 업데이트 확인이 안 돼");
+});
 
 /* --- 일행 영속화 --- */
 /* prefs.roster가 배열이면 사용자가 저장한 상태(빈 배열 포함) → 그대로 존중.
@@ -629,6 +652,114 @@ function snVictory(spr, title){
   ov.addEventListener("click", () => ov.remove());
   document.body.appendChild(ov);
 }
+
+/* ================================================================
+   사운드: 오프라인 100% → 오디오 파일 0. Web Audio로 8비트 칩튠 합성.
+   prefs.sound(기본 on)로 게이트 — 진동 haptic()과 같은 규칙.
+   게임에서:  snSfx('correct')  ·  snBgm('fuse')/snBgmStop()
+   팔레트가 곧 재미의 다양성 — 이벤트마다 다른 큐를 골라 쓴다.
+   ================================================================ */
+const snd = { ctx: null, master: null, bgmTimer: null, bgmName: null };
+function snOn(){ return prefs.sound !== false; }        /* 미설정 = 켜짐 */
+function snAudio(){                                     /* 첫 제스처 안에서 호출돼야 잠금 해제됨(자동재생 정책) */
+  if (!snOn()) return null;
+  if (!snd.ctx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try { snd.ctx = new AC(); } catch (e) { return null; }
+    snd.master = snd.ctx.createGain();
+    snd.master.gain.value = 0.5;                        /* 여러 음 겹쳐도 안 터지게 헤드룸 */
+    snd.master.connect(snd.ctx.destination);
+  }
+  if (snd.ctx.state === "suspended") snd.ctx.resume();
+  return snd.ctx;
+}
+/* 한 음: 사각파 기본, 짧은 어택 + 지수 감쇠 → 도트 블립 */
+function snTone(freq, dur, o){
+  const ctx = snAudio(); if (!ctx) return;
+  o = o || {};
+  const t = ctx.currentTime + (o.delay || 0);
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.type = o.type || "square";
+  osc.frequency.setValueAtTime(freq, t);
+  if (o.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.slide), t + dur);
+  const vol = o.vol != null ? o.vol : 0.3;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.connect(g); g.connect(snd.master);
+  osc.start(t); osc.stop(t + dur + 0.03);
+}
+/* 노이즈 버스트: 타악/폭발/버저용 (감쇠 화이트노이즈, 옵션 로우패스) */
+function snNoise(dur, o){
+  const ctx = snAudio(); if (!ctx) return;
+  o = o || {};
+  const t = ctx.currentTime + (o.delay || 0);
+  const n = Math.max(1, Math.floor(ctx.sampleRate * dur));
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const g = ctx.createGain(); g.gain.value = o.vol != null ? o.vol : 0.3;
+  if (o.lp){ const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = o.lp; src.connect(f); f.connect(g); }
+  else src.connect(g);
+  g.connect(snd.master); src.start(t);
+}
+/* 이름 붙은 효과음 팔레트 — 이벤트별로 골라 쓰면 다양해진다 */
+const SN_SFX = {
+  tap:    () => snTone(660, 0.05, { vol: .10 }),
+  select: () => { snTone(523, 0.06, { vol: .18 }); snTone(784, 0.09, { vol: .18, delay: .05 }); },
+  back:   () => { snTone(494, 0.06, { vol: .15 }); snTone(330, 0.10, { vol: .15, delay: .05 }); },
+  toggle: () => snTone(880, 0.07, { vol: .18, type: "triangle" }),
+  correct:() => [523, 659, 784, 1047].forEach((f, i) => snTone(f, 0.12, { vol: .22, delay: i * .07 })),
+  wrong:  () => { snTone(196, 0.28, { vol: .26, type: "sawtooth", slide: 104 }); snNoise(0.12, { vol: .08, lp: 700, delay: .02 }); },
+  win:    () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => snTone(f, 0.14, { vol: .24, delay: i * .11 })),
+  lose:   () => [440, 392, 330, 262].forEach((f, i) => snTone(f, 0.22, { vol: .22, delay: i * .14, type: "triangle" })),
+  tick:   () => snTone(1200, 0.03, { vol: .13 }),
+  boom:   () => { snNoise(0.55, { vol: .5, lp: 380 }); snTone(90, 0.42, { vol: .3, type: "sawtooth", slide: 42 }); },
+  coin:   () => { snTone(988, 0.06, { vol: .22 }); snTone(1319, 0.14, { vol: .22, delay: .06 }); },
+  pop:    () => snTone(1047, 0.06, { vol: .18, type: "triangle", slide: 1568 }),
+  reveal: () => { snTone(392, 0.08, { vol: .18 }); snTone(587, 0.13, { vol: .18, delay: .07 }); },
+  buzz:   () => snTone(150, 0.28, { vol: .28, type: "sawtooth" }),
+  alarm:  () => { snTone(880, 0.11, { vol: .22 }); snTone(880, 0.11, { vol: .22, delay: .17 }); },
+  spin:   () => snTone(500, 0.04, { vol: .10, slide: 1000 })
+};
+function snSfx(name){ if (snOn() && SN_SFX[name]) SN_SFX[name](); }
+/* BGM: 짧은 칩튠 루프. seq 각 스텝 {m:멜로디, b:베이스} 또는 null(쉼).
+   ponytail: setTimeout 나이브 스케줄러(살짝 드리프트) — 배경음엔 충분. 정밀 필요하면 lookahead로 교체. */
+const SN_BGM = {
+  fuse: { bpm: 108, div: 2, seq: [ { b: 110 }, null, { b: 110 }, { m: 330 }, { b: 98 }, null, { b: 98 }, { m: 294 } ] }
+};
+function snBgm(name){
+  snBgmStop();
+  const pat = SN_BGM[name]; if (!pat || !snOn() || !snAudio()) return;
+  const step = 60 / pat.bpm / (pat.div || 1);
+  let i = 0;
+  snd.bgmName = name;
+  (function loop(){
+    if (snd.bgmName !== name || !snOn()){ snBgmStop(); return; }
+    const s = pat.seq[i % pat.seq.length];
+    if (s){
+      if (s.b) snTone(s.b, step * .9, { vol: .09, type: "triangle" });
+      if (s.m) snTone(s.m, step * .8, { vol: .10, type: "square" });
+    }
+    i++;
+    snd.bgmTimer = setTimeout(loop, step * 1000);
+  })();
+}
+function snBgmStop(){ if (snd.bgmTimer){ clearTimeout(snd.bgmTimer); snd.bgmTimer = null; } snd.bgmName = null; }
+
+/* 앱 전역 UI 사운드: 버튼/카드 탭에 블립 하나 — 게임 수정 0으로 전체 커버.
+   네비게이션 탭은 BGM도 정리(떠나는 화면은 자기 reset을 못 도니 셸이 백스톱). */
+document.addEventListener("pointerdown", (e) => {
+  if (!snOn()) return;
+  const el = e.target.closest && e.target.closest("button, [data-go], .card, .chip");
+  if (!el) return;
+  if (el.matches("[data-go='home'], .back")){ snBgmStop(); snSfx("back"); return; }
+  if (el.classList.contains("tg")) return;          /* 토글은 설정 핸들러가 소리냄(중복 방지) */
+  if (el.hasAttribute("data-go")) snBgmStop();
+  snSfx("tap");
+}, { passive: true });
 
 /* --- 스플래시: 폰트 준비 + 최소 노출 후 해제, 최대 1.2s --- */
 (function splashInit(){
