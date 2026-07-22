@@ -25,6 +25,74 @@ stone:[
 "................",
 "................",
 "................"],
+shagai:[
+"................",
+"......22........",
+".....2772.......",
+"......77........",
+".....7777.......",
+"....277777......",
+"...27777777.....",
+"...277777770....",
+"...7777777700...",
+"....77777700....",
+".....777700.....",
+"................",
+"....66...66.....",
+"....66...66.....",
+"................",
+"................"],
+trunk:[
+"................",
+"................",
+"................",
+"..222222222222..",
+"..277777777770..",
+"..270777777070..",
+"..270777777070..",
+"..270776677070..",
+"..270776677070..",
+"..270777777070..",
+"..277777777770..",
+"................",
+"................",
+"................",
+"................",
+"................"],
+sulde:[
+"................",
+"................",
+"......6666......",
+"...66.6666.66...",
+"...66.6666.66...",
+".......77.......",
+".66....77....66.",
+".66....77....66.",
+".......77.......",
+"...66..77..66...",
+"...66..77..66...",
+".......77.......",
+".66....77....66.",
+".66....77....66.",
+".......77.......",
+"................"],
+khanger:[
+"................",
+"................",
+"......6446......",
+"....66666666....",
+"...6666666666...",
+"..666666666666..",
+".66666666666666.",
+".66666666666666.",
+".66666666666666.",
+".66666555566666.",
+".66666500566666.",
+".66666500566666.",
+".66666555566666.",
+"................",
+"................",
+"................"],
 letter:[
 "................",
 "................",
@@ -952,7 +1020,16 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-find{display:grid;gap:6px;margin:8px 0}
 .er-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;cursor:pointer;line-height:1}
 .er-cell:active{transform:scale(.94)}
-.er-cell.flip{background:var(--card);border-color:var(--steppe);font-size:22px;font-weight:bold}
+.er-cell.flip{background:var(--card);border-color:var(--steppe)}
+.er-cell .er-cb{display:none}
+.er-cell.flip .er-cf{display:none}
+.er-cell.flip .er-cb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.er-cval{font-size:16px;font-weight:bold}
+.er-ctext{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.9;color:var(--milk);word-break:keep-all}
+.er-c-fire{color:var(--fire)}
+.er-c-sky{color:var(--px-sky)}
+.er-c-sand{color:var(--px-sand)}
+.er-c-steppe{color:var(--steppe)}
 .er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
 .er-dcol{display:flex;flex-direction:column;align-items:center;gap:4px}
 .er-dbtn{width:46px;height:30px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:13px;cursor:pointer}
@@ -969,94 +1046,97 @@ snAddCss(`.er-shake{animation:erShake .32s}
    아이템은 act.items 맵에 선언. combos: 인벤토리 아이템 조합 → 새 아이템. */
 const ER_SCENARIOS = [];
 ER_SCENARIOS.push({
-  id: "ger", title: "게르 탈출", emoji: "🔒", tagline: "한밤의 게르, 어둠 속 다섯 자물쇠",
-  outro: "모래폭풍을 등지고 초원으로 사라졌다. 다음 밤, 또 어딘가에 갇히겠지.",
+  id: "khan", title: "칸의 게르", emoji: "🔒", tagline: "1206년 쿠릴타이 전야, 갇힌 전령",
+  outro: "말이 바람을 갈랐다. 대게르 앞 — 헵투울의 창이 일제히 너를 겨눴지만, 네가 치켜든 봉인이 창끝을 멈췄다. 봉인을 뜯은 칸이 고개를 들었다. \"늦지 않았군.\" 다음 날 아침, 쿠릴타이의 함성이 초원을 덮었다. 테무진 — 이제 칭기즈 칸이다. 네 이름은 어느 기록에도 남지 않았지만, 그 아침을 지킨 건 너였다.",
   acts: [
     {
-      id: "ger",
-      name: "제1막 · 잠긴 게르",
-      intro: "여행 셋째 밤. 눈을 뜨니 게르 문이 밖에서 잠겼다. 화로의 불씨만 희미하다. 단서를 뒤져 자물쇠를 풀고 문을 열자. 무엇이든 먼저 눌러서 '조사'해 봐.",
+      id: "guestger",
+      name: "제1막 · 손님의 게르",
+      intro: "1206년 봄, 오논 강가의 대영지. 내일 아침 쿠릴타이에서 테무진이 칸으로 추대된다. 서쪽 국경의 급보를 품고 밤새 달려온 너는, 나이만의 첩자로 몰려 손님 게르에 갇혔다. 품속의 봉인된 급보만은 지켜냈다. 새벽 경비 교대 전에 나가야 한다 — 뭐든 눌러서 조사해 봐.",
       time: 900,   /* 하드코어 제한시간(초) — 15분 */
       hearts: 5,
-      items: { keyA: "🗝️ 열쇠조각 ㄱ", keyB: "🗝️ 열쇠조각 ㄴ", keyBody: "🗝️ 열쇠 몸통", master: "🔑 완성된 열쇠" },
+      items: { knife: "청동 칼", rope: "말총 밧줄", ready: "탈출 채비" },
       combos: [
-        { need: ["keyA", "keyB", "keyBody"], gives: "master", text: "세 조각이 딸깍— 열쇠 하나로 맞물렸다!" }
+        { need: ["knife", "rope"], gives: "ready", text: "칼을 허리에 꽂고 밧줄을 어깨에 감았다. 나갈 채비가 됐다." }
       ],
       objects: [
-        { id: "letter", nm: "낡은 편지", spr: "letter",
-          txt: "화로 옆 쪽지: '재는 거짓말을 안 해. 허나 어둠 속에선 아무것도 못 보지 — 먼저 빛부터 밝혀라. 그리고 마두금은 몇 줄이더냐.'" },
-        { id: "lamp", nm: "등잔 셋", spr: "lamp",
-          txt: "등잔 셋에 불을 붙였다. 게르 안이 환해진다 — 이제 구석구석 보인다.",
+        { id: "lamp", nm: "등잔", spr: "lamp",
+          txt: "부싯돌이 곁에 놓인 기름 등잔. 불을 붙이자 게르 안이 살아난다.",
           sets: "lit" },
-        { id: "fire", nm: "화로", spr: "fire",
-          need: "lit", lockedTxt: "재를 헤쳐도 너무 어두워 아무것도 안 보인다. 빛부터 밝혀야겠다.",
-          txt: "재 속에 표식 새긴 돌들이 묻혀 있다. 화로 밑엔 네 자리 자물쇠 — 돌을 헤쳐 숫자를 찾자.",
-          find: { prompt: "돌을 눌러 헤쳐 봐. 표식(숫자) 새긴 돌을 찾아, 왼쪽 위부터 순서대로 읽으면 암호.", cols: 4,
-            cells: [ {}, { c: "2" }, {}, { c: "8" }, {}, {}, { c: "1" }, {}, {}, { c: "4" }, {}, {} ] },
-          lock: { ans: ["2814"], digits: 4,
-            hints: ["재에 드러난 돌의 숫자를 왼쪽부터 그대로.", "네 자리. 2로 시작해.", "2814."],
-            open: "화로 밑 칸이 열렸다. 열쇠조각 ㄱ과 메모: '별을 짜 넣은 바닥, 하늘과 맞춰라.'",
-            give: "keyA" } },
-        { id: "morin", nm: "마두금", spr: "morin",
-          txt: "말머리 장식 마두금. 줄 2개, 조임쇠 2개, 울림통 옆 매듭 3개가 묶여 있다. 몸통에 세 자리 자물쇠.",
-          lock: { ans: ["223"], digits: 3,
-            hints: ["편지가 시켰지 — 줄·조임쇠·매듭을 차례로 세어라.", "줄 2, 조임쇠 2, 매듭 3.", "223."],
-            open: "울림통이 열리며 열쇠조각 ㄴ이 굴러 나왔다.",
-            give: "keyB" } },
-        { id: "rug", nm: "양탄자", spr: "rug",
-          need: "lit", lockedTxt: "바닥 양탄자가 어둠에 묻혀 무늬가 안 보인다.",
-          txt: "불빛에 양탄자 무늬가 드러난다 — 별 일곱이 국자 모양(북두칠성)으로 짜여 있다. 손잡이 끝 세 별이 유독 밝다. 천창으로 진짜 하늘과 맞춰 보라." },
-        { id: "toono", nm: "천창(토노)", spr: "toono",
-          txt: "천창 너머 밤하늘. 양탄자의 국자를 하늘에서 찾으니, 손잡이 끝 세 별의 밝기 순서가 보인다 — 셋째가 가장 밝고, 다음이 첫째, 그다음 둘째. 궤짝은 이 순서를 원한다." },
+        { id: "letter", nm: "품속의 급보", spr: "letter",
+          need: "lit", lockedTxt: "어두워서 겉장의 글이 안 보인다. 불부터 밝히자.",
+          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 글을 흘려 놓았다 — 위에서 아래로, 왼 줄부터 읽는 글. 몇 글자에는 붉은 먹이 스몄다.",
+          ctext: { segs: [
+            { t: "쿠", c: "fire" }, { t: "르릉, 봄 천둥이 멀리서 운다.", br: true },
+            { t: "물이 흐" }, { t: "릴", c: "fire" }, { t: " 때는 별을 보라.", br: true },
+            { t: "낙" }, { t: "타", c: "fire" }, { t: "는 무릎 꿇는 법을 안다.", br: true },
+            { t: "이", c: "fire" }, { t: " 밤을 견뎌라.", br: true },
+            { t: "의", c: "fire" }, { t: "심은 아침 해에 녹는다.", br: true },
+            { t: "해", c: "fire" }, { t: "가 뜨기 전에 움직여라." }
+          ] } },
         { id: "chest", nm: "궤짝", spr: "chest",
-          txt: "구석의 나무 궤짝. 세 자리 다이얼 자물쇠가 걸려 있다.",
-          lock: { ans: ["312"], digits: 3, type: "dial", prompt: "다이얼을 돌려 세 별의 순서를 맞춰 봐.",
-            hints: ["천창에서 본 세 별의 순서야.", "셋째·첫째·둘째 → 3, 1, 2.", "312."],
-            open: "궤짝이 열렸다. 열쇠 몸통이 들어 있다. 이제 조각들을 맞출 차례.",
-            give: "keyBody" } },
-        { id: "door", nm: "게르 문", spr: "door", final: true,
-          txt: "밖으로 나가는 문. 열쇠 구멍이 하나.",
-          lock: { item: "master", open: "완성된 열쇠를 꽂자 빗장이 풀린다. 문틈으로 찬 바람이 밀려든다 — 밖으로!" } }
+          txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹 자국이 배어 있다.",
+          lock: { ans: ["1206"], digits: 4,
+            hints: ["급보 겉장 — 붉은 먹이 스민 글자만 이어 읽어 봐.", "'쿠릴타이의 해'. 내일이 바로 그날이라고 했지 — 올해가 몇 년이더라.", "1206."],
+            open: "궤짝이 열렸다. 청동 칼 한 자루 — 날이 아직 시퍼렇다.",
+            give: "knife" } },
+        { id: "shagai", nm: "샤가이 주머니", spr: "shagai",
+          txt: "화로 곁 가죽 주머니에 샤가이 네 알. 애들 장난감이 아니다 — 점을 칠 때는 말, 낙타, 양, 염소. 언제나 이 차례로 읽는다." },
+        { id: "fire", nm: "화로", spr: "fire",
+          need: "lit", lockedTxt: "화로 속은 그림자뿐이다. 빛이 필요하다.",
+          txt: "게르의 심장, 화로. 함부로 뒤지면 불의 정령이 노한다지만 — 재 속에 급히 감춘 손자국이 남아 있다.",
+          find: { prompt: "재를 헤쳐 봐. 표식을 새긴 돌들이 나온다.", cols: 4,
+            cells: [ { s: "hawk", c: "5" }, { s: "horse", c: "7" }, {}, { s: "sheep", c: "4" },
+                     { s: "camel", c: "2" }, {}, { s: "goat", c: "9" }, { s: "wolf", c: "3" } ] } },
+        { id: "trunk", nm: "가죽 궤", spr: "trunk",
+          txt: "서쪽 자리의 가죽 궤 — 사내들의 마구가 놓이는 자리다. 다이얼이 넷. 뚜껑에는 낡은 샤가이 한 알이 끈으로 매여 있다.",
+          lock: { ans: ["7249"], digits: 4, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
+            hints: ["뚜껑의 샤가이 — 점칠 때의 차례가 있다고 했지.", "말·낙타·양·염소의 차례로, 재 속 돌의 숫자를. 늑대와 매는 가축이 아니야.", "7249."],
+            open: "궤가 열렸다. 잘 꼰 말총 밧줄이 사려 있다.",
+            give: "rope" } },
+        { id: "door", nm: "게르 문", spr: "door",
+          txt: "남쪽 문. 밖에서 빗장이 질렸고, 문틈으로 창끝의 그림자가 오간다. 밤을 지키는 헵투울이다. 문지방을 밟는 건 죽음이고 — 어차피 이 문은 열리지 않는다. 다른 길을 찾자." },
+        { id: "toono", nm: "천창(토노)", spr: "toono", final: true,
+          txt: "머리 위의 천창. 덮개 펠트가 가죽끈으로 단단히 묶여 있고, 기둥은 맨손으로 오르기엔 미끄럽다.",
+          lock: { item: "ready" } }
       ]
     },
     {
-      id: "storm",
-      name: "제2막 · 모래폭풍 전야",
-      intro: "문을 열고 나왔지만 캠프는 텅 비었고, 지평선에서 모래벽이 밀려온다. 말을 타고 초원을 벗어나야 해 — 폭풍이 닿기 전에. 서두르자.",
+      id: "camp",
+      name: "제2막 · 새벽의 대영지",
+      intro: "칼로 천창의 가죽끈을 끊고, 밧줄을 타고 게르 뒤편에 내려섰다. 동트기 전의 푸른 어둠. 말을 찾아, 헵투울의 눈을 피해, 대게르에 급보를 전해야 한다.",
       time: 720,   /* 하드코어 12분 */
       hearts: 5,
-      items: { bridle: "🪢 굴레", saddle: "🐴 안장", flare: "🎆 신호탄", ready: "🐎 말 (탈 준비 끝)" },
+      items: { saddle: "안장", horse: "네 말", ready: "달릴 채비" },
       combos: [
-        { need: ["bridle", "saddle"], gives: "ready", text: "낙타… 아니 말에게 굴레와 안장을 채웠다. 탈 준비 끝!" }
+        { need: ["saddle", "horse"], gives: "ready", text: "안장을 얹고 뱃대끈을 조였다. 이제 달릴 수 있다." }
       ],
       objects: [
-        { id: "well", nm: "우물", spr: "well",
-          txt: "캄캄한 마른 우물. 안쪽 벽에 페인트 자국이 어렴풋한데 너무 어두워 안 보인다. 손전등으로 벽을 훑어 보자.",
-          torch: { prompt: "우물 벽을 손가락으로 훑어(비춰) 봐. 페인트로 크게 적힌 세 숫자를 찾아, 왼쪽부터 순서대로.",
-            marks: [ { d: "4", x: 24, y: 34 }, { d: "2", x: 52, y: 60 }, { d: "5", x: 78, y: 40 } ] } },
-        { id: "stable", nm: "마구간 궤", spr: "stable",
-          txt: "마구간 문에 걸린 세 자리 자물쇠. 안에서 가죽 냄새가 난다.",
-          lock: { ans: ["425"], digits: 3,
-            hints: ["우물 벽에 적힌 세 숫자야.", "4, 2, 5.", "425."],
-            open: "마구간이 열렸다. 말에 채울 굴레를 얻었다. 안장은… 저 낙타가 깔고 앉아 있네.",
-            give: "bridle" } },
-        { id: "ovoo", nm: "오보(돌무더기)", spr: "ovoo",
-          txt: "성황당 같은 돌무더기 오보. 흰 돌 넷, 그 위에 검은 돌 셋이 얹혀 있다. 신호탄 상자가 '흰 다음 검은' 순서를 물었지." },
-        { id: "sky", nm: "밤하늘", spr: "bigdipper",
-          txt: "폭풍 오기 직전의 맑은 하늘. 북두칠성 일곱 별이 또렷하다. 마지막 한 자리는 저 별의 수라고 신호탄 상자에 적혀 있었다." },
-        { id: "flarebox", nm: "신호탄 상자", spr: "flarebox",
-          txt: "낡은 신호탄 상자. 세 자리 자물쇠 — '흰 돌, 검은 돌, 별의 수' 순.",
-          lock: { ans: ["437"], digits: 3,
-            hints: ["흰 돌 4, 검은 돌 3, 북두칠성 별 7.", "4, 3, 7 순서로.", "437."],
-            open: "신호탄을 얻었다. 하늘로 쏘면 저 낙타가 놀라 일어날지도.",
-            give: "flare" } },
-        { id: "camel", nm: "누운 낙타", spr: "camel",
-          txt: "안장을 깔고 앉아 꿈쩍 않는 낙타. 뭔가로 놀래켜야 일어나겠다.",
-          lock: { item: "flare", open: "신호탄을 쏘자 낙타가 벌떡! 깔고 있던 안장이 툭 떨어졌다.",
+        { id: "post", nm: "초소 명부", spr: "journal",
+          txt: "빈 초소에 명부가 펼쳐져 있다. \"낮을 지키는 토르구드, 일흔.\" 밤 당번 쪽은 찢겨 나갔다. 여백에 누가 급히 갈겨 놨다 — \"밤은 낮보다 열이 많다.\"" },
+        { id: "gearchest", nm: "마구 궤", spr: "stable",
+          txt: "초소 옆 마구 궤. 두 자리 다이얼 — 헵투울의 창 문양이 찍혀 있다.",
+          lock: { ans: ["80"], digits: 2, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
+            hints: ["명부 — 밤 당번은 몇이었을까.", "낮이 일흔. 밤은 그보다 열이 많다.", "80."],
+            open: "궤가 열렸다. 기름 먹인 안장이 반듯하게 들어 있다.",
             give: "saddle" } },
-        { id: "gate", nm: "초원 끝", spr: "horse", final: true,
-          txt: "캠프를 벗어나는 길. 준비된 말만 있으면 달릴 수 있다.",
-          lock: { item: "ready", open: "말에 올라 초원을 가른다. 등 뒤로 모래벽이 무너져 내린다 — 탈출 성공!" } }
+        { id: "sulde", nm: "아홉 백기", spr: "sulde",
+          txt: "대게르로 가는 길목, 술데가 늘어섰다. 어둠 속엔 흰 말총 술만 떠 보인다 — 모두 몇인가." },
+        { id: "sky", nm: "새벽 하늘", spr: "bigdipper",
+          txt: "동트기 전 하늘. 일곱 신이 아직 또렷하고, 황금 말뚝만이 제자리에 박혀 있다. 별들은 말뚝에 매인 말떼처럼 그 둘레를 돈다." },
+        { id: "ovoo", nm: "오보", spr: "ovoo",
+          txt: "돌무지 오보. 눈 녹은 진창에 갓 지난 발자국 — 해 도는 방향으로 오보를 감았다. 감고, 또 감고, 다시 한 번." },
+        { id: "pen", nm: "말 울타리", spr: "horse",
+          txt: "울타리 안에서 네 말이 코를 푸르르 분다. 빗장에 세 자리 자물쇠. 기둥에 뭔가 새겨져 있는데 어둠에 잠겨 보이지 않는다.",
+          torch: { prompt: "기둥을 비춰 봐 — 새김이 차례를 말해 준다.",
+            marks: [ { s: "sulde", x: 20, y: 38 }, { s: "bigdipper", x: 50, y: 62 }, { s: "ovoo", x: 80, y: 40 } ] },
+          lock: { ans: ["973"], digits: 3,
+            hints: ["기둥의 새김 셋 — 각각의 '수'가 차례다.", "술데를 세고, 별을 세고, 발자국이 오보를 감은 바퀴를 세.", "973."],
+            open: "빗장이 떨어졌다. 말이 네 어깨에 콧김을 뿜는다 — 오랜 친구처럼.",
+            give: "horse" } },
+        { id: "khanger", nm: "칸의 대게르", spr: "khanger", final: true,
+          txt: "아홉 백기 너머, 새벽빛에 흰 벽이 드러나는 대게르. 급보를 전할 곳은 저기다. 달릴 채비가 되면 나선다.",
+          lock: { item: "ready" } }
       ]
     }
   ]
@@ -1775,7 +1855,7 @@ function erStars(heartsLeft, heartsMax, hintsUsed){
 }
 /*ER_LOGIC_END*/
 
-const ER_SAVE_KEY = "er_save_v2";
+const ER_SAVE_KEY = "er_save_v3";   /* v3: 게르 시나리오 '칸의 게르'로 재구성 — 구세이브 무효화 */
 const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0, dial: {} };
 
 /* ---------- 상태/세이브 ---------- */
@@ -1909,14 +1989,26 @@ function erRenderInv(){
   if (cb) cb.addEventListener("click", erCombine);
 }
 
-/* 관찰(표식 찾기) 미니 씬 — 돌 타일을 탭해 뒤집으면 표식(숫자/·)이 드러남. 순수 단서라 별도 검증 없음(자물쇠가 검증) */
+/* 관찰(표식 찾기) 미니 씬 — 돌 타일을 탭해 뒤집으면 심볼+값이 드러남. 순수 단서라 별도 검증 없음(자물쇠가 검증).
+   셀: {s?: 스프라이트, c?: 값}. 다 뒤집는 건 '수집'일 뿐 — 답은 다른 단서의 규칙(필터·순서)을 적용해야 나온다 (트릭사전 2장) */
 const ER_STONE = '<px-sprite name="stone" scale="3"></px-sprite>';
 function erFindHtml(f){
   const cols = f.cols || 4;
   return '<div class="hint" style="margin-top:8px">' + escHtml(f.prompt || "") + "</div>" +
     '<div class="er-find" style="grid-template-columns:repeat(' + cols + ',1fr)">' +
-    f.cells.map((c) => '<button class="er-cell" data-c="' + escHtml(c.c || "·") + '">' + ER_STONE + "</button>").join("") +
+    f.cells.map((c) => '<button class="er-cell"><span class="er-cf">' + ER_STONE + '</span><span class="er-cb">' +
+      (c.s ? '<px-sprite name="' + c.s + '" scale="2"></px-sprite>' : "") +
+      (c.c ? '<span class="er-cval">' + escHtml(c.c) + "</span>" : (c.s ? "" : "·")) +
+      "</span></button>").join("") +
     "</div>";
+}
+
+/* 색글자·행 단서 — 긴 글 속 일부 글자만 색이 다름 → 모아 읽으면 단어 (트릭사전 1장 색글자 추출·아크로스틱) */
+function erCtextHtml(ct){
+  return (ct.prompt ? '<div class="hint" style="margin-top:8px">' + escHtml(ct.prompt) + "</div>" : "") +
+    '<div class="er-ctext">' + ct.segs.map((s) =>
+      "<span" + (s.c ? ' class="er-c-' + s.c + '"' : "") + ">" + escHtml(s.t) + "</span>" + (s.br ? "<br>" : "")
+    ).join("") + "</div>";
 }
 
 /* 다이얼 자물쇠 — 키보드 대신 손으로 ▲▼ 돌려 맞춤. 맞으면 즉시(딸깍) 해제. 상태는 er.dial[id] */
@@ -1935,9 +2027,11 @@ function erDialHtml(o){
     '<div class="er-dial">' + cols + "</div>";
 }
 
-/* 손전등 관찰 — 어둠 속을 손가락으로 훑어 숨은 표식을 비춰 찾음. 순수 단서(검증은 해당 자물쇠가) */
+/* 손전등 관찰 — 어둠 속을 손가락으로 훑어 숨은 표식을 비춰 찾음. 순수 단서(검증은 해당 자물쇠가).
+   표식: {d: 텍스트} 또는 {s: 스프라이트} + x,y(%) */
 function erTorchHtml(t){
-  const marks = t.marks.map((m) => '<span class="er-mark" style="left:' + m.x + "%;top:" + m.y + '%">' + escHtml(m.d) + "</span>").join("");
+  const marks = t.marks.map((m) => '<span class="er-mark" style="left:' + m.x + "%;top:" + m.y + '%">' +
+    (m.s ? '<px-sprite name="' + m.s + '" scale="2"></px-sprite>' : escHtml(m.d)) + "</span>").join("");
   return '<div class="hint" style="margin-top:8px">' + escHtml(t.prompt || "") + "</div>" +
     '<div class="er-torch" id="er-torch">' + marks + '<div class="er-torch-cover" id="er-torchcover"></div></div>';
 }
@@ -1957,6 +2051,8 @@ function erRenderPanel(){
   if (!solved && !gated && o.find){ html += erFindHtml(o.find); }
   /* 손전등 관찰: 어둠 속을 손가락으로 훑어 표식을 비춰 찾음 */
   if (!solved && !gated && o.torch){ html += erTorchHtml(o.torch); }
+  /* 색글자·행 단서 */
+  if (!solved && !gated && o.ctext){ html += erCtextHtml(o.ctext); }
 
   if (!solved && !gated && o.lock){
     if (o.lock.ans && o.lock.type === "dial"){
@@ -1987,8 +2083,7 @@ function erRenderPanel(){
   p.style.display = "";
 
   p.querySelectorAll(".er-cell").forEach((b) => b.addEventListener("click", () => {
-    const flipped = b.classList.toggle("flip");
-    b.innerHTML = flipped ? escHtml(b.dataset.c) : ER_STONE;
+    b.classList.toggle("flip");
     haptic(10);
   }));
 
