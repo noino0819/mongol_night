@@ -1128,8 +1128,7 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-ctext{text-wrap:pretty}
 .er-pop{animation:erPop .42s cubic-bezier(.2,1.4,.4,1)}
 @keyframes erPop{0%{transform:scale(.4);opacity:.2}60%{transform:scale(1.18)}100%{transform:scale(1)}}
-.er-taps{display:block;margin:6px auto;background:var(--night2);border:2px dashed var(--line);border-radius:14px;padding:12px 20px;cursor:pointer;line-height:0}
-.er-taps:active{transform:scale(.94);border-color:var(--fire)}
+.er-tappable{cursor:pointer}
 .er-flash{animation:erFlash .5s}
 @keyframes erFlash{0%{box-shadow:0 0 0 0 var(--steppe)}30%{box-shadow:0 0 14px 2px var(--steppe)}100%{box-shadow:0 0 0 0 transparent}}
 .er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
@@ -1179,7 +1178,7 @@ ER_SCENARIOS.push({
         { id: "chest", nm: "궤짝", spr: "chest",
           txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹 자국이 배어 있다.",
           lock: { ans: ["1206"], digits: 4,
-            hints: ["급보 겉장 — 붉은 먹이 스민 글자만 이어 읽어 봐.", "'쿠릴타이의 해'. 내일이 바로 그날이라고 했지 — 올해가 몇 년이더라.", "1206."],
+            hints: ["급보 겉장을 다시 봐. 왜 하필 몇 글자만 붉은 먹이 스몄을까.", "'쿠릴타이의 해'. 내일이 바로 그날이라고 했지 — 올해가 몇 년이더라.", "1206."],
             open: "궤짝이 열렸다. 청동 칼 한 자루 — 날이 아직 시퍼렇다.",
             give: "knife" } },
         { id: "shagai", nm: "샤가이 주머니", spr: "shagai",
@@ -1193,7 +1192,7 @@ ER_SCENARIOS.push({
         { id: "trunk", nm: "가죽 궤", spr: "trunk",
           txt: "서쪽 자리의 가죽 궤 — 사내들의 마구가 놓이는 자리다. 다이얼이 넷. 뚜껑에는 낡은 샤가이 한 알이 끈으로 매여 있다.",
           lock: { ans: ["7249"], digits: 4, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
-            hints: ["뚜껑의 샤가이 — 점칠 때의 차례가 있다고 했지.", "말·낙타·양·염소의 차례로, 재 속 돌의 숫자를. 늑대와 매는 가축이 아니야.", "7249."],
+            hints: ["뚜껑에 샤가이가 왜 매여 있을까. 재 속에서 찾은 것들과 짝이 맞을지도.", "말·낙타·양·염소의 차례로, 재 속 돌의 숫자를. 늑대와 매는 가축이 아니야.", "7249."],
             open: "궤가 열렸다. 잘 꼰 말총 밧줄이 사려 있다.",
             give: "rope" } },
         { id: "door", nm: "게르 문", spr: "door",
@@ -1233,7 +1232,7 @@ ER_SCENARIOS.push({
           torch: { prompt: "기둥을 비춰 봐 — 새김이 차례를 말해 준다.",
             marks: [ { s: "sulde", x: 20, y: 38 }, { s: "bigdipper", x: 50, y: 62 }, { s: "ovoo", x: 80, y: 40 } ] },
           lock: { ans: ["973"], digits: 3,
-            hints: ["기둥의 새김 셋 — 각각의 '수'가 차례다.", "술데를 세고, 별을 세고, 발자국이 오보를 감은 바퀴를 세.", "973."],
+            hints: ["빗장 옆 기둥을 손전등으로 비춰 봤어? 새김 셋이 순서를 말해 줘.", "술데를 세고, 별을 세고, 발자국이 오보를 감은 바퀴를 세.", "973."],
             open: "빗장이 떨어졌다. 말이 네 어깨에 콧김을 뿜는다 — 오랜 친구처럼.",
             give: "horse" } },
         { id: "khanger", nm: "칸의 대게르", spr: "khanger", final: true,
@@ -1285,7 +1284,7 @@ ER_SCENARIOS.push({
         { id: "drawer", nm: "스승의 서랍", spr: "drawer",
           txt: "스승이 도구를 넣어 두던 개인 서랍. 글자판 자물쇠 위에 새김 — '만든 이의 이름으로 연다.'",
           lock: { ans: ["오르트"], digits: 3,
-            hints: ["벽시계 안쪽 각인 — 가장 오래된 해에 남은 이름이 제작자야.", "1871년에 새겨진 이름. 스승 본인이지.", "'오르트'."],
+            hints: ["이 서랍은 만든 이의 이름으로 열려. 그 이름, 시계 속을 뒤졌다면 봤을 텐데.", "1871년에 새겨진 이름. 스승 본인이지.", "'오르트'."],
             open: "서랍이 스르륵 열리고, 길쭉한 진자 막대가 누워 있다. 스승이 남겨 둔 마지막 부품이다.",
             give: "rod" } },
         { id: "pendmount", nm: "대진자 걸이", spr: "pendmount", final: true,
@@ -1316,7 +1315,7 @@ ER_SCENARIOS.push({
         { id: "bellchest", nm: "카운트휠 궤", spr: "toolbox",
           txt: "종을 세는 톱니, 카운트휠이 든 궤. 두 자리 자물쇠 위에 새김 — '하루의 절반, 시계가 우는 모든 종을 더한 자에게.'",
           lock: { ans: ["78"], digits: 2,
-            hints: ["시계는 한 시에 한 번, 두 시에 두 번, 시각만큼 운다.", "자정(12)까지 1 더하기 2 더하기 … 더하기 12를 더해 봐.", "78."],
+            hints: ["'하루의 종을 다 더하라'잖아. 시계가 시각마다 몇 번씩 우는지 떠올려 봐.", "자정(12)까지 1 더하기 2 더하기 … 더하기 12를 더해 봐.", "78."],
             open: "궤가 열리고 태엽 손잡이가 나왔다. 축에 물릴 톱니는 빠져 있다.",
             give: "crank" } },
         { id: "windbox", nm: "태엽 구멍", spr: "gear",
@@ -1365,7 +1364,7 @@ ER_SCENARIOS.push({
         { id: "clock", nm: "벽시계", spr: "wallclock",
           txt: "바늘이 도는 것 같기도, 아닌 것 같기도. 네 자리 다이얼 아래 새김 — '거울 속 시간은 끝에서부터 흐른다.'",
           lock: { ans: ["0512"], digits: 4, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
-            hints: ["어둠 속 거울에서 본 시계 시각을, 새김대로 끝에서부터 읽어 봐.", "거울 속 시계는 21시 50분(2150), 거꾸로 흐르고 있었지. 끝에서부터 읽으면?", "2150을 뒤집으면 0512. 새벽 5시 12분이야."],
+            hints: ["어둠 속 거울에서 시계를 봤지. 새김이 시간을 어떻게 읽으라고 했더라.", "거울 속 시계는 21시 50분(2150), 거꾸로 흐르고 있었지. 끝에서부터 읽으면?", "2150을 뒤집으면 0512. 새벽 5시 12분이야."],
             open: "덜컥, 뒤판이 열린다. 태엽 사이에 은나이프가 꽂혀 있다. 시계 속에 나이프라니, 인테리어 취향 확실하네.",
             give: "knife" } },
         { id: "seeds", nm: "쏟아진 씨앗", spr: "feasttable",
@@ -1377,7 +1376,7 @@ ER_SCENARIOS.push({
         { id: "winerack", nm: "은식기 진열장", spr: "winerack",
           txt: "유리문에 두 자리 다이얼. 옆에 새김 — '내가 흘린 것을 대신 세어 준 손님에게.' 백작, 이런 건 또 시적이네.",
           lock: { ans: ["83"], digits: 2, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
-            hints: ["식탁 밑 씨앗 — 붉은 겨자씨를 세고, 그다음 흰 쌀알을 세.", "붉은 겨자씨 여덟, 흰 쌀알 셋. 붉은 것 먼저.", "83."],
+            hints: ["백작이 흘리고 간 씨앗을 누가 대신 세어 줘야 한댔지. 두 종류, 순서도 있어.", "붉은 겨자씨 여덟, 흰 쌀알 셋. 붉은 것 먼저.", "83."],
             open: "진열장이 열린다. 와인은 전부 '1476년산'인데 성분표시가 없다. 안 마시는 게 좋겠어. 안쪽에 은포크가 곱게 놓여 있다.",
             give: "fork" } },
         { id: "portrait", nm: "백작의 초상화", spr: "portrait", final: true,
@@ -1408,7 +1407,7 @@ ER_SCENARIOS.push({
         { id: "coffin", nm: "백작의 석관", spr: "coffin",
           need: "mistgone", lockedTxt: "안개 너머로 검은 석관 윤곽만 보인다. 지금 들어가면 안개한테 잡아먹힐 것 같아.",
           txt: "뚜껑에 큼직하게 '절대 열지 마시오'. …열었다. 안은 텅 비었고 벨벳 베개 위에 '외출 중' 팻말만 놓여 있다. 김샜네. 대신 관 안에 낡은 그물이 깔려 있는데 매듭이 촘촘하다 — 백작은 이 매듭을 다 세야 눕는다지. 뚜껑 안쪽 새김 — '산 자의 시계는 거짓을 말한다. 죽은 시계만이 새벽을 안다.'",
-          taps: { n: 3, prompt: "빈 관을 괜히 한번 두드려 보고 싶다. 똑, 똑, 똑.",
+          taps: { n: 3,
             reveal: "관을 세 번 두드리자 — 팻말이 홱 뒤집힌다. 반대편엔 이렇게 적혀 있다. '외출 중 (진짜임. 자꾸 두드리면 유령 나옴).' …백작, 이 양반 진짜." } },
         { id: "tree", nm: "가계도 태피스트리", spr: "tapestry",
           txt: "몰락 가문의 가계도. 아래부터 — 미르차(1701~1758), 엘레나(1642~1699), 라두(1554~1601), 요나(1500~1548). 그리고 맨 위, 시조 V(1476~ ). …V만 죽은 해가 없다. 이 가문, 시작된 해부터 뭔가 이상해. 어쩐지 와인도 전부 그 해 것이더라." },
@@ -1427,7 +1426,7 @@ ER_SCENARIOS.push({
           need: "easthall", lockedTxt: "서재는 동쪽 홀 안쪽이야. 아직 갈 길이 없어.",
           txt: "동쪽 홀 서재의 검은 금고. 네 자리 다이얼 위에 새김 — '정직한 시각만이 나를 연다.'",
           lock: { ans: ["0426"], digits: 4,
-            hints: ["석관 새김대로, 재깍거리는 산 자의 시계는 다 거짓말쟁이야.", "괘종시계 넷 중 먼지 쓰고 멎은 하나 — 그게 정직한 시각이야.", "멎은 시계는 4시 26분. 0426이야."],
+            hints: ["석관 뚜껑 안쪽 새김을 떠올려 봐. 어떤 시계를 믿어야 하지?", "괘종시계 넷 중 먼지 쓰고 멎은 하나 — 그게 정직한 시각이야.", "멎은 시계는 4시 26분. 0426이야."],
             open: "철컥. 금고 안엔 보석도 유언장도 아니고 — 황금 크랭크 손잡이 하나. 커튼 감아올리는 그거. 백작이 목숨처럼 숨겨 둔 이유가 있겠지. …그때, 위층에서 현관문 열리는 소리. 돌아왔다. 서두르자.",
             give: "crank" } },
         { id: "window", nm: "동쪽 덧창", spr: "dawnwindow", final: true,
@@ -1458,8 +1457,8 @@ ER_SCENARIOS.push({
           txt: "[ 상태창 ]\n이름: 베르크\n힘  4 — 주먹은 폼이야\n지능 7 — 머리는 장식이 아니다\n운  2 — 하늘이 버렸어\n\n스탯 한번 짜다. 3화에서 죽는 엑스트라 스펙 맞네. 상태창은 언제든 다시 열어 볼 수 있어." },
         { id: "novel", nm: "머리맡의 원작 소설", spr: "book",
           txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다.",
-          taps: { n: 5, prompt: "책장을 자꾸 넘기면 뭔가 나올지도. 계속 두드려(넘겨) 봐.",
-            reveal: "[시스템] 그만 좀 넘겨… 스포일러 나온다고. 좋아, 서비스다. 흑막은 네가 '이미 만난' 자야. 시스템이 끝내 이름을 안 불러 준 사람 말이지." } },
+          taps: { n: 5,
+            reveal: "[시스템] …그만 좀 넘겨. 스포일러 나온다고. 좋아, 이것만 — 흑막은 '이미 네 앞에 있던' 자야. 그 이상은 노스포." } },
         { id: "curtain", nm: "두꺼운 커튼", spr: "curtain",
           txt: "커튼을 힘껏 걷었다. 아침 햇살이 쏟아진다. 어두웠던 벽 쪽이 환해졌어. 벽에 뭐가 걸려 있던 것 같은데.",
           sets: "lit" },
@@ -1510,7 +1509,7 @@ ER_SCENARIOS.push({
         { id: "shelf", nm: "주문서 서가", spr: "shelf",
           txt: "주문서 서가. 한 권만 금빛으로 빛나는데 잠금 룬이 막고 있다. 룬이 속삭인다 — '깨져 흩어진 그 주문의 이름, 두 글자를 말하라.'",
           lock: { ans: ["해방"], digits: 2,
-            hints: ["버그난 시스템 로그에서 붉게 남은 글자들을 이어 봐.", "노이즈 사이 붉은 글자는 '해'와 '방'. 두 글자야.", "주문의 이름은 '해방'."],
+            hints: ["버그난 로그, 노이즈 사이에 유독 살아남은 게 있었지.", "노이즈 사이 붉은 글자는 '해'와 '방'. 두 글자야.", "주문의 이름은 '해방'."],
             open: "'해방.' 룬이 풀리며 서가가 두루마리 하나를 뱉는다.",
             give: "scroll" } },
         { id: "barrier", nm: "지하 서고 결계", spr: "barrier",
@@ -1539,7 +1538,7 @@ ER_SCENARIOS.push({
           need: "exposed", lockedTxt: "문이 미동도 없다. 이야기는 범인을 지목해야 끝나는 법이지. 흑막의 정체부터 밝혀내자.",
           txt: "연회장 끝의 거대한 책 모양 문. 표지 글 — '이 이야기를 끝낼 자, 흑막의 이름 두 글자를 불러라.' 원작은 끝내 이름을 안 알려줬어. 하지만 일지의 규칙, 멎은 은시계, 그리고 끝까지 뜨지 않은 상태창 — 조각은 다 모였다. 원작에 없는 결말을, 내가 부른다.",
           lock: { ans: ["노얀"], digits: 2,
-            hints: ["'이름을 부르는 순간 완결'이랬지. 시스템이 끝내 이름을 부르지 않은 사람이 하나 있어.", "연회장의 세 사람 중 상태창이 뜨지 않은 유일한 인물, 멎은 은시계의 주인.", "집사의 이름. '노얀'이야."],
+            hints: ["연회장의 세 사람을 다시 떠올려 봐. 하나가 유독 달랐어.", "연회장의 세 사람 중 상태창이 뜨지 않은 유일한 인물, 멎은 은시계의 주인.", "집사의 이름. '노얀'이야."],
             open: "'노얀.' 이름이 울리는 순간 — 찾았다, 흑막. 잔을 닦던 손이 멈추고, 책의 문이 활짝 펼쳐진다. [完. 연중작을 완결시킨 독자에게 경의를. 구독해 주셔서 감사합니다] 눈을 뜨니 내 방 침대. 손엔 다 읽은 소설책. 마지막 장에 낯선 헌사 — '결말을 써 줘서 고마워요, 남작님.'" } }
       ]
     }
@@ -1725,19 +1724,14 @@ function erCtextHtml(ct){
 /* 문서(편지·일지·책·목차)는 종이 느낌으로 읽히게 — 스프라이트로 자동 판별 */
 const ER_DOC_SPR = new Set(["letter", "book", "diary", "journal"]);
 
-/* 두드리기 — 특정 오브젝트를 여러 번 탭하면 숨은 것이 드러남. taps:{n, prompt?, reveal, give?, sets?}.
-   횟수(n)는 숨겨서 발견의 재미를 남긴다. 완료 상태는 er.st.tapped[id]에 저장(세이브 지속) */
-function erTapsHtml(o){
-  if ((er.st.tapped || {})[o.id]) return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.reveal) + "</div>";
-  return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.prompt || "여기를 여러 번 두드려 봐.") + "</div>" +
-    '<div class="er-taps" id="er-taps" role="button"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>';
-}
+/* 두드리기 — 원래 스프라이트(패널 초상)를 신호 없이 여러 번 눌러야 숨은 게 드러남. 안내 문구 없음.
+   눌리면 흔들림만 = 발견의 재미. 아껴 쓰는 이스터에그. 완료는 er.st.tapped[id]에 저장. taps:{n, reveal, give?, sets?} */
 function erTap(id){
   const o = erObj(id);
-  if ((er.st.tapped || {})[o.id]) return;
+  if ((er.st.tapped || {})[id]) return;
   er.tapCount[id] = (er.tapCount[id] || 0) + 1;
   haptic(12); erSnd("knock");
-  const el = $("er-taps");
+  const el = $("er-port");
   if (el){ el.classList.remove("er-shake"); void el.offsetWidth; el.classList.add("er-shake"); }
   if (er.tapCount[id] >= o.taps.n){
     er.st.tapped = er.st.tapped || {};
@@ -1792,7 +1786,8 @@ function erRenderPanel(){
   const gated = o.need && !er.st.flags[o.need];
   const body = gated ? o.lockedTxt : o.txt;
   const isDoc = ER_DOC_SPR.has(o.spr) && !gated;
-  let html = '<div class="ta-box' + (isDoc ? " er-doc" : "") + '"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
+  const tapOn = o.taps && !gated && !(er.st.tapped || {})[o.id];   /* 원래 초상을 눌러 두드리기 (안내 없음) */
+  let html = '<div class="ta-box' + (isDoc ? " er-doc" : "") + '"><div class="ta-port' + (tapOn ? " er-tappable" : "") + '"' + (tapOn ? ' id="er-port"' : "") + '><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
     '<div class="ta-body"><div class="ta-nm">' + escHtml(o.nm) + (isDoc ? '<span class="er-doc-tag">읽는 중</span>' : "") + "</div>" +
     '<div class="ta-text">' + escHtml(body) + "</div></div></div>";
 
@@ -1805,7 +1800,7 @@ function erRenderPanel(){
   /* 색글자·행 단서 */
   if (!solved && !gated && o.ctext){ html += erCtextHtml(o.ctext); }
   /* 두드리기: 여러 번 탭해 숨은 것 드러내기 */
-  if (!gated && o.taps){ html += erTapsHtml(o); }
+  if (!gated && o.taps && (er.st.tapped || {})[o.id]){ html += '<div class="hint" style="margin-top:8px">✨ ' + escHtml(o.taps.reveal) + "</div>"; }
 
   if (!solved && !gated && o.lock){
     if (o.lock.ans && o.lock.type === "dial"){
@@ -1840,8 +1835,8 @@ function erRenderPanel(){
     haptic(10);
   }));
 
-  const tapBtn = $("er-taps");
-  if (tapBtn) tapBtn.addEventListener("click", () => erTap(er.panel));
+  const port = $("er-port");
+  if (port) port.addEventListener("click", () => erTap(er.panel));
 
   /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
   p.querySelectorAll(".er-dbtn").forEach((b) => b.addEventListener("click", () => {
