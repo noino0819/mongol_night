@@ -42,9 +42,9 @@ snAddCss(`/* ===== 폭탄 돌리기 ===== */
 const BOMB_TOPICS = ["치킨 브랜드","라면 종류","김씨 성 연예인","아이돌 그룹","한국 도시","과일 이름","영화 제목","네발 동물","편의점에서 파는 것","몽골에서 볼 수 있는 것","빨간색인 것","차가운 것","부엌에 있는 물건","세 글자 음식","나라 이름","스포츠 종목","직업 이름","꽃 이름","술 이름","전자제품","학교 과목","바다 생물","겨울에 하는 것","캠핑 준비물","여행 필수템","노래 제목","드라마 제목","탈 것","신체 부위","조미료/양념","반찬 종류","길거리 음식","커피/음료 메뉴","게임 이름","전래동화 등장인물","색깔 이름","동그란 것","냄새나는 것","하늘에 있는 것","학용품"];
 const BOMB_CHO = ["ㄱㅅ","ㅅㄹ","ㅁㅈ","ㅂㅅ","ㄷㅂ","ㅎㄱ","ㅈㄱ","ㅇㅅ","ㄱㅂ","ㅅㅈ","ㅊㄱ","ㅋㅍ","ㅌㅈ","ㅎㅅ","ㄴㅁ","ㅇㅈ","ㄱㄹ","ㅁㅅ","ㅂㄹ","ㅅㄱ","ㅈㅁ","ㅇㄹ","ㄷㅈ","ㅅㅁ"];
 const BOMB_WORDS = ["기차","사과","나무","라면","호수","바다","치킨","몽골","초원","여행","사진","노래","친구","기린","수박","가방","별자리","돼지","다리","구름"];
-let bomb = { mode: "topic", fuseMin: 15, fuseMax: 45, tid: null, animId: null };
+let bomb = { mode: "topic", fuseMin: 15, fuseMax: 45, tid: null, animId: null, nextTick: 0 };
 function bombFxOff(){
-  clearTimeout(bomb.tid); clearInterval(bomb.animId);
+  clearTimeout(bomb.tid); clearInterval(bomb.animId); snBgmStop();
   bomb.tid = null; bomb.animId = null;
   $("bomb-flash").style.opacity = 0;
   const icon = $("bomb-icon");
@@ -97,6 +97,8 @@ $("bomb-go").addEventListener("click", () => {
   hint.textContent = "답하고 옆으로 패스! 패스! 패스!"; hint.style.color = "";
   const fuse = (bomb.fuseMin + Math.random() * (bomb.fuseMax - bomb.fuseMin)) * 1000;
   const t0 = Date.now();
+  bomb.nextTick = 0;                 // 첫 똑딱 즉시
+  snBgm("fuse");                     // 긴장 베이스 루프 (bombFxOff에서 정지)
   clearInterval(bomb.animId);
   bomb.animId = setInterval(() => {
     const el = Date.now() - t0;
@@ -115,10 +117,13 @@ $("bomb-go").addEventListener("click", () => {
     $("bomb-flash").style.opacity = prog > 0.8 ? (0.05 + 0.1 * Math.abs(Math.sin(Date.now() / 140))).toFixed(3) : 0;
     if (prog > 0.85){ hint.textContent = "🔥 곧 터진다!!! 빨리 패스!!"; hint.style.color = "var(--danger)"; }
     if (prog > 0.75 && navigator.vibrate && Math.random() < 0.15) navigator.vibrate(60);
+    const now = Date.now();          // 가속 똑딱: 처음 느리게 → 끝으로 갈수록 촘촘하게
+    if (now >= bomb.nextTick){ snSfx("tick"); bomb.nextTick = now + Math.max(70, 460 - prog * 420); }
   }, 90);
   clearTimeout(bomb.tid);
   bomb.tid = setTimeout(() => {
     bombFxOff();
+    snSfx("boom");
     if (navigator.vibrate) navigator.vibrate([300, 100, 500]);
     $("bomb-play").style.display = "none";
     $("bomb-boom").style.display = "flex";
