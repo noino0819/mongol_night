@@ -952,7 +952,15 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-find{display:grid;gap:6px;margin:8px 0}
 .er-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;cursor:pointer;line-height:1}
 .er-cell:active{transform:scale(.94)}
-.er-cell.flip{background:var(--card);border-color:var(--steppe);font-size:22px;font-weight:bold}`);
+.er-cell.flip{background:var(--card);border-color:var(--steppe);font-size:22px;font-weight:bold}
+.er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
+.er-dcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.er-dbtn{width:46px;height:30px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:13px;cursor:pointer}
+.er-dbtn:active{transform:scale(.92)}
+.er-dnum{width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--card);border:2px solid var(--steppe);border-radius:8px;font-size:26px;font-weight:bold;color:var(--milk)}
+.er-torch{position:relative;height:150px;margin:10px 0;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:var(--night2);touch-action:none;cursor:crosshair}
+.er-mark{position:absolute;transform:translate(-50%,-50%);color:var(--fire);font-size:24px;font-weight:bold}
+.er-torch-cover{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,-200px) var(--my,-200px),transparent 0,transparent 42px,var(--night) 82px)}`);
 
 /*ER_DATA_BEGIN*/
 /* 오브젝트: { id, nm, spr, txt(조사문), need?(플래그 게이트), lockedTxt?, sets?(조사 시 플래그),
@@ -1002,7 +1010,7 @@ ER_SCENARIOS.push({
           txt: "천창 너머 밤하늘. 양탄자의 국자를 하늘에서 찾으니, 손잡이 끝 세 별의 밝기 순서가 보인다 — 셋째가 가장 밝고, 다음이 첫째, 그다음 둘째. 궤짝은 이 순서를 원한다." },
         { id: "chest", nm: "궤짝", spr: "chest",
           txt: "구석의 나무 궤짝. 세 자리 다이얼 자물쇠가 걸려 있다.",
-          lock: { ans: ["312"], digits: 3,
+          lock: { ans: ["312"], digits: 3, type: "dial", prompt: "다이얼을 돌려 세 별의 순서를 맞춰 봐.",
             hints: ["천창에서 본 세 별의 순서야.", "셋째·첫째·둘째 → 3, 1, 2.", "312."],
             open: "궤짝이 열렸다. 열쇠 몸통이 들어 있다. 이제 조각들을 맞출 차례.",
             give: "keyBody" } },
@@ -1023,7 +1031,9 @@ ER_SCENARIOS.push({
       ],
       objects: [
         { id: "well", nm: "우물", spr: "well",
-          txt: "마른 우물. 안쪽 벽 눈금에 페인트로 크게 4 · 2 · 5. 마구간 자물쇠가 이 숫자를 원할 것 같다." },
+          txt: "캄캄한 마른 우물. 안쪽 벽에 페인트 자국이 어렴풋한데 너무 어두워 안 보인다. 손전등으로 벽을 훑어 보자.",
+          torch: { prompt: "우물 벽을 손가락으로 훑어(비춰) 봐. 페인트로 크게 적힌 세 숫자를 찾아, 왼쪽부터 순서대로.",
+            marks: [ { d: "4", x: 24, y: 34 }, { d: "2", x: 52, y: 60 }, { d: "5", x: 78, y: 40 } ] } },
         { id: "stable", nm: "마구간 궤", spr: "stable",
           txt: "마구간 문에 걸린 세 자리 자물쇠. 안에서 가죽 냄새가 난다.",
           lock: { ans: ["425"], digits: 3,
@@ -1766,7 +1776,7 @@ function erStars(heartsLeft, heartsMax, hintsUsed){
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v2";
-const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0 };
+const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0, dial: {} };
 
 /* ---------- 상태/세이브 ---------- */
 function erScen(){ return ER_SCENARIOS[er.st.sc]; }
@@ -1791,6 +1801,7 @@ function erBeginAct(idx){
   er.st.tLeft = a.time;     /* 하드: 남은 초 / 소프트: 미사용 */
   er.hintStep = {};
   er.sel = [];
+  er.dial = {};
   er.ckpt = erSnap();       /* 이 막의 체크포인트 (하드코어 실패 시 복귀) */
   erSave();
   erShowActIntro();
@@ -1908,6 +1919,29 @@ function erFindHtml(f){
     "</div>";
 }
 
+/* 다이얼 자물쇠 — 키보드 대신 손으로 ▲▼ 돌려 맞춤. 맞으면 즉시(딸깍) 해제. 상태는 er.dial[id] */
+function erDialHtml(o){
+  const n = o.lock.digits || o.lock.ans[0].length;
+  const st = er.dial[o.id] || (er.dial[o.id] = Array(n).fill(0));
+  let cols = "";
+  for (let i = 0; i < n; i++){
+    cols += '<div class="er-dcol">' +
+      '<button class="er-dbtn" data-d="' + i + '" data-s="1">▲</button>' +
+      '<div class="er-dnum" id="er-dnum' + i + '">' + st[i] + "</div>" +
+      '<button class="er-dbtn" data-d="' + i + '" data-s="-1">▼</button>' +
+      "</div>";
+  }
+  return '<div class="hint" style="margin-top:8px">' + escHtml(o.lock.prompt || "다이얼을 돌려 맞춰 봐.") + "</div>" +
+    '<div class="er-dial">' + cols + "</div>";
+}
+
+/* 손전등 관찰 — 어둠 속을 손가락으로 훑어 숨은 표식을 비춰 찾음. 순수 단서(검증은 해당 자물쇠가) */
+function erTorchHtml(t){
+  const marks = t.marks.map((m) => '<span class="er-mark" style="left:' + m.x + "%;top:" + m.y + '%">' + escHtml(m.d) + "</span>").join("");
+  return '<div class="hint" style="margin-top:8px">' + escHtml(t.prompt || "") + "</div>" +
+    '<div class="er-torch" id="er-torch">' + marks + '<div class="er-torch-cover" id="er-torchcover"></div></div>';
+}
+
 function erRenderPanel(){
   const p = $("er-panel");
   if (!er.panel){ p.style.display = "none"; p.innerHTML = ""; return; }
@@ -1921,9 +1955,15 @@ function erRenderPanel(){
 
   /* 관찰 퍼즐: 프로즈로 숫자를 떠먹여주는 대신, 도트 타일을 손으로 헤쳐(탭) 표식을 직접 찾게 함 */
   if (!solved && !gated && o.find){ html += erFindHtml(o.find); }
+  /* 손전등 관찰: 어둠 속을 손가락으로 훑어 표식을 비춰 찾음 */
+  if (!solved && !gated && o.torch){ html += erTorchHtml(o.torch); }
 
   if (!solved && !gated && o.lock){
-    if (o.lock.ans){
+    if (o.lock.ans && o.lock.type === "dial"){
+      html += erDialHtml(o) +
+        '<button class="btn ghost mt" id="er-hint">힌트</button>' +
+        '<div class="hint" id="er-hintout" style="display:none"></div>';
+    } else if (o.lock.ans){
       /* 키보드는 요청 시에만: 설명 먼저 읽고 '암호 입력' 눌러야 입력칸+키보드 등장 */
       html += '<button class="btn" id="er-reveal">암호 입력</button>' +
         '<button class="btn ghost" id="er-hint">힌트</button>' +
@@ -1937,7 +1977,7 @@ function erRenderPanel(){
       const has = er.st.inv.includes(o.lock.item);
       const nm = Object.assign({}, ...erScen().acts.map((a) => a.items))[o.lock.item];
       html += has
-        ? '<button class="btn" id="er-use">' + (o.final ? "🚪 " : "▶ ") + "사용: " + escHtml(nm) + "</button>"
+        ? '<button class="btn" id="er-use">사용: ' + escHtml(nm) + "</button>"
         : '<div class="hint">아직 필요한 게 없어 — 뭔가를 얻거나 조합해야 해. (필요: ' + escHtml(nm) + ")</div>";
     }
   }
@@ -1952,6 +1992,26 @@ function erRenderPanel(){
     haptic(10);
   }));
 
+  /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
+  p.querySelectorAll(".er-dbtn").forEach((b) => b.addEventListener("click", () => {
+    const i = +b.dataset.d, s = +b.dataset.s, st = er.dial[o.id];
+    st[i] = (st[i] + s + 10) % 10;
+    $("er-dnum" + i).textContent = st[i];
+    haptic(12);
+    if (erMatch(st.join(""), o.lock.ans)) erSolve(o);
+  }));
+
+  /* 손전등: 손가락(포인터) 위치로 빛 구멍 이동 → 그 아래 표식만 보임 */
+  const tc = $("er-torch");
+  if (tc){
+    const cover = $("er-torchcover");
+    tc.addEventListener("pointermove", (e) => {
+      const r = tc.getBoundingClientRect();
+      cover.style.setProperty("--mx", (e.clientX - r.left) + "px");
+      cover.style.setProperty("--my", (e.clientY - r.top) + "px");
+    });
+  }
+
   const rev = $("er-reveal");
   if (rev){
     rev.addEventListener("click", () => {
@@ -1962,8 +2022,8 @@ function erRenderPanel(){
       inp.addEventListener("keydown", (e) => { if (e.key === "Enter") erTryCode(); });
       $("er-open").addEventListener("click", erTryCode);
     });
-    $("er-hint").addEventListener("click", erHint);
   }
+  if ($("er-hint")) $("er-hint").addEventListener("click", erHint);   /* 코드·다이얼 공통 */
   if ($("er-use")) $("er-use").addEventListener("click", erUseItem);
   $("er-close").addEventListener("click", () => { er.panel = null; erRenderPanel(); });
 }
