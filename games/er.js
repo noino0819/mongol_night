@@ -1106,7 +1106,13 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-sp-port{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:4px;line-height:0}
 .er-sp-bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:12px;border-top-left-radius:2px;padding:8px 11px}
 .er-sp-nm{font-size:12px;font-weight:800;color:var(--fire);margin-bottom:3px}
-.er-sp-line{font-size:15px;line-height:1.55;word-break:keep-all;white-space:pre-line}
+.er-sp-line{font-size:15px;line-height:1.55;word-break:keep-all;white-space:pre-line;text-wrap:pretty}
+#er-panel .ta-text{text-wrap:pretty}
+.er-ctext{text-wrap:pretty}
+.er-pop{animation:erPop .42s cubic-bezier(.2,1.4,.4,1)}
+@keyframes erPop{0%{transform:scale(.4);opacity:.2}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.er-flash{animation:erFlash .5s}
+@keyframes erFlash{0%{box-shadow:0 0 0 0 var(--steppe)}30%{box-shadow:0 0 14px 2px var(--steppe)}100%{box-shadow:0 0 0 0 transparent}}
 .er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
 .er-dcol{display:flex;flex-direction:column;align-items:center;gap:4px}
 .er-dbtn{width:46px;height:30px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:13px;cursor:pointer}
@@ -1371,7 +1377,7 @@ ER_SCENARIOS.push({
       combos: [],
       objects: [
         { id: "diary", nm: "집사의 일지", spr: "diary",
-          txt: "집사의 일지. '주인님은 해 뜨기 전 꼭 돌아오신다. 예배실 수반에 성수를 채워 둘 것 — 지하 안개는 성수로만 걷힌다. 동쪽 커튼은 무슨 일이 있어도 열지 말 것. 열면 해고다. …나는 가끔 열고 싶다.' 여백에 낙서 — '주인님 왈: 마늘이니 햇빛이니 하는 건 죄다 영화가 지어낸 거란다. 민속엔 그런 거 없거든? 진짜 약점은 따로 있지. (안 알려줌)'" },
+          txt: "집사의 일지. '주인님은 해 뜨기 전 꼭 돌아오신다.\n예배실 수반에 성수를 채워 둘 것 — 지하 안개는 성수로만 걷힌다.\n동쪽 커튼은 무슨 일이 있어도 열지 말 것. 열면 해고다. …나는 가끔 열고 싶다.'\n여백에 낙서 — '주인님 왈: 마늘이니 햇빛이니 하는 건 죄다 영화가 지어낸 거란다. 민속엔 그런 거 없거든? 진짜 약점은 따로 있지. (안 알려줌)'" },
         { id: "font", nm: "성수반", spr: "font",
           give: "holy",
           txt: "예배실 구석의 돌 수반. 집사가 채워 둔 성수가 찰랑거린다. 빈 병에 담았다. 마시진 마 — 그냥 미지근한 물맛이라는 소문이 있어." },
@@ -1384,7 +1390,7 @@ ER_SCENARIOS.push({
           need: "mistgone", lockedTxt: "안개 너머로 검은 석관 윤곽만 보인다. 지금 들어가면 안개한테 잡아먹힐 것 같아.",
           txt: "뚜껑에 큼직하게 '절대 열지 마시오'. …열었다. 안은 텅 비었고 벨벳 베개 위에 '외출 중' 팻말만 놓여 있다. 김샜네. 대신 관 안에 낡은 그물이 깔려 있는데 매듭이 촘촘하다 — 백작은 이 매듭을 다 세야 눕는다지. 뚜껑 안쪽 새김 — '산 자의 시계는 거짓을 말한다. 죽은 시계만이 새벽을 안다.'" },
         { id: "tree", nm: "가계도 태피스트리", spr: "tapestry",
-          txt: "몰락 가문의 가계도. 아래부터 — 미르차(1701~1758), 엘레나(1642~1699), 라두(1554~1601), 요나(1500~1548). 그리고 맨 위, 시조 V(1476~   ). …V만 죽은 해가 없다. 이 가문, 시작된 해부터 뭔가 이상해. 어쩐지 와인도 전부 그 해 것이더라." },
+          txt: "몰락 가문의 가계도. 아래부터 — 미르차(1701~1758), 엘레나(1642~1699), 라두(1554~1601), 요나(1500~1548). 그리고 맨 위, 시조 V(1476~ ). …V만 죽은 해가 없다. 이 가문, 시작된 해부터 뭔가 이상해. 어쩐지 와인도 전부 그 해 것이더라." },
         { id: "organ", nm: "파이프오르간", spr: "organ",
           txt: "예배당의 파이프오르간. 건반마다 0부터 9까지 숫자가 새겨져 있고, 보면대 명판 — '이 가문이 시작된 해를 연주하라.' 네 음을 차례로 짚으면 되는 모양이야. 어깨너머로 누가 듣고 있을 것 같은 기분이 든다.",
           lock: { ans: ["1476"], digits: 4,
@@ -1424,7 +1430,7 @@ ER_SCENARIOS.push({
       hearts: 5,
       items: { seala: "인장 반쪽(위)", sealb: "인장 반쪽(아래)", seal: "남작가 인장" },
       combos: [
-        { need: ["seala", "sealb"], gives: "seal", text: "반쪽 두 개를 맞대자 딱 — 남작가의 사자 인장이 완성됐다. [스킬 습득: 아이템 합성] 이 시스템, 일 좀 하네." }
+        { need: ["seala", "sealb"], gives: "seal", text: "반쪽 두 개를 맞대자 딱 — 남작가의 사자 인장이 완성됐다. 이 시스템, 일 좀 하네." }
       ],
       objects: [
         { id: "stat", nm: "상태창", spr: "statwin",
@@ -1432,7 +1438,7 @@ ER_SCENARIOS.push({
         { id: "novel", nm: "머리맡의 원작 소설", spr: "book",
           txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다." },
         { id: "curtain", nm: "두꺼운 커튼", spr: "curtain",
-          txt: "커튼을 힘껏 걷었다. 아침 햇살이 쏟아진다. [행동력 +1] 어두웠던 벽 쪽이 환해졌어. 벽에 뭐가 걸려 있던 것 같은데.",
+          txt: "커튼을 힘껏 걷었다. 아침 햇살이 쏟아진다. 어두웠던 벽 쪽이 환해졌어. 벽에 뭐가 걸려 있던 것 같은데.",
           sets: "lit" },
         { id: "tapestry", nm: "벽걸이 태피스트리", spr: "tapestry",
           need: "lit", lockedTxt: "벽에 커다란 천이 걸려 있는데 너무 어두워 무늬가 안 보여. 빛부터 어떻게 해 보자.",
@@ -1441,7 +1447,7 @@ ER_SCENARIOS.push({
           txt: "벽에 박힌 철제 금고. 세 자리 다이얼이다. 소설에 남작이 금고 여는 버릇이 적혀 있었지.",
           lock: { ans: ["742"], digits: 3, type: "dial", prompt: "다이얼을 남작의 버릇대로 돌려 봐.",
             hints: ["원작 3화 — 머리 먼저, 다음은 주먹, 마지막은 하늘. 순서를 어기면 안 열린다고 했어.", "상태창을 다시 열어 봐. 머리=지능, 주먹=힘, 하늘=운. 그 숫자를 버릇 순서대로.", "지능 7, 힘 4, 운 2. 742."],
-            open: "철컥. 금고 안에 사자 인장의 위쪽 반이 들어 있다. [지능 +1] 근데 아래쪽 반은 어디 갔어?",
+            open: "철컥. 금고 안에 사자 인장의 위쪽 반이 들어 있다. 근데 아래쪽 반은 어디 갔어?",
             give: "seala" } },
         { id: "drawer", nm: "3단 서랍장", spr: "drawer",
           txt: "세 자리 자물쇠가 달린 서랍장. 앞면에 용과 기사와 성이 조그맣게 새겨져 있다 — 벽걸이에서 본 바로 그 셋이다.",
@@ -1482,16 +1488,16 @@ ER_SCENARIOS.push({
           txt: "주문서 서가. 한 권만 금빛으로 빛나는데 잠금 룬이 막고 있다. 룬이 속삭인다 — '깨져 흩어진 그 주문의 이름, 두 글자를 말하라.'",
           lock: { ans: ["해방"], digits: 2,
             hints: ["버그난 시스템 로그에서 붉게 남은 글자들을 이어 봐.", "노이즈 사이 붉은 글자는 '해'와 '방'. 두 글자야.", "주문의 이름은 '해방'."],
-            open: "'해방.' 룬이 풀리며 서가가 두루마리 하나를 뱉는다. [스킬 습득: 해방 — 이번엔 안 깨졌습니다]",
+            open: "'해방.' 룬이 풀리며 서가가 두루마리 하나를 뱉는다.",
             give: "scroll" } },
         { id: "barrier", nm: "지하 서고 결계", spr: "barrier",
           txt: "지하 서고로 내려가는 아치. 푸른 마법막이 입구를 통째로 막고 있다. 맨손으론 어림도 없고, 그에 맞는 주문이 필요하겠어.",
           lock: { item: "scroll",
-            open: "두루마리를 펼치자 '해방'의 룬이 타오르며 결계가 유리처럼 부서진다. 지하 서고가 열렸다. [명성 +1]",
+            open: "두루마리를 펼치자 '해방'의 룬이 타오르며 결계가 유리처럼 부서진다. 지하 서고가 열렸다.",
             sets: "vault" } },
         { id: "diary", nm: "전대 빙의자의 일지", spr: "book",
           need: "vault", lockedTxt: "지하 서고 안쪽에 있어. 입구의 결계부터 어떻게 해야 해.",
-          txt: "먼지 쌓인 일지. 나보다 먼저 이 소설에 빙의했던 누군가의 기록이다. '1회차: 연회의 독주. 넉 잔째가 독이었다. / 2회차: 기사 초상이 걸린 복도의 함정. 초상이 몇 점인지는 그 결벽증 기사단장이 자랑처럼 떠들고 다니지. / 3회차: 새벽 두 시의 종과 함께 등에 칼이. — 나는 세 번 죽었다. 너는 이 순서를 잊지 마라. 그리고 명심해. 흑막은 시스템이 끝내 이름을 부르지 않는 자, 상태창이 뜨지 않는 유일한 인간이다.' …전대 빙의자는, 결국 못 나갔구나." },
+          txt: "먼지 쌓인 일지. 나보다 먼저 이 소설에 빙의했던 누군가의 기록이다. '1회차: 연회의 독주. 넉 잔째가 독이었다.\n2회차: 기사 초상이 걸린 복도의 함정. 초상이 몇 점인지는 그 결벽증 기사단장이 자랑처럼 떠들고 다니지.\n3회차: 새벽 두 시의 종과 함께 등에 칼이. — 나는 세 번 죽었다. 너는 이 순서를 잊지 마라.\n그리고 명심해 — 흑막은 시스템이 끝내 이름을 부르지 않는 자, 상태창이 뜨지 않는 유일한 인간이다.' …전대 빙의자는, 결국 못 나갔구나." },
         { id: "chest", nm: "성좌 금고", spr: "chest",
           txt: "연회장 구석의 낡은 궤. 세 자리 자물쇠가 달렸고 뚜껑에 '죽은 순서대로'라고 긁혀 있다. 누가 죽었다는 거야, 대체.",
           lock: { ans: ["482"], digits: 3,
@@ -1653,9 +1659,11 @@ function erRenderInv(){
   const names = Object.assign({}, ...erScen().acts.map((a) => a.items));
   inv.innerHTML = '<div class="er-inv-row">' +
     items.map((id) => '<button class="chip er-item' + (er.sel.includes(id) ? " sel" : "") +
+      (id === er.justGained ? " er-pop" : "") +
       '" data-it="' + id + '">' + escHtml(names[id] || id) + "</button>").join("") +
     "</div>" +
     (items.length >= 2 ? '<button class="btn ghost er-combine">🔗 고른 것 조합</button>' : "");
+  er.justGained = null;   /* 팝 애니메이션은 1회만 */
   inv.querySelectorAll(".er-item").forEach((b) => b.addEventListener("click", () => {
     const id = b.dataset.it;
     const i = er.sel.indexOf(id);
@@ -1776,7 +1784,7 @@ function erRenderPanel(){
 
   p.querySelectorAll(".er-cell").forEach((b) => b.addEventListener("click", () => {
     b.classList.toggle("flip");
-    haptic(10);
+    haptic(10); erSnd("tick");
   }));
 
   /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
@@ -1784,7 +1792,7 @@ function erRenderPanel(){
     const i = +b.dataset.d, s = +b.dataset.s, st = er.dial[o.id];
     st[i] = (st[i] + s + 10) % 10;
     $("er-dnum" + i).textContent = st[i];
-    haptic(12);
+    haptic(12); erSnd("tick");
     if (erMatch(st.join(""), o.lock.ans)) erSolve(o);
   }));
 
@@ -1835,8 +1843,31 @@ function erOpen(id){
   erRenderPanel();
 }
 
-function erGain(itemId){
-  if (!er.st.inv.includes(itemId)) er.st.inv.push(itemId);
+/* 8비트 칩튠 효과음 (WebAudio, 오프라인·파일 0). 클릭 제스처 안에서만 호출돼 자동재생 정책 통과.
+   ponytail: 전역 음소거 토글은 아직 없음 — 필요해지면 prefs에 snd 추가 */
+let erAC = null;
+function erSnd(type){
+  try {
+    erAC = erAC || new (window.AudioContext || window.webkitAudioContext)();
+    if (erAC.state === "suspended") erAC.resume();
+    const seqs = { solve: [[660, 0], [988, 0.08]], gain: [[880, 0]], combine: [[523, 0], [784, 0.07]],
+      wrong: [[165, 0]], tick: [[520, 0]] };
+    const t0 = erAC.currentTime;
+    (seqs[type] || seqs.tick).forEach(([f, d]) => {
+      const osc = erAC.createOscillator(), g = erAC.createGain(), s = t0 + d;
+      osc.type = type === "wrong" ? "sawtooth" : "square";
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, s);
+      g.gain.exponentialRampToValueAtTime(type === "tick" ? 0.06 : 0.11, s + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, s + (type === "tick" ? 0.07 : 0.15));
+      osc.connect(g); g.connect(erAC.destination);
+      osc.start(s); osc.stop(s + 0.18);
+    });
+  } catch (e) { /* 오디오 미지원 무시 */ }
+}
+
+function erGain(itemId, silent){
+  if (!er.st.inv.includes(itemId)){ er.st.inv.push(itemId); er.justGained = itemId; if (!silent) erSnd("gain"); }
 }
 
 function erTryCode(){
@@ -1858,7 +1889,7 @@ function erUseItem(){
 }
 
 function erSolve(o){
-  haptic(30);
+  haptic(30); erSnd("solve");
   er.st.solved[o.id] = true;
   if (o.lock.sets) er.st.flags[o.lock.sets] = true;
   if (o.lock.give) erGain(o.lock.give);
@@ -1868,7 +1899,7 @@ function erSolve(o){
   er.panel = o.id;
   erRender();
   const p = $("er-panel");
-  p.innerHTML = '<div class="ta-box"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
+  p.innerHTML = '<div class="ta-box er-flash"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
     '<div class="ta-body"><div class="ta-nm">🔓 ' + escHtml(o.nm) + '</div><div class="ta-text">' + escHtml(o.lock.open) + "</div></div></div>" +
     '<button class="btn mt" id="er-close">계속</button>';
   p.style.display = "";
@@ -1879,7 +1910,7 @@ function erSolve(o){
 function erWrong(msg){
   const box = $("er-msg");
   if (box) box.textContent = msg;
-  haptic([40, 40, 40]);
+  haptic([40, 40, 40]); erSnd("wrong");
   const bx = $("er-panel").querySelector(".ta-box");
   if (bx){ bx.classList.remove("er-shake"); void bx.offsetWidth; bx.classList.add("er-shake"); }
   if (er.st.mode === "hard"){
@@ -1909,9 +1940,9 @@ function erCombine(){
   if (!combo){ pwaToast("이건 서로 안 맞아 — 다른 조합을 찾아봐"); er.sel = []; erRenderInv(); return; }
   /* 재료 소모 → 결과 아이템 */
   er.st.inv = er.st.inv.filter((id) => !combo.need.includes(id));
-  erGain(combo.gives);
+  erGain(combo.gives, true);
   er.sel = [];
-  haptic(30);
+  haptic(30); erSnd("combine");
   erSave();
   erRender();
   pwaToast("🔗 " + combo.text);

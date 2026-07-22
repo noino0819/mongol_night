@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.9.0";
+  const VER = "v2.10.0";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -270,7 +270,7 @@ renderChips();
 
 /* --- 설정 페이지 --- */
 (function settingsInit(){
-  /* 토글: 사운드(기본 off)·진동(기본 on) */
+  /* 토글: 사운드·진동 모두 기본 on */
   const bindTg = (id, key, def) => {
     const el = $(id);
     const cur = () => (key in prefs ? !!prefs[key] : def);
@@ -280,9 +280,10 @@ renderChips();
       savePrefs();
       el.classList.toggle("on", prefs[key]);
       if (key === "vibe" && prefs.vibe && navigator.vibrate) navigator.vibrate(10);
+      if (key === "sound"){ if (prefs.sound) snSfx("select"); else snBgmStop(); }  /* 켜면 바로 들려주고, 끄면 BGM 정지 */
     });
   };
-  bindTg("set-sound", "sound", false);
+  bindTg("set-sound", "sound", true);
   bindTg("set-vibe", "vibe", true);
 
   /* 텍스트 속도 seg */
@@ -638,6 +639,7 @@ function snCountdown(onDone){
 }
 function snVictory(spr, title){
   haptic([30, 40, 30]);
+  snSfx("win");
   const ov = document.createElement("div");
   ov.className = "victory-ov";
   let cf = "";
