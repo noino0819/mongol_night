@@ -1434,7 +1434,7 @@ ER_SCENARIOS.push({
       ],
       objects: [
         { id: "stat", nm: "상태창", spr: "statwin",
-          txt: "[상태창] 이름: 베르크 / 힘 4 — 주먹은 폼이야 / 지능 7 — 머리는 장식이 아니다 / 운 2 — 하늘이 버렸어. 스탯 한번 짜다. 3화에서 죽는 엑스트라 스펙 맞네. 상태창은 언제든 다시 열어 볼 수 있어." },
+          txt: "[ 상태창 ]\n이름: 베르크\n힘  4 — 주먹은 폼이야\n지능 7 — 머리는 장식이 아니다\n운  2 — 하늘이 버렸어\n\n스탯 한번 짜다. 3화에서 죽는 엑스트라 스펙 맞네. 상태창은 언제든 다시 열어 볼 수 있어." },
         { id: "novel", nm: "머리맡의 원작 소설", spr: "book",
           txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다." },
         { id: "curtain", nm: "두꺼운 커튼", spr: "curtain",
@@ -1826,6 +1826,7 @@ function erRenderPanel(){
 /* ---------- 상호작용 ---------- */
 function erOpen(id){
   const o = erObj(id);
+  haptic(8); erSnd("open");
   er.panel = id;
   /* 조사 1회 효과: 게이트 안 걸린 examine 오브젝트의 sets/give (lock 없는 것만) */
   if (!er.st.seen[id] && !(o.need && !er.st.flags[o.need])){
@@ -1851,17 +1852,20 @@ function erSnd(type){
     erAC = erAC || new (window.AudioContext || window.webkitAudioContext)();
     if (erAC.state === "suspended") erAC.resume();
     const seqs = { solve: [[660, 0], [988, 0.08]], gain: [[880, 0]], combine: [[523, 0], [784, 0.07]],
-      wrong: [[165, 0]], tick: [[520, 0]] };
+      wrong: [[165, 0]], tick: [[520, 0]], open: [[392, 0]], knock: [[196, 0]], nope: [[330, 0], [247, 0.09]],
+      clear: [[659, 0], [988, 0.1]], win: [[523, 0], [659, 0.11], [784, 0.22], [1047, 0.34]],
+      fail: [[392, 0], [311, 0.13], [233, 0.28]] };
+    const soft = type === "tick" || type === "open" || type === "knock" || type === "nope";
     const t0 = erAC.currentTime;
     (seqs[type] || seqs.tick).forEach(([f, d]) => {
       const osc = erAC.createOscillator(), g = erAC.createGain(), s = t0 + d;
-      osc.type = type === "wrong" ? "sawtooth" : "square";
+      osc.type = (type === "wrong" || type === "fail" || type === "knock") ? "sawtooth" : "square";
       osc.frequency.value = f;
       g.gain.setValueAtTime(0.0001, s);
-      g.gain.exponentialRampToValueAtTime(type === "tick" ? 0.06 : 0.11, s + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, s + (type === "tick" ? 0.07 : 0.15));
+      g.gain.exponentialRampToValueAtTime(soft ? 0.06 : 0.11, s + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, s + (type === "tick" || type === "knock" ? 0.08 : 0.15));
       osc.connect(g); g.connect(erAC.destination);
-      osc.start(s); osc.stop(s + 0.18);
+      osc.start(s); osc.stop(s + 0.4);
     });
   } catch (e) { /* 오디오 미지원 무시 */ }
 }
@@ -1937,7 +1941,7 @@ function erHint(){
 function erCombine(){
   const sel = er.sel.slice().sort();
   const combo = erAct().combos.find((c) => c.need.slice().sort().join() === sel.join());
-  if (!combo){ pwaToast("이건 서로 안 맞아 — 다른 조합을 찾아봐"); er.sel = []; erRenderInv(); return; }
+  if (!combo){ erSnd("nope"); pwaToast("이건 서로 안 맞아 — 다른 조합을 찾아봐"); er.sel = []; erRenderInv(); return; }
   /* 재료 소모 → 결과 아이템 */
   er.st.inv = er.st.inv.filter((id) => !combo.need.includes(id));
   erGain(combo.gives, true);
@@ -1952,6 +1956,7 @@ function erCombine(){
 function erActClear(){
   erTimersOff();
   if (er.st.act + 1 < erScen().acts.length){
+    erSnd("clear");
     pwaToast("🎉 " + erAct().name + " 클리어! 저장됐어");
     erBeginAct(er.st.act + 1);    /* 다음 막 인트로 (자동 저장) */
   } else {
@@ -1960,7 +1965,7 @@ function erActClear(){
 }
 
 function erFail(msg){
-  erTimersOff();
+  erTimersOff(); erSnd("fail");
   $("er-play").style.display = "none";
   $("er-fail").style.display = "";
   $("er-fail-msg").textContent = msg;
@@ -1968,7 +1973,7 @@ function erFail(msg){
 }
 
 function erWin(){
-  erTimersOff();
+  erTimersOff(); erSnd("win");
   erClearSave();
   const a = erAct();
   const stars = er.st.mode === "hard" ? erStars(er.st.hearts, a.hearts, er.st.hintsTotal || 0) : 3;

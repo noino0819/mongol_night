@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.10.0";
+  const VER = "v2.10.1";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -730,7 +730,10 @@ function snSfx(name){ if (snOn() && SN_SFX[name]) SN_SFX[name](); }
 /* BGM: 짧은 칩튠 루프. seq 각 스텝 {m:멜로디, b:베이스} 또는 null(쉼).
    ponytail: setTimeout 나이브 스케줄러(살짝 드리프트) — 배경음엔 충분. 정밀 필요하면 lookahead로 교체. */
 const SN_BGM = {
-  fuse: { bpm: 108, div: 2, seq: [ { b: 110 }, null, { b: 110 }, { m: 330 }, { b: 98 }, null, { b: 98 }, { m: 294 } ] }
+  fuse:  { bpm: 108, div: 2, seq: [ { b: 110 }, null, { b: 110 }, { m: 330 }, { b: 98 }, null, { b: 98 }, { m: 294 } ] },
+  /* story: 성글고 낮은 앰비언트 — 스토리류(고비의 별·이야기꾼·게르탈출) 배경. 오래 들어도 안 질리게 부드럽게 */
+  story: { bpm: 92, div: 1, mType: "sine", bType: "sine", mVol: .07, bVol: .08,
+    seq: [ { b: 110 }, null, null, { m: 330 }, null, null, { b: 98 }, null, { m: 392 }, null, { b: 82 }, null ] }
 };
 function snBgm(name){
   snBgmStop();
@@ -742,8 +745,8 @@ function snBgm(name){
     if (snd.bgmName !== name || !snOn()){ snBgmStop(); return; }
     const s = pat.seq[i % pat.seq.length];
     if (s){
-      if (s.b) snTone(s.b, step * .9, { vol: .09, type: "triangle" });
-      if (s.m) snTone(s.m, step * .8, { vol: .10, type: "square" });
+      if (s.b) snTone(s.b, step * .9, { vol: pat.bVol != null ? pat.bVol : .09, type: pat.bType || "triangle" });
+      if (s.m) snTone(s.m, step * .8, { vol: pat.mVol != null ? pat.mVol : .10, type: pat.mType || "square" });
     }
     i++;
     snd.bgmTimer = setTimeout(loop, step * 1000);
