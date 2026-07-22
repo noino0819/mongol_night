@@ -76,6 +76,40 @@ seedw:[
 "................",
 "................",
 "................"],
+bator:[
+"................",
+".......55.......",
+"......5665......",
+".....666666.....",
+".....600006.....",
+".....666666.....",
+"......6666......",
+"......6116......",
+"....11111111....",
+"...1166666611...",
+"...1666666661...",
+"...1665566661...",
+"...1665566661...",
+"...1111111111...",
+"................",
+"................"],
+isla:[
+"................",
+".......44.......",
+"......4444......",
+".....444444.....",
+"....44444444....",
+"...4444444444...",
+"......6666......",
+".....660066.....",
+"......6666......",
+".......44.......",
+"....44444444....",
+"...4444444444...",
+"...4446666444...",
+"...4444444444...",
+"...4444444444...",
+"................"],
 trunk:[
 "................",
 "................",
@@ -1064,6 +1098,15 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-c-sky{color:var(--px-sky)}
 .er-c-sand{color:var(--px-sand)}
 .er-c-steppe{color:var(--steppe)}
+.ta-box.er-doc{border-style:dashed;border-color:var(--px-sand);background:var(--night2)}
+.ta-box.er-doc .ta-text{font-style:italic;color:var(--px-sand)}
+.er-doc-tag{font-size:10px;font-weight:600;color:var(--dim);margin-left:8px;letter-spacing:1px;vertical-align:middle}
+.er-speech{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.er-sp-row{display:flex;gap:8px;align-items:flex-start}
+.er-sp-port{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:4px;line-height:0}
+.er-sp-bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:12px;border-top-left-radius:2px;padding:8px 11px}
+.er-sp-nm{font-size:12px;font-weight:800;color:var(--fire);margin-bottom:3px}
+.er-sp-line{font-size:15px;line-height:1.55;word-break:keep-all;white-space:pre-line}
 .er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
 .er-dcol{display:flex;flex-direction:column;align-items:center;gap:4px}
 .er-dbtn{width:46px;height:30px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:13px;cursor:pointer}
@@ -1427,7 +1470,12 @@ ER_SCENARIOS.push({
             segs: [ { t: "[시스템] z#x" }, { t: "해", c: "fire" }, { t: "q▚w0x1 §¶", br: true },
                     { t: "ther3 ##" }, { t: "방", c: "fire" }, { t: " err0r ▚▚ nul" } ] } },
         { id: "trio", nm: "연회장의 세 사람", spr: "trio",
-          txt: "기사단장 바토르 [상태창: 힘 9 / 충성 10] — '서쪽 복도의 기사 초상 여덟 점은 내가 매일 광을 내지. 한 점이라도 비뚤어지면 못 참거든.' 궁정 마법사 이슬라 [상태창: 마력 8 / 호기심 12] — '요즘 시스템이 통 이상해요.' 집사 노얀은 잔을 닦으며 조용히 웃고만 있다. 셋 다 인사를 받아 주는데, 어쩐지 한 명은 상태창이 안 떴다." },
+          txt: "연회장에 셋이 모여 있다. 한 명씩 말을 붙여 보자. 셋 다 인사를 받아 주는데 — 어쩐지 한 명은 상태창이 뜨지 않는다.",
+          speech: [
+            { nm: "기사단장 바토르 [힘 9 / 충성 10]", spr: "bator", line: "서쪽 복도의 기사 초상 여덟 점은 내가 매일 광을 내지. 한 점이라도 비뚤어지면 못 참거든." },
+            { nm: "궁정 마법사 이슬라 [마력 8 / 호기심 12]", spr: "isla", line: "요즘 시스템이 통 이상해요. 허공의 글자가 자꾸 깨져서 흩어지고…" },
+            { nm: "집사 노얀 [ ? ]", spr: "butler", line: "…(잔을 닦으며 조용히 웃기만 한다. 상태창이 뜨지 않는다.)" }
+          ] },
         { id: "index", nm: "원작 목차 낱장", spr: "letter",
           txt: "품에서 원작 목차 한 장이 떨어졌다. '7장: 집사의 은시계는 밤에 멎는다 / 12장: 그 이름을 부르는 순간, 이야기는 완결된다 — 작가의 말: 흑막의 정체는 다음 화에! (이후 연재 중단)' 이 연중이 이렇게 원망스러울 줄이야. 좋아, 다음 화는 내가 쓴다." },
         { id: "shelf", nm: "주문서 서가", spr: "shelf",
@@ -1451,7 +1499,10 @@ ER_SCENARIOS.push({
             open: "궤 안에 은시계 하나. 바늘이 밤 열두 시에 멎어 있다. 이 시계… 목차 7장에서 본 것 같은데.",
             give: "watch" } },
         { id: "butler", nm: "집사 노얀", spr: "butler",
-          txt: "'남작님, 밤의 연회장은 위험합니다.' 노얀이 온화하게 웃는다. 어디서 읽은 장면인데. 이 자를 흔들려면 증거가 될 물건을 들이밀어야 해.",
+          txt: "노얀이 온화하게 웃으며 다가온다. 어디서 읽은 장면인데. 이 자를 흔들려면 증거가 될 물건을 들이밀어야 해.",
+          speech: [
+            { nm: "집사 노얀", spr: "butler", line: "남작님, 밤의 연회장은 위험합니다. 방으로 드시는 게 어떨는지요." }
+          ],
           lock: { item: "watch",
             open: "'7장. 집사의 은시계는 밤에 멎는다.' 멎은 시계를 들이밀자 노얀의 미소가 아주 잠깐 흔들린다. [경고: 해당 인물의 상태창이 존재하지 않습니다] 상태창이, 없어? …설마가 맞나.",
             sets: "exposed" } },
@@ -1637,6 +1688,18 @@ function erCtextHtml(ct){
     ).join("") + "</div>";
 }
 
+/* 문서(편지·일지·책·목차)는 종이 느낌으로 읽히게 — 스프라이트로 자동 판별 */
+const ER_DOC_SPR = new Set(["letter", "book", "diary", "journal"]);
+
+/* 인물 대사 — 말하는 이의 초상 + 말풍선. speech: [{nm, spr, line}] */
+function erSpeechHtml(list){
+  return '<div class="er-speech">' + list.map((s) =>
+    '<div class="er-sp-row"><div class="er-sp-port"><px-sprite name="' + s.spr + '" scale="3"></px-sprite></div>' +
+    '<div class="er-sp-bubble"><div class="er-sp-nm">' + escHtml(s.nm) + "</div>" +
+    '<div class="er-sp-line">' + escHtml(s.line) + "</div></div></div>"
+  ).join("") + "</div>";
+}
+
 /* 다이얼 자물쇠 — 키보드 대신 손으로 ▲▼ 돌려 맞춤. 맞으면 즉시(딸깍) 해제. 상태는 er.dial[id] */
 function erDialHtml(o){
   const n = o.lock.digits || o.lock.ans[0].length;
@@ -1669,10 +1732,13 @@ function erRenderPanel(){
   const solved = !!er.st.solved[o.id];
   const gated = o.need && !er.st.flags[o.need];
   const body = gated ? o.lockedTxt : o.txt;
-  let html = '<div class="ta-box"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
-    '<div class="ta-body"><div class="ta-nm">' + escHtml(o.nm) + "</div>" +
+  const isDoc = ER_DOC_SPR.has(o.spr) && !gated;
+  let html = '<div class="ta-box' + (isDoc ? " er-doc" : "") + '"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
+    '<div class="ta-body"><div class="ta-nm">' + escHtml(o.nm) + (isDoc ? '<span class="er-doc-tag">읽는 중</span>' : "") + "</div>" +
     '<div class="ta-text">' + escHtml(body) + "</div></div></div>";
 
+  /* 인물 대사: 초상 + 말풍선 */
+  if (!solved && !gated && o.speech){ html += erSpeechHtml(o.speech); }
   /* 관찰 퍼즐: 프로즈로 숫자를 떠먹여주는 대신, 도트 타일을 손으로 헤쳐(탭) 표식을 직접 찾게 함 */
   if (!solved && !gated && o.find){ html += erFindHtml(o.find); }
   /* 손전등 관찰: 어둠 속을 손가락으로 훑어 표식을 비춰 찾음 */
