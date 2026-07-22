@@ -1612,6 +1612,7 @@ function erEnterPlay(){
   er.panel = null;
   erTimersOff();
   er.timer = setInterval(erTick, 1000);
+  if (typeof snBgm === "function") snBgm("story");   /* 잔잔한 앰비언트 (음소거 연동, 셸이 이탈 시 정지) */
   erRender();
   erTick();
 }
@@ -1729,7 +1730,7 @@ const ER_DOC_SPR = new Set(["letter", "book", "diary", "journal"]);
 function erTapsHtml(o){
   if ((er.st.tapped || {})[o.id]) return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.reveal) + "</div>";
   return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.prompt || "여기를 여러 번 두드려 봐.") + "</div>" +
-    '<button class="er-taps" id="er-taps"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></button>';
+    '<div class="er-taps" id="er-taps" role="button"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>';
 }
 function erTap(id){
   const o = erObj(id);
@@ -1836,7 +1837,7 @@ function erRenderPanel(){
 
   p.querySelectorAll(".er-cell").forEach((b) => b.addEventListener("click", () => {
     b.classList.toggle("flip");
-    haptic(10); erSnd("tick");
+    haptic(10);
   }));
 
   const tapBtn = $("er-taps");
@@ -1847,7 +1848,7 @@ function erRenderPanel(){
     const i = +b.dataset.d, s = +b.dataset.s, st = er.dial[o.id];
     st[i] = (st[i] + s + 10) % 10;
     $("er-dnum" + i).textContent = st[i];
-    haptic(12); erSnd("tick");
+    haptic(12);
     if (erMatch(st.join(""), o.lock.ans)) erSolve(o);
   }));
 
@@ -1881,7 +1882,7 @@ function erRenderPanel(){
 /* ---------- 상호작용 ---------- */
 function erOpen(id){
   const o = erObj(id);
-  haptic(8); erSnd("open");
+  haptic(8);   /* 조사 탭 효과음은 셸 전역 pointerdown 훅이 처리 */
   er.panel = id;
   /* 조사 1회 효과: 게이트 안 걸린 examine 오브젝트의 sets/give (lock 없는 것만) */
   if (!er.st.seen[id] && !(o.need && !er.st.flags[o.need])){
@@ -1899,30 +1900,16 @@ function erOpen(id){
   erRenderPanel();
 }
 
-/* 8비트 칩튠 효과음 (WebAudio, 오프라인·파일 0). 클릭 제스처 안에서만 호출돼 자동재생 정책 통과.
-   ponytail: 전역 음소거 토글은 아직 없음 — 필요해지면 prefs에 snd 추가 */
-let erAC = null;
+/* 게임 이벤트 효과음 — 전역 사운드 엔진(shell.js snSfx/snTone)에 위임.
+   prefs.sound 음소거·공유 마스터게인을 그대로 따르고, 버튼 탭 블립은 셸의 전역 pointerdown 훅이 이미 처리함.
+   여기선 '의미 있는 사건'(해제·획득·조합·오답·승패)만 소리낸다(생성음 중복 방지). */
 function erSnd(type){
   try {
-    erAC = erAC || new (window.AudioContext || window.webkitAudioContext)();
-    if (erAC.state === "suspended") erAC.resume();
-    const seqs = { solve: [[660, 0], [988, 0.08]], gain: [[880, 0]], combine: [[523, 0], [784, 0.07]],
-      wrong: [[165, 0]], tick: [[520, 0]], open: [[392, 0]], knock: [[196, 0]], nope: [[330, 0], [247, 0.09]],
-      clear: [[659, 0], [988, 0.1]], win: [[523, 0], [659, 0.11], [784, 0.22], [1047, 0.34]],
-      fail: [[392, 0], [311, 0.13], [233, 0.28]] };
-    const soft = type === "tick" || type === "open" || type === "knock" || type === "nope";
-    const t0 = erAC.currentTime;
-    (seqs[type] || seqs.tick).forEach(([f, d]) => {
-      const osc = erAC.createOscillator(), g = erAC.createGain(), s = t0 + d;
-      osc.type = (type === "wrong" || type === "fail" || type === "knock") ? "sawtooth" : "square";
-      osc.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, s);
-      g.gain.exponentialRampToValueAtTime(soft ? 0.06 : 0.11, s + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, s + (type === "tick" || type === "knock" ? 0.08 : 0.15));
-      osc.connect(g); g.connect(erAC.destination);
-      osc.start(s); osc.stop(s + 0.4);
-    });
-  } catch (e) { /* 오디오 미지원 무시 */ }
+    if (type === "knock"){ if (typeof snTone === "function") snTone(140, 0.09, { type: "sawtooth", vol: 0.22, slide: 80 }); return; }
+    const map = { solve: "correct", gain: "pop", combine: "reveal", clear: "coin",
+      win: "win", fail: "lose", wrong: "wrong", nope: "back" };
+    if (map[type] && typeof snSfx === "function") snSfx(map[type]);
+  } catch (e) { /* 무시 */ }
 }
 
 function erGain(itemId, silent){
@@ -2020,7 +2007,7 @@ function erActClear(){
 }
 
 function erFail(msg){
-  erTimersOff(); erSnd("fail");
+  erTimersOff(); if (typeof snBgmStop === "function") snBgmStop(); erSnd("fail");
   $("er-play").style.display = "none";
   $("er-fail").style.display = "";
   $("er-fail-msg").textContent = msg;
@@ -2028,7 +2015,7 @@ function erFail(msg){
 }
 
 function erWin(){
-  erTimersOff(); erSnd("win");   /* 탈출 성공 엔딩 */
+  erTimersOff(); if (typeof snBgmStop === "function") snBgmStop(); erSnd("win");   /* 탈출 성공 엔딩 */
   erClearSave();
   const a = erAct();
   const stars = er.st.mode === "hard" ? erStars(er.st.hearts, a.hearts, er.st.hintsTotal || 0) : 3;
