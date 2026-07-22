@@ -1609,7 +1609,6 @@ function erShowActIntro(){
 function erEnterPlay(){
   $("er-act").style.display = "none";
   $("er-play").style.display = "";
-  snBgm("story");   /* 방 입장 — 미스터리 앰비언트 (reset/승리에서 정지) */
   er.panel = null;
   erTimersOff();
   er.timer = setInterval(erTick, 1000);
@@ -1927,7 +1926,7 @@ function erSnd(type){
 }
 
 function erGain(itemId, silent){
-  if (!er.st.inv.includes(itemId)){ er.st.inv.push(itemId); er.justGained = itemId; if (!silent){ erSnd("gain"); snSfx("coin"); } }   /* 단서·아이템 획득 */
+  if (!er.st.inv.includes(itemId)){ er.st.inv.push(itemId); er.justGained = itemId; if (!silent){ erSnd("gain"); } }   /* 단서·아이템 획득 */
 }
 
 function erTryCode(){
@@ -1949,7 +1948,7 @@ function erUseItem(){
 }
 
 function erSolve(o){
-  haptic(30); erSnd("solve"); snSfx("reveal");   /* 자물쇠 열림 */
+  haptic(30); erSnd("solve");   /* 자물쇠 열림 */
   er.st.solved[o.id] = true;
   if (o.lock.sets) er.st.flags[o.lock.sets] = true;
   if (o.lock.give) erGain(o.lock.give);
@@ -1970,7 +1969,7 @@ function erSolve(o){
 function erWrong(msg){
   const box = $("er-msg");
   if (box) box.textContent = msg;
-  haptic([40, 40, 40]); erSnd("wrong"); snSfx("wrong");   /* 오답·틀린 코드 */
+  haptic([40, 40, 40]); erSnd("wrong");   /* 오답·틀린 코드 */
   const bx = $("er-panel").querySelector(".ta-box");
   if (bx){ bx.classList.remove("er-shake"); void bx.offsetWidth; bx.classList.add("er-shake"); }
   if (er.st.mode === "hard"){
@@ -2029,7 +2028,7 @@ function erFail(msg){
 }
 
 function erWin(){
-  erTimersOff(); erSnd("win"); snBgmStop(); snSfx("win");   /* 탈출 성공 엔딩 — BGM 정지 + 팡파르 */
+  erTimersOff(); erSnd("win");   /* 탈출 성공 엔딩 */
   erClearSave();
   const a = erAct();
   const stars = er.st.mode === "hard" ? erStars(er.st.hearts, a.hearts, er.st.hintsTotal || 0) : 3;
@@ -2061,7 +2060,6 @@ function erRenderScens(){
 function erReset(){
   /* 진입 시: 진행 중 세이브 있으면 이어하기 노출, 아니면 시나리오·모드 선택 */
   erTimersOff();
-  snBgmStop();   /* 화면 떠날 때 BGM 정지 (필수) */
   er.panel = null; er.sel = [];
   $("er-act").style.display = "none";
   $("er-play").style.display = "none";
