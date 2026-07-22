@@ -53,6 +53,10 @@ for (const act of sc.acts){
       assert.ok(o.final || o.lock.open, P(o.id + ": 해제 문구(open) 필요"));
     }
     if (o.give) assert.ok(act.items[o.give], P(o.id + ": 미선언 아이템 지급"));
+    if (o.taps){
+      assert.ok(o.taps.n >= 1 && o.taps.reveal, P(o.id + ": taps엔 n·reveal 필요"));
+      if (o.taps.give) assert.ok(act.items[o.taps.give], P(o.id + ": 미선언 아이템 지급(taps)"));
+    }
   }
   for (const c of act.combos){
     for (const n of c.need) assert.ok(act.items[n], P("콤보 재료 미선언 " + n));
@@ -66,6 +70,11 @@ for (const act of sc.acts){
     let progressed = false;
     for (const o of act.objects){
       if (o.need && !st.flags.has(o.need)) continue;      /* 게이트 잠김 */
+      /* 두드리기 효과 (플레이어가 n회 두드린다고 가정 — 자물쇠와 독립) */
+      if (o.taps){
+        if (o.taps.sets && !st.flags.has(o.taps.sets)){ st.flags.add(o.taps.sets); progressed = true; }
+        if (o.taps.give && !st.inv.has(o.taps.give)){ st.inv.add(o.taps.give); progressed = true; }
+      }
       /* 조사 효과 */
       if (!o.lock){
         if (o.sets && !st.flags.has(o.sets)){ st.flags.add(o.sets); progressed = true; }
@@ -105,6 +114,7 @@ for (const act of sc.acts){
   act.objects.forEach((o) => {
     if (o.sets) setFlags.add(o.sets);
     if (o.lock && o.lock.sets) setFlags.add(o.lock.sets);
+    if (o.taps && o.taps.sets) setFlags.add(o.taps.sets);
     if (o.need) needFlags.add(o.need);
   });
   for (const f of setFlags) assert.ok(needFlags.has(f), P("레드헤링 플래그: " + f));

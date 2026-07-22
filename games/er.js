@@ -1111,6 +1111,8 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-ctext{text-wrap:pretty}
 .er-pop{animation:erPop .42s cubic-bezier(.2,1.4,.4,1)}
 @keyframes erPop{0%{transform:scale(.4);opacity:.2}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.er-taps{display:block;margin:6px auto;background:var(--night2);border:2px dashed var(--line);border-radius:14px;padding:12px 20px;cursor:pointer;line-height:0}
+.er-taps:active{transform:scale(.94);border-color:var(--fire)}
 .er-flash{animation:erFlash .5s}
 @keyframes erFlash{0%{box-shadow:0 0 0 0 var(--steppe)}30%{box-shadow:0 0 14px 2px var(--steppe)}100%{box-shadow:0 0 0 0 transparent}}
 .er-dial{display:flex;justify-content:center;gap:14px;margin:10px 0}
@@ -1388,7 +1390,9 @@ ER_SCENARIOS.push({
             sets: "mistgone" } },
         { id: "coffin", nm: "백작의 석관", spr: "coffin",
           need: "mistgone", lockedTxt: "안개 너머로 검은 석관 윤곽만 보인다. 지금 들어가면 안개한테 잡아먹힐 것 같아.",
-          txt: "뚜껑에 큼직하게 '절대 열지 마시오'. …열었다. 안은 텅 비었고 벨벳 베개 위에 '외출 중' 팻말만 놓여 있다. 김샜네. 대신 관 안에 낡은 그물이 깔려 있는데 매듭이 촘촘하다 — 백작은 이 매듭을 다 세야 눕는다지. 뚜껑 안쪽 새김 — '산 자의 시계는 거짓을 말한다. 죽은 시계만이 새벽을 안다.'" },
+          txt: "뚜껑에 큼직하게 '절대 열지 마시오'. …열었다. 안은 텅 비었고 벨벳 베개 위에 '외출 중' 팻말만 놓여 있다. 김샜네. 대신 관 안에 낡은 그물이 깔려 있는데 매듭이 촘촘하다 — 백작은 이 매듭을 다 세야 눕는다지. 뚜껑 안쪽 새김 — '산 자의 시계는 거짓을 말한다. 죽은 시계만이 새벽을 안다.'",
+          taps: { n: 3, prompt: "빈 관을 괜히 한번 두드려 보고 싶다. 똑, 똑, 똑.",
+            reveal: "관을 세 번 두드리자 — 팻말이 홱 뒤집힌다. 반대편엔 이렇게 적혀 있다. '외출 중 (진짜임. 자꾸 두드리면 유령 나옴).' …백작, 이 양반 진짜." } },
         { id: "tree", nm: "가계도 태피스트리", spr: "tapestry",
           txt: "몰락 가문의 가계도. 아래부터 — 미르차(1701~1758), 엘레나(1642~1699), 라두(1554~1601), 요나(1500~1548). 그리고 맨 위, 시조 V(1476~ ). …V만 죽은 해가 없다. 이 가문, 시작된 해부터 뭔가 이상해. 어쩐지 와인도 전부 그 해 것이더라." },
         { id: "organ", nm: "파이프오르간", spr: "organ",
@@ -1436,7 +1440,9 @@ ER_SCENARIOS.push({
         { id: "stat", nm: "상태창", spr: "statwin",
           txt: "[ 상태창 ]\n이름: 베르크\n힘  4 — 주먹은 폼이야\n지능 7 — 머리는 장식이 아니다\n운  2 — 하늘이 버렸어\n\n스탯 한번 짜다. 3화에서 죽는 엑스트라 스펙 맞네. 상태창은 언제든 다시 열어 볼 수 있어." },
         { id: "novel", nm: "머리맡의 원작 소설", spr: "book",
-          txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다." },
+          txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다.",
+          taps: { n: 5, prompt: "책장을 자꾸 넘기면 뭔가 나올지도. 계속 두드려(넘겨) 봐.",
+            reveal: "[시스템] 그만 좀 넘겨… 스포일러 나온다고. 좋아, 서비스다. 흑막은 네가 '이미 만난' 자야. 시스템이 끝내 이름을 안 불러 준 사람 말이지." } },
         { id: "curtain", nm: "두꺼운 커튼", spr: "curtain",
           txt: "커튼을 힘껏 걷었다. 아침 햇살이 쏟아진다. 어두웠던 벽 쪽이 환해졌어. 벽에 뭐가 걸려 있던 것 같은데.",
           sets: "lit" },
@@ -1539,7 +1545,7 @@ function erStars(heartsLeft, heartsMax, hintsUsed){
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v3";   /* v3: 게르 시나리오 '칸의 게르'로 재구성 — 구세이브 무효화 */
-const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0, dial: {} };
+const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0, dial: {}, tapCount: {} };
 
 /* ---------- 상태/세이브 ---------- */
 function erScen(){ return ER_SCENARIOS[er.st.sc]; }
@@ -1558,6 +1564,7 @@ function erBeginAct(idx){
   er.st.act = idx;
   er.st.solved = {};
   er.st.seen = {};
+  er.st.tapped = {};
   er.st.inv = [];
   er.st.flags = {};
   er.st.hearts = a.hearts;
@@ -1565,6 +1572,7 @@ function erBeginAct(idx){
   er.hintStep = {};
   er.sel = [];
   er.dial = {};
+  er.tapCount = {};
   er.ckpt = erSnap();       /* 이 막의 체크포인트 (하드코어 실패 시 복귀) */
   erSave();
   erShowActIntro();
@@ -1584,6 +1592,7 @@ function erShowActIntro(){
 function erEnterPlay(){
   $("er-act").style.display = "none";
   $("er-play").style.display = "";
+  snBgm("story");   /* 방 입장 — 미스터리 앰비언트 (reset/승리에서 정지) */
   er.panel = null;
   erTimersOff();
   er.timer = setInterval(erTick, 1000);
@@ -1699,6 +1708,31 @@ function erCtextHtml(ct){
 /* 문서(편지·일지·책·목차)는 종이 느낌으로 읽히게 — 스프라이트로 자동 판별 */
 const ER_DOC_SPR = new Set(["letter", "book", "diary", "journal"]);
 
+/* 두드리기 — 특정 오브젝트를 여러 번 탭하면 숨은 것이 드러남. taps:{n, prompt?, reveal, give?, sets?}.
+   횟수(n)는 숨겨서 발견의 재미를 남긴다. 완료 상태는 er.st.tapped[id]에 저장(세이브 지속) */
+function erTapsHtml(o){
+  if ((er.st.tapped || {})[o.id]) return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.reveal) + "</div>";
+  return '<div class="hint" style="margin-top:8px">' + escHtml(o.taps.prompt || "여기를 여러 번 두드려 봐.") + "</div>" +
+    '<button class="er-taps" id="er-taps"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></button>';
+}
+function erTap(id){
+  const o = erObj(id);
+  if ((er.st.tapped || {})[o.id]) return;
+  er.tapCount[id] = (er.tapCount[id] || 0) + 1;
+  haptic(12); erSnd("knock");
+  const el = $("er-taps");
+  if (el){ el.classList.remove("er-shake"); void el.offsetWidth; el.classList.add("er-shake"); }
+  if (er.tapCount[id] >= o.taps.n){
+    er.st.tapped = er.st.tapped || {};
+    er.st.tapped[id] = true;
+    if (o.taps.sets) er.st.flags[o.taps.sets] = true;
+    if (o.taps.give) erGain(o.taps.give); else erSnd("solve");
+    erSave();
+    erRender();
+    pwaToast("✨ " + o.taps.reveal);
+  }
+}
+
 /* 인물 대사 — 말하는 이의 초상 + 말풍선. speech: [{nm, spr, line}] */
 function erSpeechHtml(list){
   return '<div class="er-speech">' + list.map((s) =>
@@ -1753,6 +1787,8 @@ function erRenderPanel(){
   if (!solved && !gated && o.torch){ html += erTorchHtml(o.torch); }
   /* 색글자·행 단서 */
   if (!solved && !gated && o.ctext){ html += erCtextHtml(o.ctext); }
+  /* 두드리기: 여러 번 탭해 숨은 것 드러내기 */
+  if (!gated && o.taps){ html += erTapsHtml(o); }
 
   if (!solved && !gated && o.lock){
     if (o.lock.ans && o.lock.type === "dial"){
@@ -1786,6 +1822,9 @@ function erRenderPanel(){
     b.classList.toggle("flip");
     haptic(10); erSnd("tick");
   }));
+
+  const tapBtn = $("er-taps");
+  if (tapBtn) tapBtn.addEventListener("click", () => erTap(er.panel));
 
   /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
   p.querySelectorAll(".er-dbtn").forEach((b) => b.addEventListener("click", () => {
@@ -1871,7 +1910,7 @@ function erSnd(type){
 }
 
 function erGain(itemId, silent){
-  if (!er.st.inv.includes(itemId)){ er.st.inv.push(itemId); er.justGained = itemId; if (!silent) erSnd("gain"); }
+  if (!er.st.inv.includes(itemId)){ er.st.inv.push(itemId); er.justGained = itemId; if (!silent){ erSnd("gain"); snSfx("coin"); } }   /* 단서·아이템 획득 */
 }
 
 function erTryCode(){
@@ -1893,7 +1932,7 @@ function erUseItem(){
 }
 
 function erSolve(o){
-  haptic(30); erSnd("solve");
+  haptic(30); erSnd("solve"); snSfx("reveal");   /* 자물쇠 열림 */
   er.st.solved[o.id] = true;
   if (o.lock.sets) er.st.flags[o.lock.sets] = true;
   if (o.lock.give) erGain(o.lock.give);
@@ -1914,7 +1953,7 @@ function erSolve(o){
 function erWrong(msg){
   const box = $("er-msg");
   if (box) box.textContent = msg;
-  haptic([40, 40, 40]); erSnd("wrong");
+  haptic([40, 40, 40]); erSnd("wrong"); snSfx("wrong");   /* 오답·틀린 코드 */
   const bx = $("er-panel").querySelector(".ta-box");
   if (bx){ bx.classList.remove("er-shake"); void bx.offsetWidth; bx.classList.add("er-shake"); }
   if (er.st.mode === "hard"){
@@ -1973,7 +2012,7 @@ function erFail(msg){
 }
 
 function erWin(){
-  erTimersOff(); erSnd("win");
+  erTimersOff(); erSnd("win"); snBgmStop(); snSfx("win");   /* 탈출 성공 엔딩 — BGM 정지 + 팡파르 */
   erClearSave();
   const a = erAct();
   const stars = er.st.mode === "hard" ? erStars(er.st.hearts, a.hearts, er.st.hintsTotal || 0) : 3;
@@ -2005,6 +2044,7 @@ function erRenderScens(){
 function erReset(){
   /* 진입 시: 진행 중 세이브 있으면 이어하기 노출, 아니면 시나리오·모드 선택 */
   erTimersOff();
+  snBgmStop();   /* 화면 떠날 때 BGM 정지 (필수) */
   er.panel = null; er.sel = [];
   $("er-act").style.display = "none";
   $("er-play").style.display = "none";
