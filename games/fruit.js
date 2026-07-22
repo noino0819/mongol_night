@@ -4,7 +4,7 @@
 snAddScreen("fruit", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 과일 종!</h2></div>
     <div id="fruit-setup">
-      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판의 카드 더미</b>를 탭해서 한 장씩 뒤집어. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 자기 이름판을 먼저 탭(=종)! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
+      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판</b>을 탭해서 한 장씩 뒤집어. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 <b>가운데 자기 이름 종</b>을 먼저 탭! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
       <div class="field">
         <label>참여자 선택 (탭해서 켜고 끄기, 2~6명)</label>
         <div class="seg" id="fruit-players"></div>
@@ -13,7 +13,7 @@ snAddScreen("fruit", `
     </div>
     <div id="fruit-game" style="display:none">
       <div class="fruit-arena" id="fruit-arena">
-        <div class="fcenter"><div class="fbell"><px-sprite name="bell" scale="3"></px-sprite></div></div>
+        <div class="fcenter" id="fruit-bells"></div>
         <div class="fmsg" id="fruit-msg"></div>
       </div>
       <button class="btn ghost mt" id="fruit-stop">게임 끝내기 (카드 많은 순 정산)</button>
@@ -43,12 +43,31 @@ snAddCss(`/* ---------- 과일 종! (할리갈리) ---------- */
   .fzone.bc{bottom:10px;left:50%;transform:translateX(-50%)}
   .fzone.lm{top:50%;left:10px;transform:translateY(-50%) rotate(90deg)}
   .fzone.rm{top:50%;right:10px;transform:translateY(-50%) rotate(-90deg)}
+  /* 가운데 종 클러스터 — 자기 자리 방향 칸에 자기 종 (2열 그리드, 상단은 180도) */
   .fcenter{
     position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    display:flex;gap:8px;align-items:center;justify-content:center;
+    display:grid;grid-template-columns:repeat(2,64px);gap:8px;
   }
-  .fbell{font-size:42px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
-  .fmsg{position:absolute;top:50%;left:50%;transform:translate(-50%,58px);font-size:14px;font-weight:800;color:var(--fire);text-align:center;width:150px}`);
+  .fbellbtn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;
+    border:2px solid var(--line);border-radius:14px;background:var(--card);padding:6px 2px;
+    font-weight:800;font-size:10px;cursor:pointer;touch-action:manipulation;
+  }
+  .fbellbtn .fzname{max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fbellbtn.tl{grid-area:1/1}.fbellbtn.tr{grid-area:1/2}.fbellbtn.tc{grid-area:1/1/2/3}
+  .fbellbtn.lm{grid-area:2/1}.fbellbtn.rm{grid-area:2/2}
+  .fbellbtn.bl{grid-area:3/1}.fbellbtn.br{grid-area:3/2}.fbellbtn.bc{grid-area:3/1/4/3}
+  .fbellbtn.tl,.fbellbtn.tr,.fbellbtn.tc{transform:rotate(180deg)}
+  .fbellbtn.lm{transform:rotate(90deg)}.fbellbtn.rm{transform:rotate(-90deg)}
+  .fbellbtn.good{background:#1E4633;border-color:var(--steppe)}
+  .fbellbtn.bad{background:#4A2230;border-color:var(--danger)}
+  .fbellbtn.dead{opacity:.35;pointer-events:none}
+  .fmsg{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+    font-size:14px;font-weight:800;color:var(--fire);text-align:center;width:150px;
+    background:var(--night2);border:1px solid var(--line);border-radius:12px;padding:8px 6px;
+  }
+  .fmsg:empty{display:none}`);
 /* ================= 과일 종! (할리갈리) ================= */
 const FRUITS = ["strawberry","banana","kiwi","grape"]; /* SPR 스프라이트 키 */
 /* 정식 할리갈리 분포: 과일당 1개×5장, 2개×3장, 3개×3장, 4개×2장, 5개×1장 = 14장 × 4과일 = 56장 */
@@ -113,18 +132,23 @@ $("fruit-start").addEventListener("click", () => {
 function buildFruitArena(){
   const arena = $("fruit-arena");
   arena.querySelectorAll(".fzone").forEach(z => z.remove());
+  const bells = $("fruit-bells");
+  bells.innerHTML = "";
   const layout = FZ_LAYOUT[fr.players.length];
   fr.players.forEach((name, i) => {
+    /* 자기 판 탭 = 뒤집기만 (종은 가운데로 분리) */
     const z = document.createElement("button");
     z.className = "fzone " + layout[i];
     z.id = "fz-" + i;
-    z.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      /* 자기 🃏 더미 탭 = 뒤집기(자기 차례만), 그 외 = 종 */
-      if (e.target.closest(".fzflip")) fruitFlipTurn(i);
-      else fruitBell(i, z);
-    });
+    z.addEventListener("pointerdown", (e) => { e.preventDefault(); fruitFlipTurn(i); });
     arena.appendChild(z);
+    /* 가운데 종 — 자기 자리 방향 칸 */
+    const b = document.createElement("button");
+    b.className = "fbellbtn " + layout[i];
+    b.id = "fb-" + i;
+    b.innerHTML = '<px-sprite name="bell" scale="2"></px-sprite><span class="fzname">' + escHtml(name) + "</span>";
+    b.addEventListener("pointerdown", (e) => { e.preventDefault(); haptic(30); fruitBell(i, b); });
+    bells.appendChild(b);
     fruitRenderZone(i);
   });
   fruitRenderTurn();
@@ -164,6 +188,8 @@ function fruitRenderTurn(){
     const z = $("fz-" + j);
     z.classList.toggle("turn", fr.running && j === fr.turn);
     z.classList.toggle("dead", !fruitAlive(j));
+    const b = $("fb-" + j);
+    if (b) b.classList.toggle("dead", !fruitAlive(j));
   });
 }
 function fruitSumOK(){
