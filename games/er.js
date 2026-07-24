@@ -1155,7 +1155,14 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-dnum{width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:var(--card);border:2px solid var(--steppe);border-radius:8px;font-size:26px;font-weight:bold;color:var(--milk)}
 .er-torch{position:relative;height:150px;margin:10px 0;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:var(--night2);touch-action:none;cursor:crosshair}
 .er-mark{position:absolute;transform:translate(-50%,-50%);color:var(--fire);font-size:24px;font-weight:bold}
-.er-torch-cover{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,-200px) var(--my,-200px),transparent 0,transparent 42px,var(--night) 82px)}`);
+.er-torch-cover{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,-200px) var(--my,-200px),transparent 0,transparent 42px,var(--night) 82px)}
+.er-page{margin-top:10px;background:var(--night2);border:2px solid var(--line);border-left:3px solid var(--px-sand);border-radius:10px;padding:12px 14px}
+.er-page-body{font-size:14px;line-height:1.85;color:var(--px-sand);font-style:italic;white-space:pre-line;word-break:keep-all;min-height:60px;text-wrap:pretty}
+.er-page-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.er-pbtn{background:var(--card);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:12px;padding:5px 12px;cursor:pointer}
+.er-pbtn:active{transform:scale(.94)}
+.er-pbtn:disabled{opacity:.32;cursor:default}
+.er-page-count{font-size:12px;color:var(--dim);letter-spacing:1px}`);
 
 /*ER_DATA_BEGIN*/
 /* 오브젝트: { id, nm, spr, txt(조사문), need?(플래그 게이트), lockedTxt?, sets?(조사 시 플래그),
@@ -1235,7 +1242,10 @@ ER_SCENARIOS.push({
       ],
       objects: [
         { id: "post", nm: "초소 명부", spr: "journal",
-          txt: "빈 초소에 명부가 펼쳐져 있다. \"낮을 지키는 토르구드, 일흔.\" 밤 당번 쪽은 찢겨 나갔다. 여백에 누가 급히 갈겨 놨다 — \"밤은 낮보다 열이 많다.\"" },
+          txt: "빈 초소에 명부가 펼쳐져 있어요. 한 장씩 넘겨 봐요.",
+          pages: { sheets: [
+            "낮 당번. 낮을 지키는 토르구드, 일흔.",
+            "밤 당번 — 이 면은 누가 찢어 갔다. 찢긴 자리 여백에 급히 갈긴 글씨: \"밤은 낮보다 열이 많다.\"" ] } },
         { id: "gearchest", nm: "마구 궤", spr: "stable",
           txt: "초소 옆 마구 궤. 두 자리 다이얼 — 헵투울의 창 문양이 찍혀 있다.",
           lock: { ans: ["80"], digits: 2, type: "dial", prompt: "다이얼을 돌려 맞춰 봐.",
@@ -1377,7 +1387,11 @@ ER_SCENARIOS.push({
       ],
       objects: [
         { id: "invite", nm: "초대장", spr: "letter",
-          txt: "'친애하는 손님께. 잠시 볼일이 있어 자리를 비우니, 절대 촛불을 끄지 말 것. 절대로. 그리고 포크와 나이프는 반드시 겹쳐 두시길. — V.' 이렇게까지 강조하면 오히려 하고 싶어지는데. (참고로 이 저택은 예산 문제로 16×16픽셀로 지어졌지만 분위기는 만점이다.)" },
+          txt: "V가 남긴 초대장이에요. 한 장씩 넘겨 읽어 봐요.",
+          pages: { sheets: [
+            "친애하는 손님께. 잠시 볼일이 있어 자리를 비웁니다. 부디 편히 계시길. — V",
+            "한 가지. 절대 촛불을 끄지 말 것. 절대로.",
+            "그리고 포크와 나이프는 반드시 겹쳐 두시길. — V\n\n…이렇게까지 강조하면 오히려 더 하고 싶어지잖아요. (참고로 이 저택은 예산 문제로 16×16픽셀로 지어졌지만 분위기는 만점이에요.)" ] } },
         { id: "candle", nm: "은촛대", spr: "candelabra",
           txt: "그렇게 끄지 말라던 그 촛불이다. 끄지 말라니까 더 끄고 싶잖아. …후. 껐다. 어둠이 내려앉자 맞은편 거울 테두리가 푸르스름하게 빛난다.",
           sets: "dark" },
@@ -1418,7 +1432,11 @@ ER_SCENARIOS.push({
       combos: [],
       objects: [
         { id: "diary", nm: "집사의 일지", spr: "diary",
-          txt: "집사의 일지. '주인님은 해 뜨기 전 꼭 돌아오신다.\n예배실 수반에 성수를 채워 둘 것 — 지하 안개는 성수로만 걷힌다.\n동쪽 커튼은 무슨 일이 있어도 열지 말 것. 열면 해고다. …나는 가끔 열고 싶다.'\n여백에 낙서 — '주인님 왈: 마늘이니 햇빛이니 하는 건 죄다 영화가 지어낸 거란다. 민속엔 그런 거 없거든? 진짜 약점은 따로 있지. (안 알려줌)'" },
+          txt: "집사의 일지예요. 날짜별로 적혀 있어요. 한 장씩 넘겨 봐요.",
+          pages: { sheets: [
+            "주인님은 해 뜨기 전 꼭 돌아오신다.\n예배실 수반에 성수를 채워 둘 것 — 지하 안개는 성수로만 걷힌다.",
+            "동쪽 커튼은 무슨 일이 있어도 열지 말 것. 열면 해고다.\n…나는 가끔, 아주 가끔 열고 싶다.",
+            "여백의 낙서 — 주인님 왈: '마늘이니 햇빛이니 하는 건 죄다 영화가 지어낸 거란다. 민속엔 그런 거 없거든? 진짜 약점은 따로 있지.' (안 알려줌)" ] } },
         { id: "font", nm: "성수반", spr: "font",
           give: "holy",
           txt: "예배실 구석의 돌 수반. 집사가 채워 둔 성수가 찰랑거린다. 빈 병에 담았다. 마시진 마 — 그냥 미지근한 물맛이라는 소문이 있어." },
@@ -1552,7 +1570,12 @@ ER_SCENARIOS.push({
             sets: "vault" } },
         { id: "diary", nm: "전대 빙의자의 일지", spr: "book",
           need: "vault", lockedTxt: "지하 서고 안쪽에 있어. 입구의 결계부터 어떻게 해야 해.",
-          txt: "먼지 쌓인 일지. 나보다 먼저 이 소설에 빙의했던 누군가의 기록이다. '1회차: 연회의 독주. 넉 잔째가 독이었다.\n2회차: 기사 초상이 걸린 복도의 함정. 초상이 몇 점인지는 그 결벽증 기사단장이 자랑처럼 떠들고 다니지.\n3회차: 새벽 두 시의 종과 함께 등에 칼이. — 나는 세 번 죽었다. 너는 이 순서를 잊지 마라.\n그리고 명심해 — 흑막은 시스템이 끝내 이름을 부르지 않는 자, 상태창이 뜨지 않는 유일한 인간이다.' …전대 빙의자는, 결국 못 나갔구나." },
+          txt: "먼지 쌓인 일지. 나보다 먼저 이 소설에 빙의했던 누군가의 기록이에요. 한 장씩 넘겨 읽어 봐요.",
+          pages: { sheets: [
+            "1회차. 연회의 독주. 넉 잔째가 독이었다.",
+            "2회차. 기사 초상이 걸린 복도의 함정. 초상이 몇 점인지는… 그 결벽증 기사단장이 자랑처럼 떠들고 다니지.",
+            "3회차. 새벽 두 시의 종과 함께, 등에 칼이.\n— 나는 세 번 죽었다. 너는 이 순서를 잊지 마라.",
+            "그리고 명심해. 흑막은 시스템이 끝내 이름을 부르지 않는 자, 상태창이 뜨지 않는 유일한 인간이다.\n…전대 빙의자는, 결국 못 나갔구나." ] } },
         { id: "chest", nm: "성좌 금고", spr: "chest",
           txt: "연회장 구석의 낡은 궤. 세 자리 자물쇠가 달렸고 뚜껑에 '죽은 순서대로'라고 긁혀 있다. 누가 죽었다는 거야, 대체.",
           lock: { ans: ["482"], digits: 3,
@@ -1597,7 +1620,7 @@ function erFixSave(s, scens){
   const a = s && scens[s.sc] && scens[s.sc].acts[s.act];
   if (!a) return null;
   const def = { mode: "soft", hintsTotal: 0, hearts: a.hearts, tLeft: a.time,
-    solved: {}, seen: {}, tapped: {}, talked: {}, flags: {}, hintStep: {} };
+    solved: {}, seen: {}, tapped: {}, talked: {}, flags: {}, hintStep: {}, pageAt: {} };
   Object.keys(def).forEach((k) => { if (s[k] === null || typeof s[k] !== typeof def[k]) s[k] = def[k]; });
   if (!Array.isArray(s.inv)) s.inv = [];
   s.hearts = Math.max(0, Math.min(a.hearts, s.hearts));   /* HUD의 하트 repeat()가 음수로 터지는 것 방지 */
@@ -1632,6 +1655,7 @@ function erBeginAct(idx){
   er.st.hearts = a.hearts;
   er.st.tLeft = a.time;     /* 하드: 남은 초 / 소프트: 미사용 */
   er.st.hintStep = {};      /* 힌트 진행도도 세이브에 (이어하기 시 이미 본 힌트부터) */
+  er.st.pageAt = {};        /* 문서 페이지 진행도 (나갔다 와도 읽던 장) */
   er.sel = [];
   er.dial = {};
   er.tapCount = {};
@@ -1772,6 +1796,20 @@ function erCtextHtml(ct){
 /* 문서(편지·일지·책·목차)는 종이 느낌으로 읽히게 — 스프라이트로 자동 판별 */
 const ER_DOC_SPR = new Set(["letter", "book", "diary", "journal"]);
 
+/* 다중 페이지 문서 — 편지·일지·명부·책을 한 장씩 넘겨 읽는다. 앞뒤로 자유 이동 + 카운터 상시 노출
+   → '다 넘겨야 끝'이 아니라 '넘겨 읽다 발견'. 각 장이 독립 정보를 가질 때만 정당(트릭사전: 헛클릭 금지·2단 상한).
+   pages:{sheets:[...]} — 진행도 er.st.pageAt[objId]. 순수 단서라 별도 검증 없음(자물쇠가 검증). */
+function erPagesHtml(o){
+  const sheets = o.pages.sheets, n = sheets.length;
+  const at = Math.min((er.st.pageAt || {})[o.id] || 0, n - 1);
+  return '<div class="er-page"><div class="er-page-body">' + escHtml(sheets[at]) + "</div>" +
+    '<div class="er-page-nav">' +
+      '<button class="er-pbtn" data-pg="-1"' + (at === 0 ? " disabled" : "") + ">‹ 이전 장</button>" +
+      '<span class="er-page-count">' + (at + 1) + " / " + n + "</span>" +
+      '<button class="er-pbtn" data-pg="1"' + (at === n - 1 ? " disabled" : "") + ">다음 장 ›</button>" +
+    "</div></div>";
+}
+
 /* 두드리기 — 원래 스프라이트(패널 초상)를 신호 없이 여러 번 눌러야 숨은 게 드러남. 안내 문구 없음.
    눌리면 흔들림만 = 발견의 재미. 아껴 쓰는 이스터에그. 완료는 er.st.tapped[id]에 저장. taps:{n, reveal, give?, sets?} */
 function erTap(id){
@@ -1874,6 +1912,8 @@ function erRenderPanel(){
   if (!solved && !gated && o.torch){ html += erTorchHtml(o.torch); }
   /* 색글자·행 단서 */
   if (!solved && !gated && o.ctext){ html += erCtextHtml(o.ctext); }
+  /* 다중 페이지 문서: 한 장씩 넘겨 읽기 */
+  if (!solved && !gated && o.pages){ html += erPagesHtml(o); }
   /* 두드리기: 여러 번 탭해 숨은 것 드러내기 */
   if (!gated && o.taps && (er.st.tapped || {})[o.id]){ html += '<div class="hint" style="margin-top:8px">✨ ' + escHtml(o.taps.reveal) + "</div>"; }
 
@@ -1915,6 +1955,13 @@ function erRenderPanel(){
 
   /* 인물 대사: 초상 눌러 다음 대사로 */
   p.querySelectorAll(".er-sp-row").forEach((b) => b.addEventListener("click", () => erTalk(er.panel, +b.dataset.sp)));
+
+  /* 페이지 넘김: 앞뒤 자유 이동(카운터 상시). 다 넘겨야 풀리는 게 아니라 넘겨 읽다 발견 */
+  p.querySelectorAll(".er-pbtn").forEach((b) => b.addEventListener("click", () => {
+    const pa = er.st.pageAt || (er.st.pageAt = {}), n = o.pages.sheets.length;
+    pa[o.id] = Math.max(0, Math.min(n - 1, Math.min(pa[o.id] || 0, n - 1) + (+b.dataset.pg)));
+    haptic(10); erSave(); erRenderPanel();
+  }));
 
   /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
   p.querySelectorAll(".er-dbtn").forEach((b) => b.addEventListener("click", () => {
