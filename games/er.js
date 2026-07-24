@@ -1125,7 +1125,10 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .ta-box.er-doc .ta-text{font-style:italic;color:var(--px-sand)}
 .er-doc-tag{font-size:10px;font-weight:600;color:var(--dim);margin-left:8px;letter-spacing:1px;vertical-align:middle}
 .er-speech{display:flex;flex-direction:column;gap:8px;margin:10px 0}
-.er-sp-row{display:flex;gap:8px;align-items:flex-start}
+.er-sp-row{display:flex;gap:8px;align-items:flex-start;width:100%;background:none;color:inherit;font-family:inherit;text-align:left;padding:0;border:0;cursor:pointer}
+.er-sp-row:not(.er-sp-done):active{transform:scale(.98)}
+.er-sp-done{cursor:default}
+.er-sp-more{font-size:11px;color:var(--px-sand);margin-top:5px}
 .er-sp-port{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:4px;line-height:0}
 .er-sp-bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:12px;border-top-left-radius:2px;padding:8px 11px}
 .er-sp-nm{font-size:12px;font-weight:800;color:var(--fire);margin-bottom:3px}
@@ -1465,7 +1468,7 @@ ER_SCENARIOS.push({
         { id: "novel", nm: "머리맡의 원작 소설", spr: "book",
           txt: "『철혈의 성좌』 3화가 펼쳐져 있다. 내가 읽다 잠든 그 페이지. '망나니 남작 베르크는 금고를 열 때 버릇이 있었다. 머리를 먼저 쓰고, 다음은 주먹, 마지막은 하늘에 맡겼다. 버릇의 순서를 어기면 금고는 절대 열리지 않았다.' 잠깐, 베르크? 그거 나잖아. 소설 속 묘사가 통째로 힌트라니, 책 좀 읽길 잘했다.",
           taps: { n: 5,
-            reveal: "[시스템] …그만 좀 넘겨. 스포일러 나온다고. 좋아, 이것만 — 흑막은 '이미 네 앞에 있던' 자야. 그 이상은 노스포." } },
+            reveal: "[시스템] …그만 좀 넘겨. 스포일러 나온다고. 좋아, 이것만 — 원작은 12장에서 뚝 끊겼어. 결말은 아무도 몰라. 네가 직접 써야 한다는 뜻이야. 그 이상은 노스포." } },
         { id: "curtain", nm: "두꺼운 커튼", spr: "curtain",
           txt: "커튼을 힘껏 걷었다. 아침 햇살이 쏟아진다. 어두웠던 벽 쪽이 환해졌어. 벽에 뭐가 걸려 있던 것 같은데.",
           sets: "lit" },
@@ -1505,11 +1508,20 @@ ER_SCENARIOS.push({
             segs: [ { t: "[시스템] z#x" }, { t: "해", c: "fire" }, { t: "q▚w0x1 §¶", br: true },
                     { t: "ther3 ##" }, { t: "방", c: "fire" }, { t: " err0r ▚▚ nul" } ] } },
         { id: "trio", nm: "연회장의 세 사람", spr: "trio",
-          txt: "연회장에 셋이 모여 있다. 한 명씩 말을 붙여 보자. 셋 다 인사를 받아 주는데 — 어쩐지 한 명은 상태창이 뜨지 않는다.",
+          txt: "연회장에 셋이 모여 있다. 초상을 하나씩 눌러 말을 붙여 보자 — 사람은 곱씹을수록 다른 걸 흘리는 법이니까.",
           speech: [
-            { nm: "기사단장 바토르 [힘 9 / 충성 10]", spr: "bator", line: "서쪽 복도의 기사 초상 여덟 점은 내가 매일 광을 내지. 한 점이라도 비뚤어지면 못 참거든." },
-            { nm: "궁정 마법사 이슬라 [마력 8 / 호기심 12]", spr: "isla", line: "요즘 시스템이 통 이상해요. 허공의 글자가 자꾸 깨져서 흩어지고…" },
-            { nm: "집사 노얀 [ ? ]", spr: "noyan", line: "…(잔을 닦으며 조용히 웃기만 한다. 상태창이 뜨지 않는다.)" }
+            { nm: "기사단장 바토르 [힘 9 / 충성 10]", spr: "bator", lines: [
+              "손님이 있었나. 나는 서쪽 복도를 지키는 몸이라 오래는 못 있네.",
+              "그 복도의 기사 초상 여덟 점은 내가 매일 광을 내지. 한 점이라도 비뚤어지면 못 참거든.",
+              "…자네, 아까부터 사람 이름 옆을 자꾸 훔쳐보는군. 시스템창 말인가? 나야 힘 9에 충성 10, 떳떳하네. 남들 것도 그리 잘 보이나?" ] },
+            { nm: "궁정 마법사 이슬라 [마력 8 / 호기심 12]", spr: "isla", lines: [
+              "어머, 새 얼굴. 이 성엔 오래 머물 손님으로는 안 보이는데.",
+              "요즘 시스템이 통 이상해요. 허공의 글자가 자꾸 깨져서 흩어지고…",
+              "그러고 보니 — 여기 사람들, 다들 이름 옆에 숫자가 뜨죠? 저는 마력 8. 근데 딱 한 사람은, 아무리 봐도 그게 안 떠요. 누군지는… 직접 보세요." ] },
+            { nm: "집사 노얀 [ ? ]", spr: "noyan", lines: [
+              "…남작님. 이 늦은 밤 연회장엔 무슨 볼일이신지요.",
+              "(잔을 닦으며 조용히 웃을 뿐, 좀처럼 말이 없다.)",
+              "제 이름 옆이요…? (그제야 알아챈다 — 이 자의 이름 옆에는, 힘도 충성도, 아무 숫자도 뜨지 않는다.)" ] }
           ] },
         { id: "index", nm: "원작 목차 낱장", spr: "letter",
           txt: "품에서 원작 목차 한 장이 떨어졌다. '7장: 집사의 은시계는 밤에 멎는다 / 12장: 그 이름을 부르는 순간, 이야기는 완결된다 — 작가의 말: 흑막의 정체는 다음 화에! (이후 연재 중단)' 이 연중이 이렇게 원망스러울 줄이야. 좋아, 다음 화는 내가 쓴다." },
@@ -1571,7 +1583,7 @@ function erFixSave(s, scens){
   const a = s && scens[s.sc] && scens[s.sc].acts[s.act];
   if (!a) return null;
   const def = { mode: "soft", hintsTotal: 0, hearts: a.hearts, tLeft: a.time,
-    solved: {}, seen: {}, tapped: {}, flags: {}, hintStep: {} };
+    solved: {}, seen: {}, tapped: {}, talked: {}, flags: {}, hintStep: {} };
   Object.keys(def).forEach((k) => { if (s[k] === null || typeof s[k] !== typeof def[k]) s[k] = def[k]; });
   if (!Array.isArray(s.inv)) s.inv = [];
   s.hearts = Math.max(0, Math.min(a.hearts, s.hearts));   /* HUD의 하트 repeat()가 음수로 터지는 것 방지 */
@@ -1600,6 +1612,7 @@ function erBeginAct(idx){
   er.st.solved = {};
   er.st.seen = {};
   er.st.tapped = {};
+  er.st.talked = {};
   er.st.inv = [];
   er.st.flags = {};
   er.st.hearts = a.hearts;
@@ -1765,13 +1778,33 @@ function erTap(id){
   }
 }
 
-/* 인물 대사 — 말하는 이의 초상 + 말풍선. speech: [{nm, spr, line}] */
-function erSpeechHtml(list){
-  return '<div class="er-speech">' + list.map((s) =>
-    '<div class="er-sp-row"><div class="er-sp-port"><px-sprite name="' + s.spr + '" scale="4"></px-sprite></div>' +
-    '<div class="er-sp-bubble"><div class="er-sp-nm">' + escHtml(s.nm) + "</div>" +
-    '<div class="er-sp-line">' + escHtml(s.line) + "</div></div></div>"
-  ).join("") + "</div>";
+/* 인물 대사 — 초상을 눌러 개별 대화. 같은 이를 다시 누르면 다음 대사로 이어짐(마지막에서 멈춤).
+   단서는 앞 대사가 아니라 뒤쪽 대사에 숨겨 둬, 몇 번 말을 붙여야 스스로 눈치채게 한다.
+   speech:[{nm, spr, lines:[...]}] (line 단수도 허용). 진행도 er.st.talked[objId][i] */
+function erSpeechHtml(o){
+  const prog = (er.st.talked || {})[o.id] || [];
+  return '<div class="er-speech">' + o.speech.map((s, i) => {
+    const lines = s.lines || [s.line];
+    const at = Math.min(prog[i] || 0, lines.length - 1);
+    const more = at < lines.length - 1;
+    return '<button type="button" class="er-sp-row' + (more ? "" : " er-sp-done") + '" data-sp="' + i + '">' +
+      '<div class="er-sp-port"><px-sprite name="' + s.spr + '" scale="4"></px-sprite></div>' +
+      '<div class="er-sp-bubble"><div class="er-sp-nm">' + escHtml(s.nm) + "</div>" +
+      '<div class="er-sp-line">' + escHtml(lines[at]) + "</div>" +
+      (more ? '<div class="er-sp-more">⋯ 더 눌러서 말 붙이기</div>' : "") +
+      "</div></button>";
+  }).join("") + "</div>";
+}
+
+/* 대화 진행 — 같은 NPC를 다시 누르면 다음 대사로. 마지막 대사에서 멈춤. */
+function erTalk(objId, i){
+  const s = erObj(objId).speech[i];
+  const len = (s.lines || [s.line]).length;
+  er.st.talked = er.st.talked || {};
+  const prog = er.st.talked[objId] || (er.st.talked[objId] = []);
+  const cur = prog[i] || 0;
+  haptic(10);
+  if (cur < len - 1){ prog[i] = cur + 1; erSave(); erRenderPanel(); }
 }
 
 /* 다이얼 자물쇠 — 키보드 대신 손으로 ▲▼ 돌려 맞춤. 맞으면 즉시(딸깍) 해제. 상태는 er.dial[id] */
@@ -1813,7 +1846,7 @@ function erRenderPanel(){
     '<div class="ta-text">' + escHtml(body) + "</div></div></div>";
 
   /* 인물 대사: 초상 + 말풍선 */
-  if (!solved && !gated && o.speech){ html += erSpeechHtml(o.speech); }
+  if (!solved && !gated && o.speech){ html += erSpeechHtml(o); }
   /* 관찰 퍼즐: 프로즈로 숫자를 떠먹여주는 대신, 도트 타일을 손으로 헤쳐(탭) 표식을 직접 찾게 함 */
   if (!solved && !gated && o.find){ html += erFindHtml(o.find); }
   /* 손전등 관찰: 어둠 속을 손가락으로 훑어 표식을 비춰 찾음 */
@@ -1858,6 +1891,9 @@ function erRenderPanel(){
 
   const port = $("er-port");
   if (port) port.addEventListener("click", () => erTap(er.panel));
+
+  /* 인물 대사: 초상 눌러 다음 대사로 */
+  p.querySelectorAll(".er-sp-row").forEach((b) => b.addEventListener("click", () => erTalk(er.panel, +b.dataset.sp)));
 
   /* 다이얼: ▲▼로 자릿수 조정, 맞으면 즉시 해제 */
   p.querySelectorAll(".er-dbtn").forEach((b) => b.addEventListener("click", () => {
