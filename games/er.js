@@ -1851,6 +1851,16 @@ function erFixSave(s, scens){
   s.hearts = Math.max(0, Math.min(a.hearts, s.hearts));   /* HUD의 하트 repeat()가 음수로 터지는 것 방지 */
   return s;
 }
+/* 하드코어에서 하트를 다 잃은(=이미 실패한) 세이브인가 — 이어하기 시 죽은 상태로 재진입해 무한 사망하는 것 방지 */
+function erIsDead(s){ return !!s && s.mode === "hard" && s.hearts <= 0; }
+/* 막의 신선한 체크포인트(풀 하트·풀 타임·진행 0). 실패 후 '다시 도전' 복귀·죽은 세이브 이어하기의 리셋 지점.
+   로드/중도 상태를 스냅하면 하트·시간이 깎인 채 복귀해 무한 사망/시간초과가 됨 → 반드시 막 정의(act)에서 재구성.
+   hintsTotal(누적 힌트)은 별점 산정용이라 이어감. */
+function erFreshCkpt(st, act){
+  return { sc: st.sc, mode: st.mode, act: st.act, hintsTotal: st.hintsTotal || 0,
+    solved: {}, seen: {}, tapped: {}, talked: {}, inv: [], flags: {},
+    hearts: act.hearts, tLeft: act.time, hintStep: {}, pageAt: {} };
+}
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v3";   /* v3: 게르 시나리오 '칸의 게르'로 재구성 — 구세이브 무효화 */
@@ -1923,7 +1933,10 @@ function erContinue(){
   if (!s){ pwaToast("세이브가 없네요 — 처음부터 갈게요"); erReset(); return; }
   er.st = s;
   er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {}; er.asm = null;   /* 저장 안 되는 임시 상태는 새로 — 이전 판 잔재 제거 */
-  er.ckpt = erSnap();   /* 이어하기 지점을 새 체크포인트로 */
+  /* 하트를 다 잃은 하드코어 세이브로 이어하면 죽은 상태 재진입 → 무한 사망. 이 막을 새 하트로 다시 시작(실패 후 '다시 도전'과 동일) */
+  if (erIsDead(er.st)) er.st = erFreshCkpt(er.st, erAct());
+  er.ckpt = erFreshCkpt(er.st, erAct());   /* 체크포인트는 '이 막의 처음'(풀 하트·풀 타임) — 로드/중도 상태를 스냅하지 않음 */
+  erSave();
   erEnterPlay();
 }
 

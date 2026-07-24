@@ -12,8 +12,8 @@ const grab = (name) => {
   if (!m) throw new Error(name + " 블록 없음");
   return m[1];
 };
-const { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave } =
-  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave };")();
+const { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave, erIsDead, erFreshCkpt } =
+  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave, erIsDead, erFreshCkpt };")();
 
 /* 등록된 스프라이트 이름(assemble base/piece 존재 검증용) */
 const SPR_NAMES = new Set([...src.matchAll(/^([a-z][a-z0-9]*):\[/gm)].map((m) => m[1]));
@@ -45,6 +45,25 @@ assert.equal(erFixSave({ sc: 0, act: 7 }, ER_SCENARIOS), null);           /* 없
     solved: { a: true }, seen: {}, tapped: {}, flags: {}, hintStep: { a: 2 }, hintsTotal: 3 }, ER_SCENARIOS);
   assert.equal(keep.hearts, 2); assert.equal(keep.tLeft, 120); assert.equal(keep.hintsTotal, 3);
   assert.deepEqual(keep.inv, ["x"]);            /* 정상 세이브는 그대로 통과 */
+}
+
+/* 이어하기 무한사망 버그 방지 — 하트 0 하드코어 세이브 판정 + 신선한 체크포인트 재구성 */
+assert.equal(erIsDead({ mode: "hard", hearts: 0 }), true);
+assert.equal(erIsDead({ mode: "hard", hearts: 3 }), false);
+assert.equal(erIsDead({ mode: "soft", hearts: 0 }), false);   /* 소프트는 하트 미사용 → 죽음 아님 */
+assert.equal(erIsDead(null), false);
+{
+  const a0 = ER_SCENARIOS[0].acts[0];
+  const dead = { sc: 0, act: 0, mode: "hard", hearts: 0, tLeft: 0, hintsTotal: 4,
+    solved: { x: true }, inv: ["y"], flags: { f: true } };
+  const fresh = erFreshCkpt(dead, a0);
+  assert.equal(fresh.hearts, a0.hearts, "체크포인트는 풀 하트여야 (무한사망 방지)");
+  assert.equal(fresh.tLeft, a0.time, "체크포인트는 풀 타임여야 (타임아웃 루프 방지)");
+  assert.deepEqual(fresh.solved, {}, "체크포인트는 진행 0(막 처음)");
+  assert.deepEqual(fresh.inv, [], "체크포인트는 인벤 비움");
+  assert.deepEqual(fresh.flags, {}, "체크포인트는 플래그 초기화");
+  assert.equal(fresh.hintsTotal, 4, "누적 힌트는 유지(별점 산정용)");
+  assert.equal(fresh.mode, "hard"); assert.equal(fresh.act, 0);
 }
 
 /* ---------- 2~4. 시나리오·막별 검사 ---------- */
