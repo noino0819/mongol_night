@@ -12,8 +12,8 @@ const grab = (name) => {
   if (!m) throw new Error(name + " 블록 없음");
   return m[1];
 };
-const { ER_SCENARIOS, erNorm, erMatch, erStars } =
-  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars };")();
+const { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave } =
+  new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave };")();
 
 /* ---------- 1. 로직 단위 테스트 ---------- */
 assert.equal(erNorm("  낙 타 "), "낙타");
@@ -25,6 +25,24 @@ assert.equal(erStars(5, 5, 0), 3);   /* 풀피+힌트0 */
 assert.equal(erStars(2, 5, 0), 2);   /* 하트 절반 미만 */
 assert.equal(erStars(5, 5, 3), 2);   /* 힌트 과다 */
 assert.equal(erStars(1, 5, 9), 1);   /* 탈출만 */
+
+/* 세이브 보정(이어하기 견고성) */
+assert.equal(erFixSave(null, ER_SCENARIOS), null);
+assert.equal(erFixSave({ sc: 99, act: 0 }, ER_SCENARIOS), null);          /* 없는 시나리오 */
+assert.equal(erFixSave({ sc: 0, act: 7 }, ER_SCENARIOS), null);           /* 없는 막 */
+{
+  const a0 = ER_SCENARIOS[0].acts[0];
+  const fixed = erFixSave({ sc: 0, act: 0, inv: null, solved: undefined, hearts: 99 }, ER_SCENARIOS);
+  assert.deepEqual(fixed.inv, []);
+  assert.deepEqual(fixed.solved, {});
+  assert.deepEqual(fixed.hintStep, {});
+  assert.equal(fixed.hearts, a0.hearts);        /* 하트 상한 클램프 — HUD repeat() 음수 방지 */
+  assert.equal(fixed.tLeft, a0.time);
+  const keep = erFixSave({ sc: 0, act: 1, mode: "hard", hearts: 2, tLeft: 120, inv: ["x"],
+    solved: { a: true }, seen: {}, tapped: {}, flags: {}, hintStep: { a: 2 }, hintsTotal: 3 }, ER_SCENARIOS);
+  assert.equal(keep.hearts, 2); assert.equal(keep.tLeft, 120); assert.equal(keep.hintsTotal, 3);
+  assert.deepEqual(keep.inv, ["x"]);            /* 정상 세이브는 그대로 통과 */
+}
 
 /* ---------- 2~4. 시나리오·막별 검사 ---------- */
 for (const sc of ER_SCENARIOS){

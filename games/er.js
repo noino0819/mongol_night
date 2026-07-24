@@ -1558,10 +1558,22 @@ function erMatch(input, ans){
 function erStars(heartsLeft, heartsMax, hintsUsed){
   return 1 + (heartsLeft * 2 >= heartsMax ? 1 : 0) + (hintsUsed <= 2 ? 1 : 0);
 }
+/* 세이브 보정 — 구버전·손상 세이브도 이어하기가 터지지 않게 필드 기본값을 채워 넣는다.
+   시나리오/막이 사라진 세이브는 null(=이어하기 숨김). */
+function erFixSave(s, scens){
+  const a = s && scens[s.sc] && scens[s.sc].acts[s.act];
+  if (!a) return null;
+  const def = { mode: "soft", hintsTotal: 0, hearts: a.hearts, tLeft: a.time,
+    solved: {}, seen: {}, tapped: {}, flags: {}, hintStep: {} };
+  Object.keys(def).forEach((k) => { if (s[k] === null || typeof s[k] !== typeof def[k]) s[k] = def[k]; });
+  if (!Array.isArray(s.inv)) s.inv = [];
+  s.hearts = Math.max(0, Math.min(a.hearts, s.hearts));   /* HUD의 하트 repeat()가 음수로 터지는 것 방지 */
+  return s;
+}
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v3";   /* v3: 게르 시나리오 '칸의 게르'로 재구성 — 구세이브 무효화 */
-const er = { st: null, ckpt: null, sel: [], hintStep: {}, panel: null, timer: null, selScen: 0, dial: {}, tapCount: {} };
+const er = { st: null, ckpt: null, sel: [], panel: null, timer: null, selScen: 0, dial: {}, tapCount: {} };
 
 /* ---------- 상태/세이브 ---------- */
 function erScen(){ return ER_SCENARIOS[er.st.sc]; }
@@ -1569,7 +1581,7 @@ function erAct(){ return erScen().acts[er.st.act]; }
 function erObj(id){ return erAct().objects.find((o) => o.id === id); }
 function erSnap(){ return JSON.parse(JSON.stringify(er.st)); }
 function erSave(){ try { localStorage.setItem(ER_SAVE_KEY, JSON.stringify(er.st)); } catch (e) { /* 무시 */ } }
-function erLoad(){ try { const s = JSON.parse(localStorage.getItem(ER_SAVE_KEY) || "null"); return (s && ER_SCENARIOS[s.sc] && ER_SCENARIOS[s.sc].acts[s.act]) ? s : null; } catch (e) { return null; } }
+function erLoad(){ try { return erFixSave(JSON.parse(localStorage.getItem(ER_SAVE_KEY) || "null"), ER_SCENARIOS); } catch (e) { return null; } }
 function erClearSave(){ try { localStorage.removeItem(ER_SAVE_KEY); } catch (e) { /* 무시 */ } }
 
 function erTimersOff(){ if (er.timer){ clearInterval(er.timer); er.timer = null; } }
@@ -1585,7 +1597,7 @@ function erBeginAct(idx){
   er.st.flags = {};
   er.st.hearts = a.hearts;
   er.st.tLeft = a.time;     /* 하드: 남은 초 / 소프트: 미사용 */
-  er.hintStep = {};
+  er.st.hintStep = {};      /* 힌트 진행도도 세이브에 (이어하기 시 이미 본 힌트부터) */
   er.sel = [];
   er.dial = {};
   er.tapCount = {};
@@ -1606,7 +1618,8 @@ function erShowActIntro(){
 }
 
 function erEnterPlay(){
-  $("er-act").style.display = "none";
+  /* 어디서 들어오든(인트로·이어하기·실패 재도전) 다른 화면은 전부 닫고 플레이만 — 화면 겹침 방지 */
+  ["er-setup", "er-act", "er-fail", "er-done"].forEach((id) => { $(id).style.display = "none"; });
   $("er-play").style.display = "";
   er.panel = null;
   erTimersOff();
@@ -1623,10 +1636,9 @@ function erNew(mode){
 }
 function erContinue(){
   const s = erLoad();
-  if (!s){ pwaToast("세이브가 없네 — 처음부터 가자"); return; }
+  if (!s){ pwaToast("세이브가 없네 — 처음부터 가자"); erReset(); return; }
   er.st = s;
-  er.hintStep = {};
-  er.sel = [];
+  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {};   /* 저장 안 되는 임시 상태는 새로 — 이전 판 잔재 제거 */
   er.ckpt = erSnap();   /* 이어하기 지점을 새 체크포인트로 */
   erEnterPlay();
 }
@@ -1640,6 +1652,7 @@ function erTick(){
   } else {
     er.st.tLeft = (er.st.tLeft || 0) + 1;   /* 소프트: 경과 카운트업 */
   }
+  if (er.st.tLeft % 10 === 0) erSave();     /* 시계도 10초마다 저장 — 나갔다 와도 시간이 되감기지 않게 */
   erUpdateHud();
 }
 
@@ -1965,11 +1978,11 @@ function erWrong(msg){
 
 function erHint(){
   const o = erObj(er.panel);
-  const step = er.hintStep[o.id] || 0;
+  const step = er.st.hintStep[o.id] || 0;
   if (step >= o.lock.hints.length){ $("er-hintout").textContent = "💡 이 자물쇠 힌트는 여기까지야."; $("er-hintout").style.display = ""; return; }
   $("er-hintout").textContent = "💡 " + o.lock.hints[step];
   $("er-hintout").style.display = "";
-  er.hintStep[o.id] = step + 1;
+  er.st.hintStep[o.id] = step + 1;
   er.st.hintsTotal = (er.st.hintsTotal || 0) + 1;
   if (er.st.mode === "hard"){ er.st.tLeft = Math.max(0, er.st.tLeft - 15); erUpdateHud(); }  /* 힌트 -15초 */
   erSave();
@@ -2060,8 +2073,9 @@ $("er-continue").addEventListener("click", erContinue);
 $("er-act-go").addEventListener("click", erEnterPlay);
 $("er-again").addEventListener("click", () => { erClearSave(); erReset(); });
 $("er-fail-continue").addEventListener("click", () => {
+  if (!er.ckpt){ erReset(); return; }            /* 체크포인트가 없으면(리로드 등) 셋업으로 — 빈 화면 방지 */
   er.st = JSON.parse(JSON.stringify(er.ckpt));   /* 이 막 체크포인트 복귀 (하트·시간 리셋) */
-  er.hintStep = {}; er.sel = [];
+  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {};
   erSave();
   erEnterPlay();
 });
