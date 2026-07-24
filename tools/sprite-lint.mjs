@@ -41,16 +41,19 @@ for (const [src, map] of Object.entries(sources)) for (const name of Object.keys
 }
 const SPR = Object.assign({}, ...Object.values(sources));
 
+/* 허용 해상도 티어(도트 가이드): 16×16 기본 · 32×32 클로즈업 쇼피스. 정사각만. 64+는 툴 파이프라인 도입 시 열 것 */
+const SIZES = new Set([16, 32]);
 let errs = dup, warns = 0;
 for (const [name, rows] of Object.entries(SPR)){
-  if (rows.length !== 16){ console.error(`✗ ${name}: ${rows.length}행 (16이어야)`); errs++; continue; }
+  const N = rows.length;
+  if (!SIZES.has(N)){ console.error(`✗ ${name}: ${N}행 (허용 크기 16 또는 32)`); errs++; continue; }
   rows.forEach((r, y) => {
-    if (r.length !== 16){ console.error(`✗ ${name} ${y}행: ${r.length}자 (16이어야)`); errs++; }
+    if (r.length !== N){ console.error(`✗ ${name} ${y}행: ${r.length}자 (정사각 ${N}이어야)`); errs++; }
     if (/[^0-7.]/.test(r)){ console.error(`✗ ${name} ${y}행: 유효문자(0-7,.) 외 사용 → "${r}"`); errs++; }
   });
   /* 고아 픽셀: 4방 이웃이 전부 투명인 색픽셀 */
-  const at = (x, y) => (y >= 0 && y < 16 && x >= 0 && x < 16) ? rows[y][x] : ".";
-  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++){
+  const at = (x, y) => (y >= 0 && y < N && x >= 0 && x < N) ? rows[y][x] : ".";
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++){
     if (at(x, y) === ".") continue;
     if (at(x-1,y) === "." && at(x+1,y) === "." && at(x,y-1) === "." && at(x,y+1) === "."){
       console.warn(`⚠ ${name}: 고아 픽셀 (${x},${y})='${at(x,y)}'`); warns++;
@@ -61,9 +64,9 @@ for (const [name, rows] of Object.entries(SPR)){
   if (spec){
     const sil = rows.map((r) => r.replace(/[^.]/g, "#"));
     const rev = (s) => [...s].reverse().join("");
-    const rot = sil.map((_, y) => sil.map((__, x) => sil[15 - x][y]).join("")); /* 90° 회전 */
+    const rot = sil.map((_, y) => sil.map((__, x) => sil[N - 1 - x][y]).join("")); /* 90° 회전 */
     if (spec.includes("H") && !sil.every((r) => r === rev(r))){ console.error(`✗ ${name}: 실루엣 좌우 비대칭 (SYM=H)`); errs++; }
-    if (spec.includes("V") && !sil.every((r, y) => r === sil[15 - y])){ console.error(`✗ ${name}: 실루엣 상하 비대칭 (SYM=V)`); errs++; }
+    if (spec.includes("V") && !sil.every((r, y) => r === sil[N - 1 - y])){ console.error(`✗ ${name}: 실루엣 상하 비대칭 (SYM=V)`); errs++; }
     if (spec.includes("R") && !sil.every((r, y) => r === rot[y])){ console.error(`✗ ${name}: 90° 회전 비대칭 — 상하·좌우 돌출부 모양을 통일해야 안 눌려 보임 (SYM=R)`); errs++; }
   }
 }

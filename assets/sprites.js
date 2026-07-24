@@ -906,8 +906,9 @@ medal3:[
 "......7777......",
 "................"],
 };
-function stamp(g,key,dx,dy,scale){const m=SPR[key];if(!m)return;for(let y=0;y<m.length;y++){const row=m[y];for(let x=0;x<row.length&&x<16;x++){const c=row[x];if(c==='.')continue;g.fillStyle=PAL[+c];g.fillRect((dx+x)*scale,(dy+y)*scale,scale,scale);}}}
-function draw(cv,key,scale){if(!SPR[key]||!cv)return;scale=scale||3;cv.width=16*scale;cv.height=16*scale;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.clearRect(0,0,cv.width,cv.height);stamp(g,key,0,0,scale);}
+/* 스프라이트 크기는 맵 자체의 행·열 수로 결정 — 16×16 기본, 32×32 등 큰 티어도 그대로 렌더(도트 가이드 해상도 티어) */
+function stamp(g,key,dx,dy,scale){const m=SPR[key];if(!m)return;for(let y=0;y<m.length;y++){const row=m[y];for(let x=0;x<row.length;x++){const c=row[x];if(c==='.')continue;g.fillStyle=PAL[+c];g.fillRect((dx+x)*scale,(dy+y)*scale,scale,scale);}}}
+function draw(cv,key,scale){const m=SPR[key];if(!m||!cv)return;scale=scale||3;const w=m[0].length,h=m.length;cv.width=w*scale;cv.height=h*scale;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;g.clearRect(0,0,cv.width,cv.height);stamp(g,key,0,0,scale);}
 class PxSprite extends HTMLElement{
 static get observedAttributes(){return['name','scale']}
 connectedCallback(){this._render()}
