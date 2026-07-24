@@ -12,7 +12,7 @@ snAddScreen("omok", `
     <div class="field" style="margin-bottom:10px"><div class="seg" id="omok-rule">
       <button data-rule="free" class="sel">자유룰</button><button data-rule="renju">렌주룰 (흑 금수)</button>
     </div>
-    <p class="hint" id="omok-rule-hint" style="display:none;margin:8px 0 0">흑(선공)은 <b>삼삼·사사·장목(6목 이상)</b>에 둘 수 없어요. 금수 자리는 ❌로 표시됩니다. 선공 필승법 방지용 정식 룰!</p></div>
+    <p class="hint" id="omok-rule-hint" style="display:none;margin:8px 0 0">흑(선공)은 <b>삼삼·사사·장목(6목 이상)</b>에 둘 수 없어요. 금수 자리는 ❌로 표시돼요. 선공 필승법 방지용 정식 룰!</p></div>
     <canvas id="omok-canvas"></canvas>
     <div class="omok-btns">
       <button class="btn ghost" id="omok-undo">한 수 무르기</button>
@@ -73,7 +73,7 @@ const OM_DIRS = [[0,1],[1,0],[1,1],[1,-1]];
     const r = Math.round((e.clientY - rect.top) / cell) - 1;
     if (r < 0 || c < 0 || r >= om.size || c >= om.size || om.board[r][c]) return;
     if (omMode === "multi"){
-      if (om.turn !== omMyColor){ omHint("상대 차례야"); return; }
+      if (om.turn !== omMyColor){ omHint("상대 차례예요"); return; }
       if (mpAmHost()){ if (omApply(r, c)) omBroadcastState(); }
       else mpToHost({ t: "move", r, c });          /* 게스트: 호스트 심판 대기 (로컬 반영 X) */
       return;
@@ -305,7 +305,7 @@ function omRenderModeBar(){
   host.style.display = "";
   snModeBar(host, omMode, (m) => {
     if (m === "multi"){
-      if (!mpAmHost()){ alert("여러 폰 오목은 호스트 폰에서 시작해줘"); return; }
+      if (!mpAmHost()){ alert("여러 폰 오목은 호스트 폰에서 시작해주세요"); return; }
       omMode = "multi"; omEnterMulti(true); return;
     }
     omMode = "solo"; omMyColor = 0; omokNew();
@@ -319,7 +319,7 @@ function omBroadcastState(){
 function omEnterMulti(doNav){
   const names = mpNames();
   if (names.length < 2){
-    alert("여러 폰 오목은 2명 연결이 필요해 (지금 " + names.length + "명)");
+    alert("여러 폰 오목은 2명 연결이 필요해요 (지금 " + names.length + "명)");
     omMode = "solo"; omMyColor = 0; omokNewBoard(); omRenderModeBar(); return;
   }
   omMyColor = 1;                                    /* 호스트 = 흑(선) */

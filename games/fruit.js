@@ -4,7 +4,7 @@
 snAddScreen("fruit", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔔 과일 종!</h2></div>
     <div id="fruit-setup">
-      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판</b>을 탭해서 한 장씩 뒤집어. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 <b>가운데 자기 이름 종</b>을 먼저 탭! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
+      <p class="hint">진짜 할리갈리! 카드 56장을 똑같이 나눠 갖고, 자기 차례가 오면 <b>자기 판</b>을 탭해서 한 장씩 뒤집어요. 깔린 카드들 중 <b style="color:var(--fire)">같은 과일 합이 정확히 5</b>가 되는 순간 <b>가운데 자기 이름 종</b>을 먼저 탭해요! 맞으면 깔린 카드 싹쓸이, 틀리면 전원에게 한 장씩 벌금. 카드 다 잃으면 탈락 — 끝까지 살아남으면 승리.</p>
       <div class="field">
         <label>참여자 선택 (탭해서 켜고 끄기, 2~6명)</label>
         <div class="seg" id="fruit-players"></div>
@@ -127,7 +127,7 @@ $("fruit-start").addEventListener("click", () => {
   fr.turn = 0; fr.locked = false; fr.flipLock = false; fr.running = true;
   $("fruit-setup").style.display = "none"; $("fruit-game").style.display = ""; $("fruit-result").style.display = "none";
   buildFruitArena();
-  $("fruit-msg").textContent = fr.players[0] + "부터 뒤집어!";
+  $("fruit-msg").textContent = fr.players[0] + "부터 뒤집어요!";
 });
 function buildFruitArena(){
   const arena = $("fruit-arena");
@@ -279,7 +279,7 @@ $("fruit-again").addEventListener("click", () => { fruitReset(); });
    진행이 멈출 수 있음 — 호스트가 '게임 끝내기'로 정산하는 게 탈출구. */
 function fruitStartMulti(){
   const names = mpNames();
-  if (!mpLive() || names.length < 2) return alert("여러 폰은 폰 2대 이상 연결돼야 해");
+  if (!mpLive() || names.length < 2) return alert("여러 폰은 폰 2대 이상 연결돼야 해요");
   fr.players = names;
   fr.decks = fr.players.map(() => []);
   fruitDeck56().forEach((c, i) => fr.decks[i % fr.players.length].push(c));
@@ -288,7 +288,7 @@ function fruitStartMulti(){
   mpNav("fruit");                    /* 게스트들 이 화면으로 (게스트: __guest_fruit 실행 → 대기) */
   mp.game = { onMsg: fruitHostMsg, onPeers(){} };
   $("fruit-setup").style.display = "none"; $("fruit-game").style.display = "none"; $("fruit-result").style.display = "none";
-  $("fruit-msg").textContent = fr.players[0] + "부터 뒤집어!";
+  $("fruit-msg").textContent = fr.players[0] + "부터 뒤집어요!";
   fruitBeam();
 }
 /* 게스트 입력 수신 → 이름으로 인덱스 찾아 기존 로직에 태움 */
@@ -335,7 +335,7 @@ function fruitMpShow(m){
     el.innerHTML = '<div class="stage-center" style="min-height:50vh"><span class="tag">최종 결과</span>'
       + '<div class="reveal-card"><div class="lbl">최종 카드</div><div class="val" style="font-size:19px;line-height:2">'
       + m.rank.map((r, i) => medal(i) + escHtml(r.n) + " — " + r.s + "장").join("<br>")
-      + '</div></div><div class="hint" style="margin:0">호스트 폰에서 한 판 더 열 수 있어</div></div>';
+      + '</div></div><div class="hint" style="margin:0">호스트 폰에서 한 판 더 열 수 있어요</div></div>';
     return;
   }
   const my = m.players.indexOf(mp.name);

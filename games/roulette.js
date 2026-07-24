@@ -11,7 +11,7 @@ snAddScreen("roulette", `
       <button class="btn ghost" id="rou-penalty-btn">벌칙도 뽑기</button>
       <button class="btn ghost" id="rou-list-btn">벌칙 목록 / 수정</button>
       <div class="pen-panel" id="rou-list-panel" hidden>
-        <p class="pen-hint">한 줄에 벌칙 하나. 룰렛·폭탄 게임 공용으로 쓰여.</p>
+        <p class="pen-hint">한 줄에 벌칙 하나. 룰렛·폭탄 게임 공용으로 쓰여요.</p>
         <textarea class="pen-edit" id="rou-list-edit" rows="10" spellcheck="false" autocapitalize="off"></textarea>
         <div class="pen-actions">
           <button class="btn" id="rou-list-save">저장</button>
@@ -31,18 +31,18 @@ snAddCss(`.penalty{font-size:18px;font-weight:700;color:var(--fire);min-height:2
 /* ================= 룰렛 ================= */
 /* 당첨 리액션 — 매번 랜덤으로 골라 웃긴 문구 + 이모지 + 애니메이션이 다르게 나옴 */
 const ROU_HITS = [
-  { e: "🎉", q: "당첨! 축하해" },
-  { e: "💀", q: "오늘 넌 못 도망가" },
+  { e: "🎉", q: "당첨! 축하해요" },
+  { e: "💀", q: "오늘은 못 도망가요" },
   { e: "👑", q: "오늘의 주인공 등장" },
-  { e: "🎯", q: "딱 걸렸다" },
-  { e: "🔥", q: "운명이 골랐어" },
-  { e: "😈", q: "미안하지만 너야" },
+  { e: "🎯", q: "딱 걸렸어요" },
+  { e: "🔥", q: "운명이 골랐어요" },
+  { e: "😈", q: "미안하지만 당신이에요" },
   { e: "🍗", q: "제물로 선정됨" },
-  { e: "🫵", q: "바로 너, 도망 금지" },
+  { e: "🫵", q: "바로 당신, 도망 금지" },
   { e: "🎲", q: "주사위 신의 선택" },
   { e: "🚨", q: "당첨자 검거 완료" },
-  { e: "⚡", q: "하늘이 점지했다" },
-  { e: "🥹", q: "그냥 받아들여" },
+  { e: "⚡", q: "하늘이 점지했어요" },
+  { e: "🥹", q: "그냥 받아들여요" },
 ];
 const ROU_ANIMS = ["rhit1", "rhit2", "rhit3", "rhit4"];
 
@@ -99,7 +99,7 @@ $("rou-list-btn").addEventListener("click", () => {
 });
 $("rou-list-save").addEventListener("click", () => {
   const list = $("rou-list-edit").value.split("\n").map(s => s.trim()).filter(Boolean);
-  if (!list.length) { $("rou-list-saved").textContent = "최소 1개는 있어야 해"; return; }
+  if (!list.length) { $("rou-list-saved").textContent = "최소 1개는 있어야 해요"; return; }
   PENALTIES = list;
   try { localStorage.setItem(PENALTY_KEY, JSON.stringify(list)); } catch (e) { /* 무시 */ }
   $("rou-list-edit").value = list.join("\n");

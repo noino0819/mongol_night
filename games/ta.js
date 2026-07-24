@@ -57,7 +57,7 @@ const TA_STORY = {
   p_03: { sp: "tengri", text: "…일어나라, 인간들. 고비의 별이 떨어졌다. 주워 와라.", goto: "p_04" },
   p_04: { sp: "tengri", text: "가진 건 용기·지혜·인심, 그리고 양 다섯 마리. 사흘 주지. …파티와 상의해도 좋다.", goto: "p_05" },
   p_05: {
-    sp: "narr", text: "어떻게 떠날까? (다수결!)",
+    sp: "narr", text: "어떻게 떠날까요? (다수결!)",
     choices: [
       { label: "말을 타고 질주한다 (용기+1)", set: { 용기: 1 }, goto: "p_06" },
       { label: "별자리로 길을 잡는다 (지혜+1)", set: { 지혜: 1 }, goto: "p_06" },
@@ -76,7 +76,7 @@ const TA_STORY = {
     ]
   },
   c1_02: {
-    sp: "narr", text: "말을 달리는 독수리 사냥꾼이 보인다. 따라잡아야 말을 걸지.",
+    sp: "narr", text: "말을 달리는 독수리 사냥꾼이 보인다. 따라잡아야 말을 걸 수 있어요.",
     choices: [{ label: "말을 몰아 추격한다", check: { stat: "용기", dc: 5 }, ok: "c1_03", fail: "c1_04" }]
   },
   c1_03: { sp: "npc_hunter", text: "호오, 말 좀 타는군. 같이 가지.", goto: "c1_05" },
@@ -147,7 +147,7 @@ const TA_STORY = {
     ]
   },
   c1_24: { sp: "tengri", text: "…놓쳤군. 둘째 날에 만회해라. 반드시.", set: { fails: 1 }, goto: "c1_25" },
-  c1_25: { sp: "narr", text: "모닥불 곁에서 첫째 날이 저문다. (여기까지 자동 저장돼!)", goto: "c2_01" },
+  c1_25: { sp: "narr", text: "모닥불 곁에서 첫째 날이 저문다. (여기까지 자동 저장돼요!)", goto: "c2_01" },
 
   /* ---------- 2장 둘째 날 — 모래폭풍의 밤 ---------- */
   c2_01: { sp: "narr", text: "초원이 끝나고 모래가 시작된다. 양들이 혀를 빼물었다.", goto: "c2_02" },
@@ -232,7 +232,7 @@ const TA_STORY = {
   c2_28: { sp: "tengri", text: "…모래가 삼켰군. 조각이 가라앉았다.", set: { fails: 1 }, goto: "c2_30" },
   c2_29: { sp: "narr", text: "둘째 조각 획득! (⭐+1) 폭풍이 거짓말처럼 잦아든다.", set: { star: 1 }, goto: "c2_30" },
   c2_30: { sp: "npc_family2", text: "새벽, 게르로 돌아오자 가족이 끌어안는다. 쪽잠이 꿀맛이다.", goto: "c2_31" },
-  c2_31: { sp: "tengri", text: "…마지막 날이다. 별이 떨어진 크레이터로 간다. (여기까지 자동 저장돼!)", goto: "c3_01" },
+  c2_31: { sp: "tengri", text: "…마지막 날이다. 별이 떨어진 크레이터로 간다. (여기까지 자동 저장돼요!)", goto: "c3_01" },
 
   /* ---------- 3장 셋째 날 — 늑대의 시험 ---------- */
   c3_01: { sp: "narr", text: "크레이터 능선. 아래에서 빛이 새어 나오고, 사방에서 늑대 울음이 겹친다.", goto: "c3_02" },
@@ -439,7 +439,7 @@ function taStart(fresh){
 }
 function taContinue(){
   const s = taLoadGame();
-  if (!s){ pwaToast("세이브가 없네…? 처음부터 가자"); taStart(true); return; }
+  if (!s){ pwaToast("세이브가 없네요…? 처음부터 갈게요"); taStart(true); return; }
   ta.vars = taClampVars(s.vars);
   ta.turnIdx = s.turnIdx || 0;
   ta.ckpt = s.ckpt || null;
@@ -498,7 +498,7 @@ function taRender(){
     const visible = node.choices.filter((c) => !c.hideIf || !taCond(c.hideIf, ta.vars));
     if (!isEnd && roster.length){
       bar.style.display = "";
-      bar.innerHTML = "이번 선택 담당: <b>" + escHtml(roster[ta.turnIdx % roster.length]) + "</b> · 파티와 상의해도 좋아";
+      bar.innerHTML = "이번 선택 담당: <b>" + escHtml(roster[ta.turnIdx % roster.length]) + "</b> · 파티와 상의해도 좋아요";
     }
     visible.forEach((c) => {
       const b = document.createElement("button");
@@ -584,12 +584,12 @@ function taReset(){
   $("ta-setup").style.display = "";
   $("ta-party").innerHTML = roster.length
     ? roster.map((n) => '<span class="pn">' + escHtml(n) + "</span>").join("")
-    : '<span class="empty">설정(⚙️)에서 일행을 먼저 등록해줘!</span>';
+    : '<span class="empty">설정(⚙️)에서 일행을 먼저 등록해 주세요!</span>';
   $("ta-continue").style.display = taLoadGame() ? "" : "none";
 }
 $("ta-new").addEventListener("click", () => {
   if (taLoadGame()){
-    mbAsk("🌠", "처음부터 다시 떠날까?", "지난 여정 세이브는 사라져",
+    mbAsk("🌠", "처음부터 다시 떠날까요?", "지난 여정 세이브는 사라져요",
       "새로 떠나기", "이어하기로 갈래",
       () => { taClearSave(); taStart(true); }, () => taContinue());
     return;

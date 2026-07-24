@@ -67,7 +67,7 @@ function cfCamStart(video, onSample){
     };
     cf.raf = requestAnimationFrame(loop);
   }).catch(() => {
-    const h = $("cf-hint"); if (h) h.textContent = "카메라 권한이 필요해 — 허용하고 다시 들어와줘";
+    const h = $("cf-hint"); if (h) h.textContent = "카메라 권한이 필요해요 — 허용하고 다시 들어와 주세요";
   });
 }
 
@@ -104,7 +104,7 @@ function cfLobby(){
     cfRoot().innerHTML =
       '<div class="stage-center" style="gap:12px"><div style="font-size:64px">🌈</div>' +
       '<div class="who">여러 폰으로 즐기는 게임</div>' +
-      '<p class="hint" style="margin:0">각자 폰 카메라로 목표 색과 가장 비슷한 걸 주변에서 찾아! 먼저 폰을 연결해줘</p>' +
+      '<p class="hint" style="margin:0">각자 폰 카메라로 목표 색과 가장 비슷한 걸 주변에서 찾아요! 먼저 폰을 연결해 주세요</p>' +
       '<button class="btn" id="cf-goconnect">📡 폰 연결하러 가기</button></div>';
     $("cf-goconnect").addEventListener("click", () => go("mp"));
     return;
@@ -113,8 +113,8 @@ function cfLobby(){
     mp.game = { onMsg: cfHostMsg, onPeers(){ if (cf.phase === "lobby") cfLobby(); } };
     cfRoot().innerHTML =
       '<div class="stage-center" style="gap:10px"><span class="tag">색찾기 · ' + mpNames().length + '명</span>' +
-      '<div style="font-size:56px">🌈</div><div class="who">주변에서 색을 찾아라</div>' +
-      '<p class="hint" style="margin:0">라운드를 시작하면 모두의 폰에 목표 색이 떠. 카메라로 가장 비슷한 색을 찾아 제출 — 제일 가까운 사람이 1점!</p></div>' +
+      '<div style="font-size:56px">🌈</div><div class="who">주변에서 색을 찾아요</div>' +
+      '<p class="hint" style="margin:0">라운드를 시작하면 모두의 폰에 목표 색이 떠요. 카메라로 가장 비슷한 색을 찾아 제출 — 제일 가까운 사람이 1점!</p></div>' +
       cfBoardHtml(cf.scores) +
       '<button class="btn mt" id="cf-start">' + (cf.round ? "다음 라운드 시작" : "라운드 시작") + '</button>' +
       (cf.round ? '<button class="btn ghost mt" id="cf-end2">게임 끝내기 · 순위</button>' : '');
@@ -127,7 +127,7 @@ function cfLobby(){
 function cfWaitScreen(){
   cf.phase = "wait";
   cfRoot().innerHTML = '<div class="stage-center"><span class="tag">색찾기</span><div class="who">대기 중…</div>' +
-    '<p class="hint" style="margin:0">호스트가 라운드를 시작하면 카메라가 켜져</p></div>';
+    '<p class="hint" style="margin:0">호스트가 라운드를 시작하면 카메라가 켜져요</p></div>';
   mp.game = { onMsg(from, m){ cfGuestMsg(m); } };
 }
 
@@ -137,14 +137,14 @@ function cfCaptureUI(isHost, target){
   cf.target = target; cf.locked = false;
   const tRgb = cfHexRgb(target.hex);
   cfRoot().innerHTML =
-    cfTargetHtml(target, "이 색을 찾아!") +
+    cfTargetHtml(target, "이 색을 찾아요!") +
     '<div style="position:relative;margin-top:12px">' +
       '<video id="cf-video" playsinline muted style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:16px;background:#000;display:block"></video>' +
       '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74px;height:74px;border:3px solid #fff;border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.55);pointer-events:none"></div>' +
     '</div>' +
     '<div style="display:flex;align-items:center;gap:12px;margin-top:12px">' +
       '<span id="cf-swatch" style="width:48px;height:48px;border-radius:10px;border:1px solid var(--line);background:#888"></span>' +
-      '<div><div id="cf-acc" style="font-size:22px;font-weight:800">–</div><div id="cf-hint" class="hint" style="margin:0">중앙 네모를 색에 맞춰봐</div></div>' +
+      '<div><div id="cf-acc" style="font-size:22px;font-weight:800">–</div><div id="cf-hint" class="hint" style="margin:0">중앙 네모를 색에 맞춰 봐요</div></div>' +
     '</div>' +
     '<button class="btn mt" id="cf-submit">이 색으로 제출</button>' +
     (isHost ? '<div id="cf-hoststat" class="hint" style="text-align:center;margin-top:10px"></div>' +
@@ -155,7 +155,7 @@ function cfCaptureUI(isHost, target){
     sw.style.background = "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")";
     const acc = cfAcc(cfDE(rgb, tRgb));
     accEl.textContent = acc + "%";
-    hintEl.textContent = acc >= 85 ? "🔥 거의 똑같아!" : acc >= 65 ? "😮 꽤 비슷해" : acc >= 40 ? "🙂 그럭저럭" : "❄️ 아직 멀었어";
+    hintEl.textContent = acc >= 85 ? "🔥 거의 똑같아요!" : acc >= 65 ? "😮 꽤 비슷해요" : acc >= 40 ? "🙂 그럭저럭" : "❄️ 아직 멀었어요";
   });
   $("cf-submit").addEventListener("click", () => cfSubmit(isHost));
   if (isHost){ $("cf-reveal").addEventListener("click", cfHostReveal); cfHostStat(); }
@@ -174,7 +174,7 @@ function cfSubmit(isHost){
 /* ---------- 호스트 (심판·전광판) ---------- */
 function cfStartRound(){
   const players = mpNames();
-  if (players.length < 2){ alert("색찾기는 폰이 2대 이상 연결돼야 해 (지금 " + players.length + "명)"); return; }
+  if (players.length < 2){ alert("색찾기는 폰이 2대 이상 연결돼야 해요 (지금 " + players.length + "명)"); return; }
   cf.players = players;
   cf.round++;
   let t; do { t = CF_COLORS[Math.floor(Math.random() * CF_COLORS.length)]; } while (cf.target && t.n === cf.target.n);
@@ -201,7 +201,7 @@ function cfHostReveal(){
   if (cf.phase !== "capture") return;
   const tRgb = cfHexRgb(cf.target.hex);
   const scored = cf.players.filter(p => cf.subs[p]).map(p => { const dist = cfDE(cf.subs[p], tRgb); return { name:p, rgb:cf.subs[p], dist, acc:cfAcc(dist) }; });
-  if (!scored.length){ alert("아직 아무도 제출 안 했어"); return; }
+  if (!scored.length){ alert("아직 아무도 제출 안 했어요"); return; }
   scored.sort((a, b) => a.dist - b.dist);
   const best = scored[0].dist; /* 가장 가까운 사람만 1점 (동률이면 나눠 가짐) */
   scored.forEach((r, i) => { r.rank = i + 1; r.pts = r.dist === best ? 1 : 0; if (r.pts) cf.scores[r.name] = (cf.scores[r.name] || 0) + 1; });
@@ -232,7 +232,7 @@ function cfResultUI(rows, target, scores, isHost){
       '<span style="margin-left:auto;font-weight:700">' + tail + '</span></div>';
   }).join("");
   cfRoot().innerHTML =
-    cfTargetHtml(target, "이 색이었어") +
+    cfTargetHtml(target, "이 색이었어요") +
     '<div style="margin-top:12px">' + body + '</div>' +
     cfBoardHtml(scores) +
     (isHost ? '<button class="btn mt" id="cf-next">다음 라운드 →</button><button class="btn ghost mt" id="cf-end">게임 끝내기 · 순위</button>'

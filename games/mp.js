@@ -137,7 +137,7 @@ async function mpScan(expect, onOk){
       onOk(r.data);
     } else if (r.data.startsWith("SN1") && ts - mp.warnTs > 2500){
       mp.warnTs = ts;
-      alert(expect === "SN1A" ? "이건 초대 QR이야 — 게스트 폰의 답장 QR을 비춰줘" : "이건 답장 QR이야 — 호스트 폰의 초대 QR을 비춰줘");
+      alert(expect === "SN1A" ? "이건 초대 QR이에요 — 게스트 폰의 답장 QR을 비춰 주세요" : "이건 답장 QR이에요 — 호스트 폰의 초대 QR을 비춰 주세요");
     }
   };
   mp.scanRAF = requestAnimationFrame(loop);
@@ -220,7 +220,7 @@ function mpKeepalive(){
   }, 5000);
 }
 function mpFail(e){
-  alert("연결 준비에 실패했어" + (e && e.name === "NotAllowedError" ? " — 카메라 허용이 필요해" : ""));
+  alert("연결 준비에 실패했어요" + (e && e.name === "NotAllowedError" ? " — 카메라 허용이 필요해요" : ""));
   mpStopScan();
   mp.peers.length || mp.hostChan ? mpRoom() : mpView("mp-role");
 }
@@ -260,7 +260,7 @@ async function mpInvite(){
   try {
     /* 카메라 권한을 '먼저' 받는다 — 그래야 SDP에 핫스팟 인터페이스의 실제 IP(192.168.x 등)가 실림.
        권한 전엔 핫스팟 인터페이스가 안 보여(셀룰러만 보임) LAN 판별이 오판되므로, LAN 검사는 아래 실제 오퍼에서만. */
-    mpFlow("카메라 준비", "게스트 답장을 스캔해야 해서 카메라 허용이 필요해");
+    mpFlow("카메라 준비", "게스트 답장을 스캔해야 해서 카메라 허용이 필요해요");
     await mpCam(); /* 권한을 먼저 받아야 SDP에 mDNS 대신 실제 IP가 실림 (핫스팟 멀티캐스트 이슈 회피) */
     mpCamOff();
     mpFlow("초대장 만드는 중", "…");
@@ -274,13 +274,13 @@ async function mpInvite(){
     if (!mpHasLan(pc.localDescription.sdp)){
       try { pc.close(); } catch (e) { /* 무시 */ }
       mp.pendingPc = null;
-      alert("핫스팟·Wi-Fi에 안 붙어 있어(셀룰러 데이터만으론 안 돼) — 핫스팟 켜고 다시 해줘");
+      alert("핫스팟·Wi-Fi에 안 붙어 있어요(셀룰러 데이터만으론 안 돼요) — 핫스팟 켜고 다시 해 주세요");
       mp.peers.length ? mpRoom() : mpView("mp-role");
       return;
     }
     const code = await mpPack("O", pc.localDescription.sdp);
     /* QR 보여주면서 동시에 카메라로 답장을 기다린다 — 폰을 서로 마주 대면 스캔→답장→연결이 한 번에 끝남 */
-    mpShowQr(code, "초대 QR", "게스트: [참가하기]로 위 QR을 스캔 → 게스트 화면에 답장 QR이 뜨면 아래 카메라에 비춰줘. 그럼 자동 연결!");
+    mpShowQr(code, "초대 QR", "게스트: [참가하기]로 위 QR을 스캔 → 게스트 화면에 답장 QR이 뜨면 아래 카메라에 비춰 주세요. 그럼 자동 연결!");
     $("mp-flow").classList.add("dual");
     mpShowCam();
     await mpScan("SN1A", async (data) => {
@@ -291,7 +291,7 @@ async function mpInvite(){
       const t = setTimeout(() => {
         if (!peer.on){
           try { pc.close(); } catch (e) { /* 무시 */ }
-          alert("연결이 안 됐어. 전원이 같은 Wi-Fi(핫스팟)인지 확인하고 다시 초대해줘");
+          alert("연결이 안 됐어요. 전원이 같은 Wi-Fi(핫스팟)인지 확인하고 다시 초대해 주세요");
           mpRoom();
         }
       }, 15000);
@@ -303,7 +303,7 @@ async function mpInvite(){
 /* ---------- 게스트 ---------- */
 async function mpJoin(){
   try {
-    mpFlow("초대 스캔", "먼저 호스트가 켠 핫스팟(Wi-Fi)에 붙어 있는지 확인! 그다음 호스트 화면의 초대 QR을 비춰줘");
+    mpFlow("초대 스캔", "먼저 호스트가 켠 핫스팟(Wi-Fi)에 붙어 있는지 확인! 그다음 호스트 화면의 초대 QR을 비춰 주세요");
     mpShowCam();
     await mpScan("SN1O", async (data) => {
       const o = await mpUnpack(data);
@@ -315,14 +315,14 @@ async function mpJoin(){
       let opened = false;
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "failed" && !opened){
-          alert("연결이 안 됐어 — 호스트와 같은 Wi-Fi(핫스팟)인지 확인하고 다시 참가해줘");
+          alert("연결이 안 됐어요 — 호스트와 같은 Wi-Fi(핫스팟)인지 확인하고 다시 참가해 주세요");
           mpReset();
         }
       };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
         e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); snSfx("coin"); mpFlash("🔗 연결 완료!"); mpRoom(); };   /* 호스트 연결 성공 */
-        e.channel.onclose = () => { alert("호스트와 연결이 끊겼어"); mpReset(); };
+        e.channel.onclose = () => { alert("호스트와 연결이 끊겼어요"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
           if (msg.t === "ping") mpSend(mp.hostChan, { t: "pong", ts: msg.ts });
@@ -338,12 +338,12 @@ async function mpJoin(){
       if (!mpHasLan(pc.localDescription.sdp)){
         try { pc.close(); } catch (e) { /* 무시 */ }
         mp.hostPc = null; mp.hostChan = null;
-        alert("핫스팟·Wi-Fi에 안 붙어 있어(셀룰러 데이터만으론 안 돼) — 호스트와 같은 Wi-Fi에 붙고 다시 참가해줘");
+        alert("핫스팟·Wi-Fi에 안 붙어 있어요(셀룰러 데이터만으론 안 돼요) — 호스트와 같은 Wi-Fi에 붙고 다시 참가해 주세요");
         mpView("mp-role");
         return;
       }
       const code = await mpPack("A", pc.localDescription.sdp);
-      mpShowQr(code, "답장 QR", "이 QR을 호스트 폰 카메라에 비춰주면 자동으로 연결돼. 이 화면 그대로!");
+      mpShowQr(code, "답장 QR", "이 QR을 호스트 폰 카메라에 비춰 주면 자동으로 연결돼요. 이 화면 그대로!");
     });
   } catch (e) { mpFail(e); }
 }
@@ -381,14 +381,14 @@ function mpRoom(){
     if (!mp.peers.length){
       const d = document.createElement("div");
       d.className = "hint";
-      d.textContent = "아직 아무도 없어 — 아래 버튼으로 초대해봐";
+      d.textContent = "아직 아무도 없어요 — 아래 버튼으로 초대해 보세요";
       box.append(d);
     }
     mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt, p.spr)));
     $("mp-invite-more").style.display = "";
     $("mp-roster-field").style.display = "none"; /* 호스트는 위 연결 행이 이미 전원(실상태) */
     $("mp-leave").textContent = "🚪 방 닫기 (전원 연결 해제)";
-    $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼. 게임은 ← 홈에서 골라 시작하면 전원이 따라와";
+    $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼요. 게임은 ← 홈에서 골라 시작하면 전원이 따라와요";
   } else {
     $("mp-room-label").textContent = "대기방 · 내 연결";
     box.append(mpPeerRow((mp.hostName || "호스트") + " (호스트)", !!(mp.hostChan && mp.hostChan.readyState === "open"), mp.rtt, mp.hostSpr));
@@ -398,7 +398,7 @@ function mpRoom(){
     (mp.rosterNames || []).forEach((n, i) => rbox.append(mpChip(n, (mp.rosterSprs || [])[i])));
     $("mp-roster-field").style.display = mp.rosterNames && mp.rosterNames.length ? "" : "none";
     $("mp-leave").textContent = "🚪 방 나가기";
-    $("mp-room-hint").textContent = "호스트가 게임을 고르면 이 폰도 자동으로 따라가 — 화면 켜둔 채 기다려줘";
+    $("mp-room-hint").textContent = "호스트가 게임을 고르면 이 폰도 자동으로 따라가요 — 화면 켜둔 채 기다려 주세요";
   }
   if (typeof mpSyncBack === "function") mpSyncBack(); /* 게스트: 뒤로가기 숨김·라벨 교체 (net.js) */
 }
@@ -432,14 +432,14 @@ function mpEnter(){
 
 /* ---------- 버튼 ---------- */
 $("mp-host-btn").addEventListener("click", () => {
-  if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아");
+  if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아요");
   mp.role = "host";
   mp.name = ($("mp-name").value.trim() || "호스트").slice(0, 8);
   prefs.mpName = $("mp-name").value.trim(); savePrefs();
   mpInvite();
 });
 $("mp-join-btn").addEventListener("click", () => {
-  if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아");
+  if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아요");
   mp.role = "guest";
   mp.name = ($("mp-name").value.trim() || "게스트").slice(0, 8);
   prefs.mpName = $("mp-name").value.trim(); savePrefs();
@@ -454,7 +454,7 @@ $("mp-invite-more").addEventListener("click", mpInvite);
 $("mp-ping").addEventListener("click", () => {
   const ts = performance.now();
   if (mp.role === "host"){
-    if (!mp.peers.some((p) => p.on)) return alert("아직 연결된 폰이 없어");
+    if (!mp.peers.some((p) => p.on)) return alert("아직 연결된 폰이 없어요");
     mp.peers.forEach((p) => mpSend(p.chan, { t: "ping", ts }));
   } else mpSend(mp.hostChan, { t: "ping", ts });
 });
@@ -474,8 +474,8 @@ MP_EMOTES.forEach((emo) => {
   $("mp-emo").append(b);
 });
 $("mp-leave").addEventListener("click", () => {
-  if (mp.role === "host") snConfirm("🚪", "방을 닫을까?", "전원 연결이 끊기고 진행 중인 게임도 끝나", "방 닫기", mpReset);
-  else snConfirm("🚪", "방에서 나갈까?", "다시 들어오려면 호스트의 초대 QR이 필요해", "나가기", mpReset);
+  if (mp.role === "host") snConfirm("🚪", "방을 닫을까요?", "전원 연결이 끊기고 진행 중인 게임도 끝나요", "방 닫기", mpReset);
+  else snConfirm("🚪", "방에서 나갈까요?", "다시 들어오려면 호스트의 초대 QR이 필요해요", "나가기", mpReset);
 });
 
 /* ---------- 앱 재시작 감지 ---------- */
@@ -487,7 +487,7 @@ $("mp-leave").addEventListener("click", () => {
   const fresh = Date.now() - +m[2] < 3 * 3600e3;
   mpReset(); /* 플래그 제거 + role 화면 준비 */
   if (!fresh) return;
-  $("mp-reload-warn").textContent = "📴 앱이 재시작되면서 방 연결이 끊겼어 — " + (m[1] === "host" ? "방을 다시 만들고 게스트를 초대해줘" : "호스트의 초대 QR로 다시 들어가줘");
+  $("mp-reload-warn").textContent = "📴 앱이 재시작되면서 방 연결이 끊겼어요 — " + (m[1] === "host" ? "방을 다시 만들고 게스트를 초대해 주세요" : "호스트의 초대 QR로 다시 들어가 주세요");
   $("mp-reload-warn").style.display = "";
   go("mp");
 })();

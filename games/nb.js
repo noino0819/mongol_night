@@ -4,7 +4,7 @@
 snAddScreen("nb", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>⚾ 숫자야구</h2></div>
     <div id="nb-setup">
-      <p class="hint">서로의 비밀 숫자를 추리하는 2인 대전! 0~9 <b>중복 없는</b> 숫자, 자리·숫자 다 맞으면 <b>S(스트라이크)</b>, 숫자만 맞으면 <b>B(볼)</b>. 올 스트라이크 먼저 맞히면 승리 — 단 <b style="color:var(--fire)">후공에겐 마지막 동수 기회</b>가 있어.</p>
+      <p class="hint">서로의 비밀 숫자를 추리하는 2인 대전! 0~9 <b>중복 없는</b> 숫자, 자리·숫자 다 맞으면 <b>S(스트라이크)</b>, 숫자만 맞으면 <b>B(볼)</b>. 올 스트라이크 먼저 맞히면 승리 — 단 <b style="color:var(--fire)">후공에겐 마지막 동수 기회</b>가 있어요.</p>
       <div class="field"><label>대결할 2명 (선공 · 후공)</label><div class="seg" id="nb-players"></div></div>
       <div class="field"><label>자릿수</label><div class="seg" id="nb-digits">
         <button data-d="3" class="sel">3자리</button><button data-d="4">4자리</button>
@@ -93,7 +93,7 @@ function nbRenderPlayers(){
     b.addEventListener("click", () => {
       if (nb.sel.includes(n)) nb.sel = nb.sel.filter(x => x !== n);
       else if (nb.sel.length < 2) nb.sel.push(n);
-      else return alert("2명만 골라줘 (선공·후공)");
+      else return alert("2명만 고를 수 있어요 (선공·후공)");
       nbRenderPlayers();
     });
     box.appendChild(b);
@@ -106,7 +106,7 @@ $("nb-digits").querySelectorAll("button").forEach(b => b.addEventListener("click
 }));
 $("nb-start").addEventListener("click", () => {
   if (snMode(nbMode) === "multi") return startNbMulti();
-  if (nb.sel.length !== 2) return alert("대결할 2명을 골라줘!");
+  if (nb.sel.length !== 2) return alert("대결할 2명을 골라주세요!");
   nb.players = nb.sel.slice();
   nb.secret = ["", ""]; nb.logs = [[], []]; nb.solved = [0, 0]; nb.turn = 0; nb.finalPending = false;
   nbBeginSet(0);
@@ -119,7 +119,7 @@ function nbBeginSet(i){
   snPassCover(nb.players[i], () => {
     nbShow("nb-set");
     $("nb-set-name").textContent = nb.players[i];
-    $("nb-set-msg").innerHTML = "<b>" + escHtml(nb.players[i]) + "</b>의 비밀 숫자 " + nb.digits + "자리<br><span style='color:var(--dim)'>0~9 중복 없이 · 상대는 보지 마</span>";
+    $("nb-set-msg").innerHTML = "<b>" + escHtml(nb.players[i]) + "</b>의 비밀 숫자 " + nb.digits + "자리<br><span style='color:var(--dim)'>0~9 중복 없이 · 상대는 보지 마세요</span>";
     nbRenderPad("nb-set", () => {
       if (!nbValid(nb.entry, nb.digits)) return;
       nb.secret[i] = nb.entry;
@@ -137,7 +137,7 @@ function nbBeginTurn(){
     const p = nb.turn, opp = 1 - p;
     $("nb-turn-tag").textContent = nb.finalPending ? "마지막 동수 기회!" : "추측할 차례";
     $("nb-turn-name").textContent = nb.players[p];
-    $("nb-turn-msg").innerHTML = "<b>" + escHtml(nb.players[opp]) + "</b>의 숫자를 맞혀봐";
+    $("nb-turn-msg").innerHTML = "<b>" + escHtml(nb.players[opp]) + "</b>의 숫자를 맞혀봐요";
     nbRenderLogs();
     nbRenderPad("nb-play", nbSubmitGuess);
   });
@@ -233,13 +233,13 @@ function nbSetView(name, msgHtml, showPad){
   $("nb-set-pad").style.display = showPad ? "" : "none";
 }
 const nbSecretMsg = (name, digits) =>
-  "<b>" + escHtml(name) + "</b>의 비밀 숫자 " + digits + "자리<br><span style='color:var(--dim)'>0~9 중복 없이 · 네 폰에만 보여</span>";
+  "<b>" + escHtml(name) + "</b>의 비밀 숫자 " + digits + "자리<br><span style='color:var(--dim)'>0~9 중복 없이 · 이 폰에만 보여요</span>";
 
 /* ---------- 호스트 ---------- */
 function startNbMulti(){
   const order = mpNames();
-  if (order.length < 2){ alert("여러 폰 숫자야구는 2명 연결이 필요해 (지금 " + order.length + "명)"); return; }
-  if (order.length > 2){ alert("숫자야구는 딱 2명 대전이야 (지금 " + order.length + "명). 2명만 연결하고 다시 해줘"); return; }
+  if (order.length < 2){ alert("여러 폰 숫자야구는 2명 연결이 필요해요 (지금 " + order.length + "명)"); return; }
+  if (order.length > 2){ alert("숫자야구는 딱 2명 대전이에요 (지금 " + order.length + "명). 2명만 연결하고 다시 해주세요"); return; }
   nb.multi = true; nb.myIdx = 0;
   nb.players = [order[0], order[1]];
   nb.secret = ["", ""]; nb.logs = [[], []]; nb.solved = [0, 0]; nb.turn = 0; nb.finalPending = false; nb.entry = ""; nb.ready = [false, false];
@@ -279,10 +279,10 @@ function nbMultiTurn(){
 function nbRenderMultiPlay(myTurn){
   nbShow("nb-play");
   const p = nb.turn, opp = 1 - p;
-  $("nb-turn-tag").textContent = nb.finalPending ? "마지막 동수 기회!" : (myTurn ? "네 차례" : "상대 차례");
+  $("nb-turn-tag").textContent = nb.finalPending ? "마지막 동수 기회!" : (myTurn ? "내 차례" : "상대 차례");
   $("nb-turn-name").textContent = nb.players[p];
   $("nb-turn-msg").innerHTML = myTurn
-    ? "<b>" + escHtml(nb.players[opp]) + "</b>의 숫자를 맞혀봐"
+    ? "<b>" + escHtml(nb.players[opp]) + "</b>의 숫자를 맞혀봐요"
     : "<b>" + escHtml(nb.players[p]) + "</b>가 추측 중…";
   nbRenderLogs();
   if (myTurn){ nb.entry = ""; nbRenderPad("nb-play", nbMultiSubmit); }
@@ -301,7 +301,7 @@ function nbMultiSubmit(){
 window.__guest_nb = function(){
   nb.multi = true; nb.myIdx = 1; nb.entry = "";
   mp.game = { onMsg(from, m){ nbGuestMsg(from, m); } };
-  nbSetView("연결됨", "호스트가 시작하면 여기서 네 비밀 숫자를 정해", false);
+  nbSetView("연결됨", "호스트가 시작하면 여기서 비밀 숫자를 정해요", false);
 };
 function nbGuestMsg(from, m){
   if (m.t === "init"){
@@ -310,7 +310,7 @@ function nbGuestMsg(from, m){
     nbRenderPad("nb-set", () => {
       if (!nbValid(nb.entry, nb.digits)) return;
       mpToHost({ t: "secret", num: nb.entry }); nb.entry = "";
-      nbSetView("대기", "상대가 준비되면 시작해", false);
+      nbSetView("대기", "상대가 준비되면 시작해요", false);
     });
   } else if (m.t === "state"){
     nb.players = m.players.slice(); nb.digits = m.digits; nb.turn = m.turn; nb.finalPending = m.finalPending; nb.logs = m.logs;

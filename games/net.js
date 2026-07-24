@@ -97,7 +97,7 @@ function snModeBar(mountEl, current, onPick){
     if (mode === current) b.classList.add("sel");
     b.addEventListener("click", () => {
       if (mode === "multi" && !mpLive()){
-        snConfirm("📡", "폰 연결이 먼저야", "여러 폰 모드는 폰끼리 연결부터. 연결 화면으로 갈까?", "연결하러 가기", () => go("mp"));
+        snConfirm("📡", "폰 연결이 먼저예요", "여러 폰 모드는 폰끼리 연결부터 해야 해요. 연결 화면으로 갈까요?", "연결하러 가기", () => go("mp"));
         return;
       }
       onPick(mode);

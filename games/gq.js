@@ -4,7 +4,7 @@
 snAddScreen("gq", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🦉 상식퀴즈</h2></div>
     <div id="gq-setup">
-      <p class="hint">한 명씩 돌아가며 <b>4지선다 상식 스피드전</b>! 역사·과학·지리·문화가 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 골든벨 주인공</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 알려주니까 구경꾼도 같이 배우기~</p>
+      <p class="hint">한 명씩 돌아가며 <b>4지선다 상식 스피드전</b>! 역사·과학·지리·문화가 섞여 나와요. 제한 시간 안에 <b>많이 맞힌 사람이 골든벨 주인공</b>. 문제는 사람마다 다르게 나오니까 커닝은 못 해요. 틀리면 정답 알려주니까 구경꾼도 같이 배워요.</p>
       <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="gq-players"></div></div>
       <div class="field"><label>분야 (복수 선택)</label><div class="seg" id="gq-groups">
         <button data-g="hist" class="sel">역사</button><button data-g="geo" class="sel">지리</button><button data-g="sci" class="sel">과학</button><button data-g="cult" class="sel">문화·예술</button><button data-g="soc" class="sel">사회·생활</button>
@@ -17,7 +17,7 @@ snAddScreen("gq", `
     <div id="gq-pass" style="display:none" class="pass-stage">
       <div class="who-label">도전 차례</div>
       <div class="who" id="gq-pass-name">-</div>
-      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
+      <div class="hint" style="margin:0">버튼 누르는 순간 시간이 시작돼요. 심호흡 한 번 하고 시작해요</div>
       <button class="btn pass-next" id="gq-go">준비 완료, 시작! →</button>
     </div>
     <div id="gq-play" style="display:none">
@@ -617,7 +617,7 @@ function gqReset(){
   if (hint){
     if (!hint.dataset.solo) hint.dataset.solo = hint.innerHTML;
     hint.innerHTML = multi
-      ? '📡 <b>여러 폰 골든벨</b>! 호스트 폰이 문제를 내면 <b>각자 자기 폰에 답</b>을 골라. 틀리면 탈락, 끝까지 살아남으면 골든벨 주인공. 분야만 고르고 시작하자.'
+      ? '📡 <b>여러 폰 골든벨</b>! 호스트 폰이 문제를 내면 <b>각자 자기 폰에 답</b>을 골라요. 틀리면 탈락, 끝까지 살아남으면 골든벨 주인공. 분야만 고르고 시작해요.'
       : hint.dataset.solo;
   }
   $("gq-start").textContent = multi ? "🦉 골든벨 열기" : "🦉 골든벨 시작!";
@@ -626,7 +626,7 @@ function gqReset(){
 $("gq-groups").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
   const g = b.dataset.g;
   if (gq.groups.includes(g)){
-    if (gq.groups.length === 1) return alert("최소 1개 분야는 있어야지");
+    if (gq.groups.length === 1) return alert("최소 1개 분야는 있어야 해요");
     gq.groups = gq.groups.filter(x => x !== g);
   } else gq.groups.push(g);
   b.classList.toggle("sel", gq.groups.includes(g));
@@ -638,7 +638,7 @@ $("gq-time").querySelectorAll("button").forEach(b => b.addEventListener("click",
 }));
 $("gq-start").addEventListener("click", () => {
   if (snMode(gqMode) === "multi") return startGqMulti();
-  if (gq.sel.length < 2) return alert("2명 이상 선택!");
+  if (gq.sel.length < 2) return alert("2명 이상 선택해 주세요");
   const cats = new Set();
   gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
   gq.queue = shuffle(GQ_BANK.filter(q => cats.has(q.c)));
@@ -728,7 +728,7 @@ function gqTimeUp(){
   gqShow("gq-between");
   const x = gq.p[gq.turn];
   const per15 = x.score / (gq.limit / 15); /* 시간 옵션 달라도 공평한 코멘트 (4지선다라 um보다 문턱 낮춤) */
-  const cmt = per15 >= 3.5 ? "걸어다니는 백과사전이야?" : per15 >= 2.2 ? "오~ 상식 좀 있는데?" : per15 >= 1.2 ? "무난무난, 중간은 간다" : "몽골 가서 별이나 세자…";
+  const cmt = per15 >= 3.5 ? "걸어다니는 백과사전이에요?" : per15 >= 2.2 ? "오~ 상식 좀 있는데요?" : per15 >= 1.2 ? "무난무난, 중간은 가요" : "몽골 가서 별이나 셀까요…";
   $("gq-bt-name").textContent = x.name;
   $("gq-bt-msg").textContent = x.score + "점! " + cmt;
   $("gq-next-player").textContent = gq.turn >= gq.p.length - 1 ? "결과 보기 →" : "다음 사람 →";
@@ -774,7 +774,7 @@ function gqShowMp(){
 function startGqMulti(){
   const names = mpNames();                /* [호스트, 게스트…] */
   const contestants = names.slice(1);     /* 게스트가 참가자, 호스트는 사회자 */
-  if (contestants.length < 1){ alert("여러 폰 골든벨은 게스트가 1명 이상 연결돼야 해 (지금 " + contestants.length + "명)"); return; }
+  if (contestants.length < 1){ alert("여러 폰 골든벨은 게스트가 1명 이상 연결돼야 해요 (지금 " + contestants.length + "명)"); return; }
   const cats = new Set();
   gq.groups.forEach(g => GQ_GROUPS[g].cats.forEach(c => cats.add(c)));
   gq.queue = shuffle(GQ_BANK.filter(q => cats.has(q.c)));
@@ -875,7 +875,7 @@ function gqMpEndRender(rank, winner, meName){
   }).join("");
   const head = meName == null
     ? '👑 ' + winner.map(escHtml).join(", ")     /* 호스트: 주인공 발표 */
-    : (winner.includes(meName) ? '👑 골든벨 주인공!' : '수고했어');
+    : (winner.includes(meName) ? '👑 골든벨 주인공!' : '수고했어요');
   gqMpEl().innerHTML =
     '<div class="stage-center"><span class="tag">골든벨 주인공 발표</span>'
     + '<div class="who" style="color:var(--fire)">' + head + '</div>'
@@ -889,7 +889,7 @@ function gqMpEndRender(rank, winner, meName){
 window.__guest_gq = function(){
   gq.mpPhase = "wait";
   gqShowMp();
-  gqMpEl().innerHTML = '<div class="stage-center"><span class="tag">여러 폰 골든벨</span><div class="who">대기 중…</div><div class="hint" style="margin:0">호스트가 문제를 내면 여기 떠. 답은 네 폰에서 골라</div></div>';
+  gqMpEl().innerHTML = '<div class="stage-center"><span class="tag">여러 폰 골든벨</span><div class="who">대기 중…</div><div class="hint" style="margin:0">호스트가 문제를 내면 여기 떠요. 답은 각자 폰에서 골라요</div></div>';
   mp.game = { onMsg(from, m){ gqGuestMsg(m); } };
 };
 function gqGuestMsg(m){
@@ -906,7 +906,7 @@ function gqGuestQ(m){
     '<div class="um-hud"><div class="who">🦉 ' + m.n + '번</div><div><span class="tag">' + escHtml(m.c) + ' · ' + GQ_DLABEL[m.d] + '</span></div></div>'
     + '<div class="um-qcard"><div class="qq">' + escHtml(m.q) + '</div></div>'
     + '<div class="um-choices gq-choices" id="gq-g-ch"></div>'
-    + '<div class="um-flash" id="gq-g-fl">' + (gq.gAlive ? '답을 골라 — 틀리면 탈락이야' : '💀 탈락 · 구경 중') + '</div>';
+    + '<div class="um-flash" id="gq-g-fl">' + (gq.gAlive ? '답을 골라요 — 틀리면 탈락이에요' : '💀 탈락 · 구경 중') + '</div>';
   const box = el.querySelector("#gq-g-ch");
   m.opts.forEach((o, i) => {
     const b = document.createElement("button");

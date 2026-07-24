@@ -4,7 +4,7 @@
 snAddScreen("um", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>📖 우리말 겨루기</h2></div>
     <div id="um-setup">
-      <p class="hint">한 명씩 돌아가며 <b>2지선다 스피드 퀴즈</b>! 맞춤법·속담·우리말 뜻이 섞여 나와. 제한 시간 안에 <b>많이 맞힌 사람이 우승</b>. 문제는 사람마다 다르게 나오니까 커닝 못 해. 틀리면 정답 보여주니까 구경꾼도 같이 배우기~</p>
+      <p class="hint">한 명씩 돌아가며 <b>2지선다 스피드 퀴즈</b>! 맞춤법·속담·우리말 뜻이 섞여 나와요. 제한 시간 안에 <b>많이 맞힌 사람이 우승</b>. 문제는 사람마다 다르게 나오니까 커닝은 못 해요. 틀리면 정답 보여주니까 구경꾼도 같이 배워요.</p>
       <div class="field"><label>참여자 선택 (2명 이상)</label><div class="seg" id="um-players"></div></div>
       <div class="field"><label>문제 유형 (복수 선택)</label><div class="seg" id="um-types">
         <button data-t="spell" class="sel">맞춤법</button><button data-t="prov" class="sel">속담</button><button data-t="mean" class="sel">우리말 뜻</button>
@@ -17,7 +17,7 @@ snAddScreen("um", `
     <div id="um-pass" style="display:none" class="pass-stage">
       <div class="who-label">도전 차례</div>
       <div class="who" id="um-pass-name">-</div>
-      <div class="hint" style="margin:0">버튼 누르는 순간 시간 시작이야. 심호흡 한 번 하고 시작하자</div>
+      <div class="hint" style="margin:0">버튼 누르는 순간 시간이 시작돼요. 심호흡 한 번 하고 시작해요</div>
       <button class="btn pass-next" id="um-go">준비 완료, 시작! →</button>
     </div>
     <div id="um-play" style="display:none">
@@ -144,7 +144,7 @@ function umReset(){
 $("um-types").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
   const t = b.dataset.t;
   if (um.types.includes(t)){
-    if (um.types.length === 1) return alert("최소 1개 유형은 있어야지");
+    if (um.types.length === 1) return alert("최소 1개 유형은 있어야 해요");
     um.types = um.types.filter(x => x !== t);
   } else um.types.push(t);
   b.classList.toggle("sel", um.types.includes(t));
@@ -155,7 +155,7 @@ $("um-time").querySelectorAll("button").forEach(b => b.addEventListener("click",
   um.limit = +b.dataset.s;
 }));
 $("um-start").addEventListener("click", () => {
-  if (um.sel.length < 2) return alert("2명 이상 선택!");
+  if (um.sel.length < 2) return alert("2명 이상 선택해 주세요");
   let pool = [];
   um.types.forEach(t => { pool = pool.concat(UM_BANK[t].map(x => ({ t, q: x[0], a: x[1], w: x[2] }))); });
   um.queue = shuffle(pool);
@@ -237,7 +237,7 @@ function umTimeUp(){
   umShow("um-between");
   const x = um.p[um.turn];
   const per15 = x.score / (um.limit / 15); /* 시간 옵션 달라도 공평한 코멘트 */
-  const cmt = per15 >= 4 ? "우리말 박사 아니야?" : per15 >= 2.5 ? "오~ 좀 치는데?" : per15 >= 1.5 ? "무난무난, 중간은 간다" : "몽골 가기 전에 국어 공부부터 하자…";
+  const cmt = per15 >= 4 ? "우리말 박사 아니에요?" : per15 >= 2.5 ? "오~ 좀 치는데요?" : per15 >= 1.5 ? "무난무난, 중간은 가요" : "몽골 가기 전에 국어 공부부터 해요…";
   $("um-bt-name").textContent = x.name;
   $("um-bt-msg").textContent = x.score + "점! " + cmt;
   $("um-next-player").textContent = um.turn >= um.p.length - 1 ? "결과 보기 →" : "다음 사람 →";
