@@ -1113,7 +1113,7 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-cval{font-size:16px;font-weight:bold}
 .er-ctext{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.9;color:var(--milk);word-break:keep-all}
 /* 몽골 문자처럼 세로쓰기 — 위에서 아래로, 줄은 왼쪽부터 오른쪽으로(vertical-lr). nowrap이라 줄바꿈은 <br>만 */
-.er-ctext.er-vert{writing-mode:vertical-lr;height:17em;white-space:nowrap;overflow-x:auto}
+.er-ctext.er-vert{writing-mode:vertical-lr;max-height:60vh;white-space:nowrap;overflow:auto}
 .er-brief{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0;font-size:13px;color:var(--dim)}
 .er-brief summary{cursor:pointer;color:var(--px-sand)}
 .er-brief p{margin:8px 0 0;line-height:1.7}
@@ -1178,23 +1178,23 @@ ER_SCENARIOS.push({
           sets: "lit" },
         { id: "letter", nm: "품속의 급보", spr: "letter",
           need: "lit", lockedTxt: "어두워서 겉장의 글이 안 보인다. 불부터 밝히자.",
-          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 두 빛깔 먹으로 글을 흘려 놓았다 — 붉은 먹, 그리고 푸른 먹. 한 빛깔만 좇으면 뜻이 어그러진다.",
-          /* 다색 채널(트릭사전 1-1): 푸른 글자=읽는 규칙('거꾸로'), 붉은 글자=거꾸로 읽을 데이터.
-             붉은 글자만 순서대로면 '해의이타릴쿠'(엉킴) → 푸른 '거꾸로' 적용 → '쿠릴타이의 해' → 1206.
-             세로쓰기 + 색글자는 줄머리에 안 몰리게(er-check가 검사). */
+          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에, 보낸 이가 몰래 글을 흘려 놨다. 등잔불을 받자 몇 글자는 호박빛으로, 몇 글자는 푸르게 돋는다 — 한 빛깔만 좇으면 뜻이 어그러진다.",
+          /* 다색 채널(트릭사전 1-1): 푸른 글자=읽는 규칙('거꾸로'), 호박빛 글자=거꾸로 읽을 데이터.
+             호박빛만 순서대로면 '이타릴쿠'(엉킴) → 푸른 '거꾸로' 적용 → 암구호 '쿠릴타이'.
+             연도(1206)로 매핑하던 우회를 없애려 답을 디코딩 단어 자체로 둠(플레이테스트 반영).
+             색은 --fire(호박빛)·--px-sky(파랑). 색글자는 줄머리에 안 몰리게(er-check가 검사).
+             ponytail: 두 채널을 색으로만 구분 — 파티게임이라 전색맹용 비색상 이중단서는 생략, 힌트 3단이 안전망. */
           ctext: { vert: true, segs: [
-            { t: "먼동이 " }, { t: "해", c: "fire" }, { t: "를 밀기 전에 나서라.", br: true },
-            { t: "물" }, { t: "거", c: "sky" }, { t: "품 소문은 접고 참" }, { t: "의", c: "fire" }, { t: "만.", br: true },
-            { t: "그러니 " }, { t: "이", c: "fire" }, { t: " 밤을 버텨라.", br: true },
-            { t: "낙" }, { t: "타", c: "fire" }, { t: "는 " }, { t: "꾸", c: "sky" }, { t: "밈없이 무릎 꿇는다.", br: true },
-            { t: "강물 흐" }, { t: "릴", c: "fire" }, { t: " 젠 별을 길로.", br: true },
+            { t: "그러니 " }, { t: "이", c: "fire" }, { t: " 밤을 견뎌라.", br: true },
+            { t: "낙" }, { t: "타", c: "fire" }, { t: "는 " }, { t: "거", c: "sky" }, { t: "짓을 모른다.", br: true },
+            { t: "물 흐" }, { t: "릴", c: "fire" }, { t: " 젠 " }, { t: "꾸", c: "sky" }, { t: "밈없이 봐라.", br: true },
             { t: "천둥 " }, { t: "쿠", c: "fire" }, { t: "르릉을 길" }, { t: "로", c: "sky" }, { t: " 삼아라." }
           ] } },
         { id: "chest", nm: "궤짝", spr: "chest",
-          txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹과 푸른 먹 자국이 뒤엉켜 배어 있다.",
-          lock: { ans: ["1206"], digits: 4,
-            hints: ["급보 겉장을 다시 봐. 붉은 글자만 좇으면 말이 엉키지 — 푸른 글자는 뭐라 말하고 있을까.", "푸른 글자는 '거꾸로'. 붉은 글자를 거꾸로 읽으면 '쿠릴타이의 해' — 그게 몇 년이더라.", "1206."],
-            open: "궤짝이 열렸다. 청동 칼 한 자루 — 날이 아직 시퍼렇다.",
+          txt: "무쇠 걸쇠에 글자를 새겨 넣는 자물쇠가 걸린 궤짝. 걸쇠 둘레에 호박빛과 푸른 먹 자국이 뒤엉켜 배어 있다 — 급보의 그 두 빛깔이다.",
+          lock: { ans: ["쿠릴타이"],
+            hints: ["급보를 등잔불에 다시 비춰 봐. 호박빛 글자만 좇으면 말이 엉키지 — 푸른 글자는 뭐라 말하고 있을까.", "푸른 글자는 '거꾸로'. 호박빛 글자를 거꾸로 읽으면 사내들이 내일 입에 올릴 그 말이 된다.", "쿠릴타이."],
+            open: "걸쇠에 '쿠릴타이'를 새기자 궤짝이 열렸다. 청동 칼 한 자루 — 날이 아직 시퍼렇다.",
             give: "knife" } },
         { id: "shagai", nm: "샤가이 주머니", spr: "shagai",
           txt: "화로 곁 가죽 주머니에 샤가이 네 알. 애들 장난감이 아니다 — 점을 칠 때는 말, 낙타, 양, 염소. 언제나 이 차례로 읽는다." },

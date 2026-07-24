@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.11.10";
+  const VER = "v2.11.11";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -621,6 +621,32 @@ snBackSync();
       pwaToast((7 - taps) + "번 더 누르면 비밀 화면");
     }
   });
+
+  /* 두 번째 진입 — 설정 화면 맨 아래 버전 푸터 10탭(안드로이드 개발자모드식) */
+  const foot = document.querySelector("#scr-settings .footer-note");
+  if (foot){
+    let st = 0, sid = null;
+    foot.addEventListener("click", () => {
+      st++;
+      clearTimeout(sid);
+      sid = setTimeout(() => { st = 0; }, 1600);
+      if (st >= 10){ st = 0; pwaToast("🛠 메뉴얼 모드 진입"); go("kitchen"); }
+      else if (st >= 6){ pwaToast((10 - st) + "번 더"); }
+    });
+  }
+
+  /* 게임 직행 런처 — 로스터/일행 무시하고 바로 입장(QA) */
+  const launch = $("ks-launch");
+  if (launch){
+    SN_CATS.forEach((c) => c.games.forEach((g) => {
+      if (!g.go) return;
+      const b = document.createElement("button");
+      b.className = "btn ghost ks-sm";
+      b.textContent = g.name;
+      b.addEventListener("click", () => { resetGame(g.go); go(g.go); });
+      launch.appendChild(b);
+    }));
+  }
 
   /* 팔레트 스와치 */
   $("ks-pal").innerHTML = window.SN_SPRITES.PAL.map((h) =>

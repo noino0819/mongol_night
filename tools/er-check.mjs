@@ -79,7 +79,7 @@ for (const act of sc.acts){
         col = s.br ? 0 : col + s.t.length;
       }
       assert.ok(tinted.length >= 2, P(o.id + ": ctext 색글자가 2개 미만"));
-      assert.ok(atHead < tinted.length, P(o.id + ": 색글자가 전부 줄머리 — 아크로스틱은 금지, 줄 중간에 흩을 것"));
+      assert.equal(atHead, 0, P(o.id + ": 색글자가 줄머리에 있음(" + atHead + "개) — 아크로스틱 오해 유발, 전부 줄 중간에 흩을 것"));
     }
     if (o.taps){
       assert.ok(o.taps.n >= 1 && o.taps.reveal, P(o.id + ": taps엔 n·reveal 필요"));

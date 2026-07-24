@@ -695,8 +695,15 @@
 
   <!-- ============ kitchen-sink (QA 숨김 화면, 홈 로고 7연타) ============ -->
   <div class="screen" id="scr-kitchen">
-    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🧪 kitchen-sink</h2></div>
-    <p class="hint">QA용 숨김 화면 — 홈 로고 7연타로 진입. 전 컴포넌트를 여기서 잡아 검사!</p>
+    <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🧪 메뉴얼 모드</h2></div>
+    <p class="hint">QA용 숨김 화면 — 홈 로고 7연타, 또는 설정 화면 맨 아래 버전 푸터 10탭으로 진입. 전 컴포넌트를 여기서 잡아 검사!</p>
+    <div class="field"><label>게임 직행 (일행 없이 바로 입장 · QA)</label><div id="ks-launch" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+    <div class="field"><label>효과 프리뷰 — 상태창(정상 vs 글리치)</label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="er-sp-stat">상태창 · 힘 9 · 충성 10</div>
+        <div class="er-sp-stat er-glitch">상태창  ▓▒░ ▒▓ ░▒▓</div>
+      </div>
+    </div>
     <div class="field"><label>팔레트 8색</label><div id="ks-pal" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
     <div class="field"><label>버튼</label>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
