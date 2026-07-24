@@ -15,6 +15,9 @@ const grab = (name) => {
 const { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave } =
   new Function(grab("ER_DATA") + grab("ER_LOGIC") + "; return { ER_SCENARIOS, erNorm, erMatch, erStars, erFixSave };")();
 
+/* 등록된 스프라이트 이름(assemble base/piece 존재 검증용) */
+const SPR_NAMES = new Set([...src.matchAll(/^([a-z][a-z0-9]*):\[/gm)].map((m) => m[1]));
+
 /* ---------- 1. 로직 단위 테스트 ---------- */
 assert.equal(erNorm("  낙 타 "), "낙타");
 assert.equal(erNorm("2,8·1-4"), "2814");
@@ -89,6 +92,12 @@ for (const act of sc.acts){
   for (const c of act.combos){
     for (const n of c.need) assert.ok(act.items[n], P("콤보 재료 미선언 " + n));
     assert.ok(act.items[c.gives], P("콤보 결과 미선언 " + c.gives));
+    /* 겹쳐 맞추기 조합: base·piece 스프라이트가 실제 등록돼 있어야(빈 조각 방지) + prompt·text 필수 */
+    if (c.assemble){
+      assert.ok(SPR_NAMES.has(c.assemble.base), P("assemble base 스프라이트 없음: " + c.assemble.base));
+      assert.ok(SPR_NAMES.has(c.assemble.piece), P("assemble piece 스프라이트 없음: " + c.assemble.piece));
+      assert.ok(c.assemble.prompt && c.assemble.text, P("assemble엔 prompt·text 필요"));
+    }
   }
 
   /* 풀이 시뮬레이션 (그리디: 가능한 행동 반복, 진행 없으면 데드락) */

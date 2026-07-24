@@ -5,7 +5,7 @@
    설계원칙: 한 퍼즐 한 정답·자가검증·단서↔퍼즐 연결·아하는 상식·레드헤링 0·3단 힌트·쉬움→어려움.
    검증: node tools/er-check.mjs (아래 DATA/LOGIC 블록 추출해 무결성·단위 테스트) */
 
-/* ---- er 전용 스프라이트 (51종) — 병렬 세션 충돌 방지를 위해 index.html SPR이 아닌 여기서 등록 ---- */
+/* ---- er 전용 스프라이트 (55종) — 병렬 세션 충돌 방지를 위해 index.html SPR이 아닌 여기서 등록 ---- */
 /*SPR_BEGIN*/
 snAddSprites({
 stone:[
@@ -1045,6 +1045,74 @@ endgate:[
 "...6111441116...",
 "...6666666666...",
 "................"],
+fork:[
+"................",
+".....6.6.6......",
+".....6.6.6......",
+".....6.6.6......",
+".....6.6.6......",
+".....66666......",
+"......666.......",
+".......66.......",
+".......66.......",
+".......66.......",
+".......66.......",
+".......66.......",
+".......66.......",
+".......66.......",
+".......66.......",
+"................"],
+knife:[
+"................",
+".......6........",
+".......6........",
+"......66........",
+"......66........",
+"......66........",
+"......66........",
+"......66........",
+"......66........",
+"......66........",
+"......77........",
+"......77........",
+"......77........",
+"......77........",
+"......77........",
+"................"],
+seala:[
+"................",
+"................",
+"......2222......",
+"....22666622....",
+"...2266666622...",
+"..226666666622..",
+"..266666666662..",
+"..266665566662..",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................"],
+sealb:[
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"..266665566662..",
+"..266666666662..",
+"..226666666622..",
+"...2266666622...",
+"....22666622....",
+"......2222......",
+"................",
+"................"],
 });
 /*SPR_END*/
 
@@ -1162,7 +1230,15 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-pbtn{background:var(--card);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;font-size:12px;padding:5px 12px;cursor:pointer}
 .er-pbtn:active{transform:scale(.94)}
 .er-pbtn:disabled{opacity:.32;cursor:default}
-.er-page-count{font-size:12px;color:var(--dim);letter-spacing:1px}`);
+.er-page-count{font-size:12px;color:var(--dim);letter-spacing:1px}
+.er-asm{position:relative;height:184px;margin:10px 0;border:2px dashed var(--line);border-radius:12px;background:var(--night2);overflow:hidden;touch-action:none}
+.er-asm-base{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.96}
+.er-asm-slot{position:absolute;left:50%;top:50%;width:76px;height:76px;transform:translate(-50%,-50%);border:2px dashed var(--steppe);border-radius:10px;opacity:.4}
+.er-asm-piece{position:absolute;transform:translate(-50%,-50%) rotate(var(--rot,0deg));cursor:grab;touch-action:none;filter:drop-shadow(1px 2px 3px rgba(0,0,0,.55))}
+.er-asm-piece.grab{cursor:grabbing}
+.er-asm.near{border-color:var(--steppe)}
+.er-asm.near .er-asm-slot{opacity:.9;box-shadow:0 0 12px 1px var(--steppe)}
+.er-asm-snap{transition:left .16s cubic-bezier(.2,1.4,.4,1),top .16s cubic-bezier(.2,1.4,.4,1)}`);
 
 /*ER_DATA_BEGIN*/
 /* 오브젝트: { id, nm, spr, txt(조사문), need?(플래그 게이트), lockedTxt?, sets?(조사 시 플래그),
@@ -1383,7 +1459,11 @@ ER_SCENARIOS.push({
       hearts: 5,
       items: { fork: "은포크", knife: "은나이프", cross: "은십자가" },
       combos: [
-        { need: ["fork", "knife"], gives: "cross", text: "포크 위에 나이프를 겹쳤다. V의 예절대로. …어, 이거 십자가잖아. 은식기로 만든 십자가라니, 백작이 보면 기절하겠는데." }
+        { need: ["fork", "knife"], gives: "cross",
+          assemble: { base: "fork", piece: "knife", rotate: 90,
+            prompt: "은나이프를 끌어다 포크 위에 십자로 겹쳐 봐요.",
+            text: "포크 위에 나이프가 십자로 얹혔다. …어, 이거 십자가잖아요. 은식기로 만든 십자가라니, 백작이 보면 기절하겠는데요." },
+          text: "포크 위에 나이프를 겹쳤다. V의 예절대로. …어, 이거 십자가잖아요." }
       ],
       objects: [
         { id: "invite", nm: "초대장", spr: "letter",
@@ -1492,7 +1572,11 @@ ER_SCENARIOS.push({
       hearts: 5,
       items: { seala: "인장 반쪽(위)", sealb: "인장 반쪽(아래)", seal: "남작가 인장" },
       combos: [
-        { need: ["seala", "sealb"], gives: "seal", text: "반쪽 두 개를 맞대자 딱 — 남작가의 사자 인장이 완성됐다. 이 시스템, 일 좀 하네." }
+        { need: ["seala", "sealb"], gives: "seal",
+          assemble: { base: "sealb", piece: "seala",
+            prompt: "인장 반쪽(위)을 끌어다 아래 반쪽에 딱 맞춰 겹쳐 봐요.",
+            text: "반쪽 두 개를 맞대자 딱 — 남작가의 사자 인장이 완성됐다. 이 시스템, 일 좀 하네." },
+          text: "반쪽 두 개를 맞대자 딱 — 남작가의 사자 인장이 완성됐다. 이 시스템, 일 좀 하네." }
       ],
       objects: [
         { id: "stat", nm: "상태창", spr: "statwin",
@@ -1629,7 +1713,7 @@ function erFixSave(s, scens){
 /*ER_LOGIC_END*/
 
 const ER_SAVE_KEY = "er_save_v3";   /* v3: 게르 시나리오 '칸의 게르'로 재구성 — 구세이브 무효화 */
-const er = { st: null, ckpt: null, sel: [], panel: null, timer: null, selScen: 0, dial: {}, tapCount: {} };
+const er = { st: null, ckpt: null, sel: [], panel: null, timer: null, selScen: 0, dial: {}, tapCount: {}, asm: null };
 
 /* ---------- 상태/세이브 ---------- */
 function erScen(){ return ER_SCENARIOS[er.st.sc]; }
@@ -1659,6 +1743,7 @@ function erBeginAct(idx){
   er.sel = [];
   er.dial = {};
   er.tapCount = {};
+  er.asm = null;
   er.ckpt = erSnap();       /* 이 막의 체크포인트 (하드코어 실패 시 복귀) */
   erSave();
   erShowActIntro();
@@ -1679,7 +1764,7 @@ function erEnterPlay(){
   /* 어디서 들어오든(인트로·이어하기·실패 재도전) 다른 화면은 전부 닫고 플레이만 — 화면 겹침 방지 */
   ["er-setup", "er-act", "er-fail", "er-done"].forEach((id) => { $(id).style.display = "none"; });
   $("er-play").style.display = "";
-  er.panel = null;
+  er.panel = null; er.asm = null;
   erTimersOff();
   er.timer = setInterval(erTick, 1000);
   if (typeof snBgm === "function") snBgm("story");   /* 잔잔한 앰비언트 (음소거 연동, 셸이 이탈 시 정지) */
@@ -1696,7 +1781,7 @@ function erContinue(){
   const s = erLoad();
   if (!s){ pwaToast("세이브가 없네요 — 처음부터 갈게요"); erReset(); return; }
   er.st = s;
-  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {};   /* 저장 안 되는 임시 상태는 새로 — 이전 판 잔재 제거 */
+  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {}; er.asm = null;   /* 저장 안 되는 임시 상태는 새로 — 이전 판 잔재 제거 */
   er.ckpt = erSnap();   /* 이어하기 지점을 새 체크포인트로 */
   erEnterPlay();
 }
@@ -1893,6 +1978,7 @@ function erTorchHtml(t){
 
 function erRenderPanel(){
   const p = $("er-panel");
+  if (er.asm){ erAssembleView(er.asm); return; }   /* 겹쳐 맞추기 판이 열려 있으면 그게 패널을 차지 */
   if (!er.panel){ p.style.display = "none"; p.innerHTML = ""; return; }
   const o = erObj(er.panel);
   const solved = !!er.st.solved[o.id];
@@ -2104,14 +2190,82 @@ function erCombine(){
   const sel = er.sel.slice().sort();
   const combo = erAct().combos.find((c) => c.need.slice().sort().join() === sel.join());
   if (!combo){ erSnd("nope"); pwaToast("이건 서로 안 맞아요 — 다른 조합을 찾아봐요"); er.sel = []; erRenderInv(); return; }
-  /* 재료 소모 → 결과 아이템 */
+  /* 공간 조합: assemble 있으면 즉시 합치지 말고 '손으로 겹쳐 맞추는' 판을 연다 */
+  if (combo.assemble){ er.asm = combo; er.sel = []; er.panel = null; erRenderInv(); erAssembleView(combo); return; }
+  erDoCombine(combo);
+}
+
+/* 실제 조합 반영 — 재료 소모 → 결과 아이템 (버튼 조합·겹쳐 맞추기 공통 완료 지점) */
+function erDoCombine(combo){
   er.st.inv = er.st.inv.filter((id) => !combo.need.includes(id));
   erGain(combo.gives, true);
-  er.sel = [];
+  er.sel = []; er.asm = null; er.panel = null;
   haptic(30); erSnd("combine");
   erSave();
   erRender();
-  pwaToast("🔗 " + combo.text);
+  pwaToast("🔗 " + (combo.assemble ? combo.assemble.text : combo.text));
+}
+
+/* 겹쳐 맞추기 판 — 얻은 아이템 조각을 손으로 끌어다 특정 자리/방향으로 겹쳐 조합.
+   combo.assemble:{base(고정 스프라이트), piece(끌 스프라이트), rotate?(조각 회전각), prompt, text}.
+   조각을 가운데 base 위 스냅존으로 끌면 조합 완료 — 방향·겹침 자체가 인터랙션(트릭사전 §6 겹쳐 보기 오버레이). */
+function erAssembleView(combo){
+  const cfg = combo.assemble;
+  const rot = cfg.rotate || 0;
+  const p = $("er-panel");
+  p.innerHTML =
+    '<div class="hint" style="margin-top:2px">' + escHtml(cfg.prompt || "조각을 끌어다 겹쳐 봐요.") + "</div>" +
+    '<div class="er-asm" id="er-asm">' +
+      '<div class="er-asm-slot"></div>' +
+      '<div class="er-asm-base"><px-sprite name="' + cfg.base + '" scale="4"></px-sprite></div>' +
+      '<div class="er-asm-piece" id="er-asm-piece" style="--rot:' + rot + 'deg"><px-sprite name="' + cfg.piece + '" scale="4"></px-sprite></div>' +
+    "</div>" +
+    '<button class="btn ghost mt" id="er-close" data-back>← 닫기</button>';
+  p.style.display = "";
+  $("er-close").addEventListener("click", () => { er.asm = null; er.panel = null; erRenderPanel(); });
+  erAssembleDrag(combo);
+}
+
+function erAssembleDrag(combo){
+  const stage = $("er-asm"), piece = $("er-asm-piece");
+  const size = stage.getBoundingClientRect();
+  /* 조각 시작 위치: 좌상단 구석 (base는 정중앙) */
+  let px = size.width * 0.24, py = size.height * 0.26;
+  const place = () => { piece.style.left = px + "px"; piece.style.top = py + "px"; };
+  place();
+  const target = () => { const s = stage.getBoundingClientRect(); return { tx: s.width / 2, ty: s.height / 2, s }; };
+  const SNAP = 46;   /* 넉넉한 스냅 반경 — 손맛만 있고 좌절 없게 */
+  let dragging = false;
+  piece.addEventListener("pointerdown", (e) => {
+    dragging = true; piece.classList.add("grab"); piece.classList.remove("er-asm-snap");
+    try { piece.setPointerCapture(e.pointerId); } catch (err) { /* 무시 */ }
+    haptic(10);
+  });
+  piece.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const s = stage.getBoundingClientRect();
+    px = Math.max(10, Math.min(s.width - 10, e.clientX - s.left));
+    py = Math.max(10, Math.min(s.height - 10, e.clientY - s.top));
+    place();
+    const t = target();
+    stage.classList.toggle("near", Math.hypot(px - t.tx, py - t.ty) < SNAP);
+  });
+  const drop = () => {
+    if (!dragging) return;
+    dragging = false; piece.classList.remove("grab");
+    const t = target();
+    if (Math.hypot(px - t.tx, py - t.ty) < SNAP){
+      /* 스냅 → 딸깍 겹침 → 조합 완료 */
+      px = t.tx; py = t.ty; piece.classList.add("er-asm-snap"); place();
+      stage.classList.remove("near");
+      haptic(30);
+      setTimeout(() => { if (er.asm === combo) erDoCombine(combo); }, 190);
+    } else {
+      stage.classList.remove("near");
+    }
+  };
+  piece.addEventListener("pointerup", drop);
+  piece.addEventListener("pointercancel", drop);
 }
 
 /* ---------- 막 클리어 / 실패 / 승리 ---------- */
@@ -2176,7 +2330,7 @@ function erRenderScens(){
 function erReset(){
   /* 진입 시: 진행 중 세이브 있으면 이어하기 노출, 아니면 시나리오·모드 선택 */
   erTimersOff();
-  er.panel = null; er.sel = [];
+  er.panel = null; er.sel = []; er.asm = null;
   $("er-act").style.display = "none";
   $("er-play").style.display = "none";
   $("er-fail").style.display = "none";
@@ -2196,7 +2350,7 @@ $("er-again").addEventListener("click", () => { erClearSave(); erReset(); });
 $("er-fail-continue").addEventListener("click", () => {
   if (!er.ckpt){ erReset(); return; }            /* 체크포인트가 없으면(리로드 등) 셋업으로 — 빈 화면 방지 */
   er.st = JSON.parse(JSON.stringify(er.ckpt));   /* 이 막 체크포인트 복귀 (하트·시간 리셋) */
-  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {};
+  er.sel = []; er.panel = null; er.dial = {}; er.tapCount = {}; er.asm = null;
   erSave();
   erEnterPlay();
 });
