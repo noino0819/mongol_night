@@ -1,10 +1,10 @@
-/* 뒤로가기 스택 단위 테스트 — shell.js의 실제 소스를 잘라와 가짜 DOM/history로 돌린다.
-   실행:  node tools/back-test.mjs   */
+/* 뒤로가기 스택 + 화면 이탈 정리 단위 테스트 — shell.js의 실제 소스를 잘라와
+   가짜 DOM/history로 돌린다.   실행:  node tools/back-test.mjs   */
 import fs from "fs";
 import assert from "assert";
 
 const shell = fs.readFileSync(new URL("../shell.js", import.meta.url), "utf8");
-const from = shell.indexOf("const snBack = {");
+const from = shell.indexOf("function snLeave(");
 const to = shell.indexOf("\n});", shell.indexOf('window.addEventListener("popstate"')) + 4;
 assert.ok(from > 0 && to > from, "shell.js에서 뒤로가기 블록을 못 찾음");
 const SRC = shell.slice(from, to);
@@ -16,14 +16,13 @@ function el(opts){
   e.click = () => { e.clicked++; if (e.onClick) e.onClick(); };
   return e;
 }
-function env(scene){
-  /* scene: { sel -> [element] } · 셀렉터 문자열 그대로 매칭 (상태머신 검증용) */
-  const popped = [];
+function env(scene, extra){
   let handler = null;
+  const log = { toasts: [], bgmStops: 0, resets: [] };
   const history = {
-    depth: 0, pushes: 0, backs: 0,
+    depth: 0, pushes: 0,
     pushState(){ this.depth++; this.pushes++; },
-    back(){ this.depth--; this.backs++; if (handler) handler(); }
+    back(){ this.depth--; if (handler) handler(); }        /* 사용자가 뒤로가기를 누른 것과 동일 */
   };
   const document = {
     querySelectorAll: (sel) => scene[sel] || [],
@@ -32,54 +31,72 @@ function env(scene){
   const window = { addEventListener: (t, fn) => { if (t === "popstate") handler = fn; } };
   const $ = (id) => scene["#" + id] || null;
   const ob = { page: 0 };
-  const api = new Function("document", "history", "window", "$", "ob",
-    SRC + "\nreturn { snBack, snBackSync, snBackClose };")(document, history, window, $, ob);
-  return Object.assign(api, { history, document, scene, ob, press: () => handler(), popped });
+  const SN_RESETS = Object.assign({}, extra && extra.resets);
+  Object.keys(SN_RESETS).forEach((k) => {
+    const fn = SN_RESETS[k];
+    SN_RESETS[k] = () => { log.resets.push(k); if (fn !== true) fn(); };
+  });
+  const api = new Function("document", "history", "window", "$", "ob", "SN_RESETS", "snBgmStop", "pwaToast", "haptic",
+    SRC + "\nreturn { snBack, snBackSync, snBackClose, snLeave };")(
+    document, history, window, $, ob, SN_RESETS,
+    () => { log.bgmStops++; }, (m) => log.toasts.push(m), () => {});
+  return Object.assign(api, { history, scene, ob, log, press: () => handler() });
 }
-
 function scene(opts){
   opts = opts || {};
-  const home = { classList: { contains: (c) => c === "on" && !!opts.home } };
   const back = el({});
   const s = {
-    "#scr-home": home,
+    "#scr-home": { classList: { contains: (c) => c === "on" && !!opts.home } },
     "#onboard": el({ shown: false }),
     "#coach": el({ shown: false }),
     "#ob-prev": el({}),
     "#coach-ok": el({}),
     ".screen.on": [{ querySelector: (sel) => (sel === "[data-back]" ? s.inner : null) }],
-    ".screen.on .back[data-go]": [back]
+    ".screen.on .back[data-go]": opts.home ? [] : [back]      /* 홈엔 '← 홈' 버튼이 없다 */
   };
   s.back = back;
-  s.home = home;
-  s.setHome = (v) => { opts.home = v; };
+  s.goHome = () => { s[".screen.on .back[data-go]"] = []; };
   return s;
 }
 
-/* 1) 홈에선 아무것도 물지 않는다 → 뒤로가기 = 브라우저 기본(종료) */
-{
-  const s = scene({ home: true });
-  const t = env(s);
-  t.snBackSync();
-  assert.equal(t.snBack.armed, false);
-  assert.equal(t.history.pushes, 0);
-}
-
-/* 2) 게임 진입 = 엔트리 1개 물기 → 뒤로가기 1번에 '← 홈' 클릭 → 반납 없이 정리 */
+/* 1) 게임 화면: 뒤로가기 1번 = '← 홈' 클릭, 앱은 안 꺼지고 엔트리를 다시 문다 */
 {
   const s = scene({ home: false });
   const t = env(s);
   t.snBackSync();
   assert.equal(t.history.pushes, 1);
-  s.back.onClick = () => { s.setHome(true); t.snBackSync(); };   /* 실제 go("home") 경로 흉내 */
+  s.back.onClick = () => { s.goHome(); t.snBackSync(); };    /* 실제 go("home") 경로 흉내 */
   t.press();
   assert.equal(s.back.clicked, 1);
-  assert.equal(t.snBack.armed, false);
-  assert.equal(t.history.pushes, 1, "홈 복귀 후 재무장하면 안 됨");
-  assert.equal(t.history.backs, 0, "이미 소비된 엔트리를 또 반납하면 안 됨");
+  assert.equal(t.snBack.armed, true, "홈에서도 한 겹 물고 있어야 홈 가드가 걸린다");
+  assert.equal(t.log.toasts.length, 0);
 }
 
-/* 3) 게임 안쪽 레이어(data-back)가 열려 있으면 그것만 닫고 화면은 유지 → 다시 문다 */
+/* 2) 홈 가드: 첫 뒤로가기는 경고만, 엔트리는 안 문다 → 다음 한 번이 진짜 종료 */
+{
+  const s = scene({ home: true });
+  const t = env(s);
+  t.snBackSync();
+  t.press();
+  assert.match(t.log.toasts[0], /한 번 더/);
+  assert.equal(t.snBack.armed, false, "경고 뒤엔 놔줘야 다음 뒤로가기가 앱을 닫는다");
+  assert.ok(t.snBack.exitTimer, "2초 뒤 재무장 예약");
+  clearTimeout(t.snBack.exitTimer);
+}
+/* 2b) 종료 대기 중에 앱을 계속 쓰면(화면 이동) 가드가 되살아난다 */
+{
+  const s = scene({ home: true });
+  const t = env(s);
+  t.snBackSync();
+  t.press();
+  const pushes = t.history.pushes;
+  t.snBackSync();                                            /* go()가 부르는 것 */
+  assert.equal(t.snBack.armed, true);
+  assert.equal(t.snBack.exitTimer, 0, "종료 대기 취소");
+  assert.equal(t.history.pushes, pushes + 1);
+}
+
+/* 3) 게임 안쪽 레이어(data-back)가 열려 있으면 그것만 닫고 화면은 유지 */
 {
   const s = scene({ home: false });
   const t = env(s);
@@ -88,15 +105,14 @@ function scene(opts){
   t.press();
   assert.equal(s.inner.clicked, 1);
   assert.equal(s.back.clicked, 0, "안쪽 레이어가 있으면 홈으로 나가면 안 됨");
-  assert.equal(t.snBack.armed, true);
   assert.equal(t.history.pushes, 2, "닫은 뒤 엔트리를 다시 물어야 함");
 }
 
-/* 4) 모달은 노드 제거가 아니라 취소(.ghost) 버튼을 실제로 누른다 */
+/* 4) 모달은 노드 제거가 아니라 취소(.ghost) 버튼을 실제로 누른다 (콜백 안 돌면 게임이 멈춤) */
 {
   const s = scene({ home: false });
   const cancel = el({}), ok = el({});
-  s[".life-modal"] = [{ shown: true, getClientRects: () => [{}],
+  s[".life-modal"] = [{ getClientRects: () => [{}],
     querySelector: () => ({ querySelector: (q) => (q === "button.ghost" ? cancel : ok) }) }];
   const t = env(s);
   t.snBackSync();
@@ -126,33 +142,36 @@ function scene(opts){
   assert.equal(s.back.clicked, 1);
 }
 
-/* 6) 상단 '← 홈' 버튼으로 나가면 물어둔 엔트리를 반납하고, 그때 오는 popstate는 무시한다 */
-{
-  const s = scene({ home: false });
-  const t = env(s);
-  t.snBackSync();
-  s.setHome(true);
-  t.snBackSync();
-  assert.equal(t.history.backs, 1);
-  assert.equal(t.snBack.armed, false);
-  assert.equal(s.back.clicked, 0, "자기가 부른 back을 다시 처리하면 안 됨");
-  assert.equal(t.history.depth, 0);
-}
-
-/* 7) 온보딩: 2페이지면 이전 페이지로, 첫 페이지면 삼킴 */
+/* 6) 온보딩: 2페이지면 이전 페이지로, 첫 페이지면 삼킴 */
 {
   const s = scene({ home: true });
   s["#onboard"] = el({ shown: true });
   const t = env(s);
-  t.ob.page = 2;
   t.snBackSync();
-  assert.equal(t.snBack.armed, true, "온보딩도 한 겹으로 친다");
+  t.ob.page = 2;
   t.press();
   assert.equal(s["#ob-prev"].clicked, 1);
   t.ob.page = 0;
   t.press();
   assert.equal(s["#ob-prev"].clicked, 1);
-  assert.equal(s.back.clicked, 0);
+  assert.equal(t.log.toasts.length, 0, "온보딩 중엔 종료 경고가 뜨면 안 됨");
 }
 
-console.log("back-test OK — 7 cases");
+/* 7) 화면 이탈 정리: 떠나는 게임의 리셋(타이머·카메라)과 배경음을 끈다 */
+{
+  const t = env(scene({ home: false }), { resets: { bomb: true, forehead: true } });
+  t.snLeave("bomb", "home");
+  assert.deepEqual(t.log.resets, ["bomb"]);
+  assert.equal(t.log.bgmStops, 1);
+}
+/* 7b) 같은 화면 재진입·mp는 리셋하지 않는다 (mp 리셋은 mpEnter = 입장) */
+{
+  const t = env(scene({ home: false }), { resets: { bomb: true, mp: true } });
+  t.snLeave("bomb", "bomb");
+  t.snLeave("mp", "bomb");
+  t.snLeave(null, "bomb");
+  assert.deepEqual(t.log.resets, []);
+  assert.equal(t.log.bgmStops, 3, "배경음은 어느 경우든 정리");
+}
+
+console.log("back-test OK — 10 cases");
