@@ -46,6 +46,11 @@
     font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
     -webkit-user-select:none;user-select:none;
     overscroll-behavior:none;
+    /* 한글 기본 줄바꿈: 어절 단위(keep-all) + 넘칠 때만 강제 분절 + 고아 단어 방지(pretty).
+       상속되므로 앱 전체 문단에 적용됨. nowrap/숫자/라벨 요소는 각자 오버라이드. */
+    word-break:keep-all;
+    overflow-wrap:break-word;
+    text-wrap:pretty;
   }
   .app{max-width:430px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;position:relative}
 
