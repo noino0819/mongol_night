@@ -1129,6 +1129,9 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-sp-row:not(.er-sp-done):active{transform:scale(.98)}
 .er-sp-done{cursor:default}
 .er-sp-more{font-size:11px;color:var(--px-sand);margin-top:5px}
+.er-sp-stat{display:inline-block;margin-top:7px;font-size:11px;letter-spacing:1px;padding:2px 8px;border:1px solid var(--line);border-radius:6px;background:var(--night2);color:var(--px-sand)}
+.er-glitch{color:var(--fire);border-color:var(--fire);animation:erGlitch .42s steps(2) infinite}
+@keyframes erGlitch{0%{transform:translateX(0);opacity:1}25%{transform:translateX(-2px);opacity:.45}50%{transform:translateX(2px);opacity:.85}75%{transform:translateX(-1px);opacity:.5}100%{transform:translateX(1px);opacity:1}}
 .er-sp-port{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:4px;line-height:0}
 .er-sp-bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--line);border-radius:12px;border-top-left-radius:2px;padding:8px 11px}
 .er-sp-nm{font-size:12px;font-weight:800;color:var(--fire);margin-bottom:3px}
@@ -1175,20 +1178,22 @@ ER_SCENARIOS.push({
           sets: "lit" },
         { id: "letter", nm: "품속의 급보", spr: "letter",
           need: "lit", lockedTxt: "어두워서 겉장의 글이 안 보인다. 불부터 밝히자.",
-          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 안부를 몇 줄 흘려 놓았다. 몽골 글자를 세운 여섯 줄인데, 몇 글자에만 붉은 먹이 유독 짙게 스몄다.",
-          /* 세로쓰기(vert)로 렌더 — 줄머리 아크로스틱 오해를 없애려 붉은 글자는 줄 중간에 흩어 둠 */
+          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 두 빛깔 먹으로 글을 흘려 놓았다 — 붉은 먹, 그리고 푸른 먹. 한 빛깔만 좇으면 뜻이 어그러진다.",
+          /* 다색 채널(트릭사전 1-1): 푸른 글자=읽는 규칙('거꾸로'), 붉은 글자=거꾸로 읽을 데이터.
+             붉은 글자만 순서대로면 '해의이타릴쿠'(엉킴) → 푸른 '거꾸로' 적용 → '쿠릴타이의 해' → 1206.
+             세로쓰기 + 색글자는 줄머리에 안 몰리게(er-check가 검사). */
           ctext: { vert: true, segs: [
-            { t: "봄 천둥이 멀리서 " }, { t: "쿠", c: "fire" }, { t: "르릉 운다.", br: true },
-            { t: "물이 흐" }, { t: "릴", c: "fire" }, { t: " 때는 별을 보라.", br: true },
-            { t: "무릎 꿇는 법은 낙" }, { t: "타", c: "fire" }, { t: "가 안다.", br: true },
-            { t: "그러니 " }, { t: "이", c: "fire" }, { t: " 밤을 견뎌라.", br: true },
-            { t: "아침 해가 뜨면 " }, { t: "의", c: "fire" }, { t: "심도 녹는다.", br: true },
-            { t: "부디 서두르라 " }, { t: "해", c: "fire" }, { t: "가 뜨기 전에." }
+            { t: "먼동이 " }, { t: "해", c: "fire" }, { t: "를 밀기 전에 나서라.", br: true },
+            { t: "물" }, { t: "거", c: "sky" }, { t: "품 소문은 접고 참" }, { t: "의", c: "fire" }, { t: "만.", br: true },
+            { t: "그러니 " }, { t: "이", c: "fire" }, { t: " 밤을 버텨라.", br: true },
+            { t: "낙" }, { t: "타", c: "fire" }, { t: "는 " }, { t: "꾸", c: "sky" }, { t: "밈없이 무릎 꿇는다.", br: true },
+            { t: "강물 흐" }, { t: "릴", c: "fire" }, { t: " 젠 별을 길로.", br: true },
+            { t: "천둥 " }, { t: "쿠", c: "fire" }, { t: "르릉을 길" }, { t: "로", c: "sky" }, { t: " 삼아라." }
           ] } },
         { id: "chest", nm: "궤짝", spr: "chest",
-          txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹 자국이 배어 있다.",
+          txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹과 푸른 먹 자국이 뒤엉켜 배어 있다.",
           lock: { ans: ["1206"], digits: 4,
-            hints: ["급보 겉장을 다시 봐. 왜 하필 몇 글자만 붉은 먹이 스몄을까.", "'쿠릴타이의 해'. 내일이 바로 그날이라고 했지 — 올해가 몇 년이더라.", "1206."],
+            hints: ["급보 겉장을 다시 봐. 붉은 글자만 좇으면 말이 엉키지 — 푸른 글자는 뭐라 말하고 있을까.", "푸른 글자는 '거꾸로'. 붉은 글자를 거꾸로 읽으면 '쿠릴타이의 해' — 그게 몇 년이더라.", "1206."],
             open: "궤짝이 열렸다. 청동 칼 한 자루 — 날이 아직 시퍼렇다.",
             give: "knife" } },
         { id: "shagai", nm: "샤가이 주머니", spr: "shagai",
@@ -1510,18 +1515,18 @@ ER_SCENARIOS.push({
         { id: "trio", nm: "연회장의 세 사람", spr: "trio",
           txt: "연회장에 셋이 모여 있다. 초상을 하나씩 눌러 말을 붙여 보자 — 사람은 곱씹을수록 다른 걸 흘리는 법이니까.",
           speech: [
-            { nm: "기사단장 바토르 [힘 9 / 충성 10]", spr: "bator", lines: [
+            { nm: "기사단장 바토르", spr: "bator", stat: "힘 9 · 충성 10", lines: [
               "손님이 있었나. 나는 서쪽 복도를 지키는 몸이라 오래는 못 있네.",
               "그 복도의 기사 초상 여덟 점은 내가 매일 광을 내지. 한 점이라도 비뚤어지면 못 참거든.",
-              "…자네, 아까부터 사람 이름 옆을 자꾸 훔쳐보는군. 시스템창 말인가? 나야 힘 9에 충성 10, 떳떳하네. 남들 것도 그리 잘 보이나?" ] },
-            { nm: "궁정 마법사 이슬라 [마력 8 / 호기심 12]", spr: "isla", lines: [
+              "내 상태창? 힘 9에 충성 10, 떳떳하네. …한데 자네, 남들 것도 그리 유심히 들여다보나?" ] },
+            { nm: "궁정 마법사 이슬라", spr: "isla", stat: "마력 8 · 호기심 12", lines: [
               "어머, 새 얼굴. 이 성엔 오래 머물 손님으로는 안 보이는데.",
               "요즘 시스템이 통 이상해요. 허공의 글자가 자꾸 깨져서 흩어지고…",
-              "그러고 보니 — 여기 사람들, 다들 이름 옆에 숫자가 뜨죠? 저는 마력 8. 근데 딱 한 사람은, 아무리 봐도 그게 안 떠요. 누군지는… 직접 보세요." ] },
-            { nm: "집사 노얀 [ ? ]", spr: "noyan", lines: [
+              "여기 사람들 상태창을 한 번씩 열어 보세요. 다들 멀쩡한데 — 딱 하나만, 좀 이상하지 않아요?" ] },
+            { nm: "집사 노얀", spr: "noyan", statGlitch: true, lines: [
               "…남작님. 이 늦은 밤 연회장엔 무슨 볼일이신지요.",
               "(잔을 닦으며 조용히 웃을 뿐, 좀처럼 말이 없다.)",
-              "제 이름 옆이요…? (그제야 알아챈다 — 이 자의 이름 옆에는, 힘도 충성도, 아무 숫자도 뜨지 않는다.)" ] }
+              "제 상태창 말씀입니까…? 글쎄요. 저는 그저 이 성의 오래된 집사일 뿐인데요." ] }
           ] },
         { id: "index", nm: "원작 목차 낱장", spr: "letter",
           txt: "품에서 원작 목차 한 장이 떨어졌다. '7장: 집사의 은시계는 밤에 멎는다 / 12장: 그 이름을 부르는 순간, 이야기는 완결된다 — 작가의 말: 흑막의 정체는 다음 화에! (이후 연재 중단)' 이 연중이 이렇게 원망스러울 줄이야. 좋아, 다음 화는 내가 쓴다." },
@@ -1787,10 +1792,17 @@ function erSpeechHtml(o){
     const lines = s.lines || [s.line];
     const at = Math.min(prog[i] || 0, lines.length - 1);
     const more = at < lines.length - 1;
+    /* 상태창 칩 — 서술 대신 눈으로 캐치. 말을 한 번이라도 붙여야 열림(인터랙션 게이트).
+       정상=숫자 표시, 이상=글리치+흔들림(er-glitch)으로 플레이어가 직접 위화감을 느낀다 */
+    const opened = (prog[i] || 0) >= 1;
+    const stat = opened && (s.statGlitch || s.stat)
+      ? '<div class="er-sp-stat' + (s.statGlitch ? " er-glitch" : "") + '">' +
+        (s.statGlitch ? "상태창  ▓▒░ ▒▓ ░▒▓" : "상태창 · " + escHtml(s.stat)) + "</div>"
+      : "";
     return '<button type="button" class="er-sp-row' + (more ? "" : " er-sp-done") + '" data-sp="' + i + '">' +
       '<div class="er-sp-port"><px-sprite name="' + s.spr + '" scale="4"></px-sprite></div>' +
       '<div class="er-sp-bubble"><div class="er-sp-nm">' + escHtml(s.nm) + "</div>" +
-      '<div class="er-sp-line">' + escHtml(lines[at]) + "</div>" +
+      '<div class="er-sp-line">' + escHtml(lines[at]) + "</div>" + stat +
       (more ? '<div class="er-sp-more">⋯ 더 눌러서 말 붙이기</div>' : "") +
       "</div></button>";
   }).join("") + "</div>";
