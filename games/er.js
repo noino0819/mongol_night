@@ -1066,6 +1066,7 @@ snAddScreen("er", `
     </div>
     <div id="er-play" style="display:none">
       <div class="ta-hud" id="er-hud"></div>
+      <details class="er-brief"><summary>📜 상황 다시 보기</summary><p id="er-brief-txt"></p></details>
       <div class="er-scene" id="er-scene"></div>
       <div class="er-invbox" id="er-inv"></div>
       <div class="er-panel" id="er-panel" style="display:none"></div>
@@ -1111,6 +1112,11 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-cell.flip .er-cb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .er-cval{font-size:16px;font-weight:bold}
 .er-ctext{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.9;color:var(--milk);word-break:keep-all}
+/* 몽골 문자처럼 세로쓰기 — 위에서 아래로, 줄은 왼쪽부터 오른쪽으로(vertical-lr). nowrap이라 줄바꿈은 <br>만 */
+.er-ctext.er-vert{writing-mode:vertical-lr;height:17em;white-space:nowrap;overflow-x:auto}
+.er-brief{background:var(--night2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0;font-size:13px;color:var(--dim)}
+.er-brief summary{cursor:pointer;color:var(--px-sand)}
+.er-brief p{margin:8px 0 0;line-height:1.7}
 .er-c-fire{color:var(--fire)}
 .er-c-sky{color:var(--px-sky)}
 .er-c-sand{color:var(--px-sand)}
@@ -1166,14 +1172,15 @@ ER_SCENARIOS.push({
           sets: "lit" },
         { id: "letter", nm: "품속의 급보", spr: "letter",
           need: "lit", lockedTxt: "어두워서 겉장의 글이 안 보인다. 불부터 밝히자.",
-          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 안부를 몇 줄 흘려 놓았다. 급히 쓴 듯 글줄이 고르지 않은데, 몇 글자에만 붉은 먹이 유독 짙게 스몄다.",
-          ctext: { segs: [
-            { t: "쿠", c: "fire" }, { t: "르릉, 봄 천둥이 멀리서 운다.", br: true },
+          txt: "봉인은 칸만이 뜯을 수 있다. 다만 겉장에 보낸 이가 안부를 몇 줄 흘려 놓았다. 몽골 글자를 세운 여섯 줄인데, 몇 글자에만 붉은 먹이 유독 짙게 스몄다.",
+          /* 세로쓰기(vert)로 렌더 — 줄머리 아크로스틱 오해를 없애려 붉은 글자는 줄 중간에 흩어 둠 */
+          ctext: { vert: true, segs: [
+            { t: "봄 천둥이 멀리서 " }, { t: "쿠", c: "fire" }, { t: "르릉 운다.", br: true },
             { t: "물이 흐" }, { t: "릴", c: "fire" }, { t: " 때는 별을 보라.", br: true },
-            { t: "낙" }, { t: "타", c: "fire" }, { t: "는 무릎 꿇는 법을 안다.", br: true },
-            { t: "이", c: "fire" }, { t: " 밤을 견뎌라.", br: true },
-            { t: "의", c: "fire" }, { t: "심은 아침 해에 녹는다.", br: true },
-            { t: "해", c: "fire" }, { t: "가 뜨기 전에 움직여라." }
+            { t: "무릎 꿇는 법은 낙" }, { t: "타", c: "fire" }, { t: "가 안다.", br: true },
+            { t: "그러니 " }, { t: "이", c: "fire" }, { t: " 밤을 견뎌라.", br: true },
+            { t: "아침 해가 뜨면 " }, { t: "의", c: "fire" }, { t: "심도 녹는다.", br: true },
+            { t: "부디 서두르라 " }, { t: "해", c: "fire" }, { t: "가 뜨기 전에." }
           ] } },
         { id: "chest", nm: "궤짝", spr: "chest",
           txt: "무쇠 걸쇠에 네 자리 자물쇠가 걸린 궤짝. 걸쇠 둘레에 붉은 먹 자국이 배어 있다.",
@@ -1672,6 +1679,7 @@ function erUpdateHud(){
 
 function erRender(){
   erUpdateHud();
+  $("er-brief-txt").textContent = erAct().intro;   /* 인트로는 막 시작 때 한 번뿐이라 접힘 패널로 다시 읽게 */
   /* 오브젝트 그리드 */
   const scene = $("er-scene");
   scene.innerHTML = "";
@@ -1729,7 +1737,7 @@ function erFindHtml(f){
 /* 색글자·행 단서 — 긴 글 속 일부 글자만 색이 다름 → 모아 읽으면 단어 (트릭사전 1장 색글자 추출·아크로스틱) */
 function erCtextHtml(ct){
   return (ct.prompt ? '<div class="hint" style="margin-top:8px">' + escHtml(ct.prompt) + "</div>" : "") +
-    '<div class="er-ctext">' + ct.segs.map((s) =>
+    '<div class="er-ctext' + (ct.vert ? " er-vert" : "") + '">' + ct.segs.map((s) =>
       "<span" + (s.c ? ' class="er-c-' + s.c + '"' : "") + ">" + escHtml(s.t) + "</span>" + (s.br ? "<br>" : "")
     ).join("") + "</div>";
 }

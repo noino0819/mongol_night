@@ -71,6 +71,16 @@ for (const act of sc.acts){
       assert.ok(o.final || o.lock.open, P(o.id + ": 해제 문구(open) 필요"));
     }
     if (o.give) assert.ok(act.items[o.give], P(o.id + ": 미선언 아이템 지급"));
+    /* 색글자 단서: 줄머리만 색칠하면 "각 줄 첫 글자" 아크로스틱 = 노잼 + 오해 유발 */
+    if (o.ctext){
+      let col = 0, tinted = [], atHead = 0;
+      for (const s of o.ctext.segs){
+        if (s.c){ tinted.push(s.t); if (col === 0) atHead++; }
+        col = s.br ? 0 : col + s.t.length;
+      }
+      assert.ok(tinted.length >= 2, P(o.id + ": ctext 색글자가 2개 미만"));
+      assert.ok(atHead < tinted.length, P(o.id + ": 색글자가 전부 줄머리 — 아크로스틱은 금지, 줄 중간에 흩을 것"));
+    }
     if (o.taps){
       assert.ok(o.taps.n >= 1 && o.taps.reveal, P(o.id + ": taps엔 n·reveal 필요"));
       if (o.taps.give) assert.ok(act.items[o.taps.give], P(o.id + ": 미선언 아이템 지급(taps)"));
