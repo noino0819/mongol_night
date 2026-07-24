@@ -1053,7 +1053,7 @@ snAddScreen("er", `
     <div class="topbar"><button class="back" data-go="home">← 홈</button><h2>🔒 게르 탈출</h2></div>
     <div id="er-setup">
       <p class="hint">오브젝트를 눌러 <b>조사</b>하고, 단서로 <b>암호를 풀고</b>, 얻은 것들을 <b>조합해</b> 탈출하라. 다 같이 화면 보며 머리를 모으는 협동 방탈출 — 시나리오당 2막.</p>
-      <div class="field mt"><label>시나리오</label><div id="er-scens"></div></div>
+      <div class="field mt"><label>시나리오</label><p class="hint" style="margin:4px 0 0">난이도는 시나리오마다 달라요 — 처음이면 별이 적은 걸 먼저 골라 보세요.</p><div id="er-scens"></div></div>
       <div class="field mt"><label>모드</label></div>
       <button class="btn" id="er-mode-soft">🌙 소프트 — 실패 없음, 느긋하게</button>
       <button class="btn ghost" id="er-mode-hard">🔥 하드코어 — ❤️5 · 막당 제한시간 · 오답/힌트 시간 차감</button>
@@ -1103,6 +1103,11 @@ snAddCss(`.er-shake{animation:erShake .32s}
 .er-scen b{font-size:15px}
 .er-scen small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
 .er-scen .es-e{font-size:22px}
+.er-diff{display:inline-flex;align-items:center;gap:6px;margin-top:5px}
+.er-diff .pips{display:inline-flex;gap:2px}
+.er-diff .pip{width:7px;height:7px;border-radius:1px;background:var(--line)}
+.er-diff .dl{font-size:11px;font-weight:bold}
+.er-diff .dn{font-size:11px;color:var(--dim);font-weight:normal}
 .er-find{display:grid;gap:6px;margin:8px 0}
 .er-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--night2);border:2px solid var(--line);border-radius:8px;color:var(--milk);font-family:inherit;cursor:pointer;line-height:1}
 .er-cell:active{transform:scale(.94)}
@@ -1160,6 +1165,7 @@ snAddCss(`.er-shake{animation:erShake .32s}
 const ER_SCENARIOS = [];
 ER_SCENARIOS.push({
   id: "khan", title: "칸의 게르", emoji: "🔒", tagline: "1206년 쿠릴타이 전야, 갇힌 전령",
+  diff: { n: 4, label: "어려움", note: "첫 퍼즐부터 센 편 — 워밍업 없음" },
   outro: "말이 바람을 갈랐다. 대게르 앞 — 헵투울의 창이 일제히 너를 겨눴지만, 네가 치켜든 봉인이 창끝을 멈췄다. 봉인을 뜯은 칸이 고개를 들었다. \"늦지 않았군.\" 다음 날 아침, 쿠릴타이의 함성이 초원을 덮었다. 테무진 — 이제 칭기즈 칸이다. 네 이름은 어느 기록에도 남지 않았지만, 그 아침을 지킨 건 너였다.",
   acts: [
     {
@@ -1259,6 +1265,7 @@ ER_SCENARIOS.push({
 });
 ER_SCENARIOS.push({
   id: "clocktower", title: "자정의 시계탑", emoji: "🕛",
+  diff: { n: 2, label: "쉬움", note: "관찰 위주 — 입문용" },
   tagline: "스승이 떠난 밤, 멈춘 대시계에 마지막 태엽을 감는다",
   outro: "열두 번째 종이 탑을 울리고, 마을의 창마다 하나씩 불이 켜졌다. 사람들은 알았을 것이다 — 오르트의 시계가, 이제 혼자서도 걷는다는 것을.",
   acts: [
@@ -1354,6 +1361,7 @@ ER_SCENARIOS.push({
 });
 ER_SCENARIOS.push({
   id: "vampire", title: "뱀파이어 저택", emoji: "🦇",
+  diff: { n: 3, label: "보통", note: "완만한 상승 곡선" },
   tagline: "만찬에 초대받은 건 너였는데, 메뉴도 너였다. 새벽이 오기 전에 나가자.",
   outro: "여명이 저택을 삼킨다. 등 뒤에서 느긋한 박수 — '예의는 아는 손님이었어. 다음 만찬도 기대하지.' 다음엔 낮 모임인지 꼭 확인하고 받자.",
   acts: [
@@ -1454,6 +1462,7 @@ ER_SCENARIOS.push({
 });
 ER_SCENARIOS.push({
   id: "isekai", title: "빙의자는 결말을 안다", emoji: "📖",
+  diff: { n: 4, label: "어려움", note: "문서·대화 교차 추리, 후반 최난" },
   tagline: "읽던 웹소설 속 3화 사망 엑스트라에 빙의했다. 원작 지식으로 복선을 회수하고, 작가가 못 끝낸 결말을 직접 써라.",
   outro: "완결의 문이 닫히고 눈을 뜨니 익숙한 천장. 손에는 다 읽은 소설책. 마지막 화 작가의 말에 낯선 필체가 남아 있다 — '결말을 써 줘서 고마워요.'",
   acts: [
@@ -2097,13 +2106,22 @@ function erWin(){
 }
 
 /* ---------- 셋업 / 리셋 ---------- */
+/* 난이도 뱃지 — 도트 핍 n/5 + 라벨. 색: 쉬움=초원, 보통=호박, 어려움=위험 (감사관 홀리스틱 평가 기준) */
+function erDiffBadge(d){
+  if (!d) return "";
+  const color = d.n <= 2 ? "var(--steppe)" : d.n === 3 ? "var(--fire)" : "var(--danger)";
+  let pips = "";
+  for (let k = 0; k < 5; k++) pips += '<span class="pip"' + (k < d.n ? ' style="background:' + color + '"' : "") + "></span>";
+  return '<span class="er-diff"><span class="pips">' + pips + '</span><span class="dl" style="color:' + color + '">' +
+    escHtml(d.label) + "</span>" + (d.note ? '<span class="dn">· ' + escHtml(d.note) + "</span>" : "") + "</span>";
+}
 function erRenderScens(){
   const box = $("er-scens");
   box.innerHTML = "";
   ER_SCENARIOS.forEach((s, i) => {
     const b = document.createElement("button");
     b.className = "er-scen" + (i === er.selScen ? " sel" : "");
-    b.innerHTML = '<span class="es-e">' + s.emoji + '</span><span><b>' + escHtml(s.title) + "</b><small>" + escHtml(s.tagline) + "</small></span>";
+    b.innerHTML = '<span class="es-e">' + s.emoji + '</span><span><b>' + escHtml(s.title) + "</b><small>" + escHtml(s.tagline) + "</small>" + erDiffBadge(s.diff) + "</span>";
     b.addEventListener("click", () => { er.selScen = i; erRenderScens(); });
     box.appendChild(b);
   });

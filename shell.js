@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.11.11";
+  const VER = "v2.11.12";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -600,7 +600,7 @@ window.addEventListener("popstate", () => {
   const b = document.querySelector(".screen.on .back[data-go]");
   if (b){ b.click(); snBackSync(); return; }  /* 상단 '← 홈'과 같은 경로 — 게스트 나가기 확인 등 기존 분기 재사용 */
   /* 홈에서 더 닫을 게 없음 = 종료 직전. 다시 물지 않고 2초만 기다린다 */
-  pwaToast("한 번 더 뒤로가면 앱이 닫혀");
+  pwaToast("한 번 더 뒤로 가면 앱이 닫혀요");
   haptic(20);
   snBack.exitTimer = setTimeout(snBackSync, 2000);
 });
