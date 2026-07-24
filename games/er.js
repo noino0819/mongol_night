@@ -1825,7 +1825,7 @@ function erRenderPanel(){
         : '<div class="hint">아직 필요한 게 없어 — 뭔가를 얻거나 조합해야 해. (필요: ' + escHtml(nm) + ")</div>";
     }
   }
-  html += '<button class="btn ghost mt" id="er-close">← 닫기</button>' +
+  html += '<button class="btn ghost mt" id="er-close" data-back>← 닫기</button>' +
     '<div class="er-msg" id="er-msg"></div>';
   p.innerHTML = html;
   p.style.display = "";
@@ -1942,7 +1942,7 @@ function erSolve(o){
   const p = $("er-panel");
   p.innerHTML = '<div class="ta-box er-flash"><div class="ta-port"><px-sprite name="' + o.spr + '" scale="4"></px-sprite></div>' +
     '<div class="ta-body"><div class="ta-nm">🔓 ' + escHtml(o.nm) + '</div><div class="ta-text">' + escHtml(o.lock.open) + "</div></div></div>" +
-    '<button class="btn mt" id="er-close">계속</button>';
+    '<button class="btn mt" id="er-close" data-back>계속</button>';
   p.style.display = "";
   $("er-close").addEventListener("click", () => { er.panel = null; erRenderPanel(); });
   pwaToast("🔓 " + o.nm + " 해제!");

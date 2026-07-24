@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v2.11.3";
+  const VER = "v2.11.4";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -238,11 +238,12 @@ function obRender(){
   $("ob-next").style.visibility = last ? "hidden" : "visible";
   $("ob-dots").innerHTML = OB_PAGES.map((_, i) => '<i class="' + (i === ob.page ? "on" : "") + '"></i>').join("");
 }
-function obShow(){ ob.page = 0; obRender(); $("onboard").style.display = ""; }
+function obShow(){ ob.page = 0; obRender(); $("onboard").style.display = ""; snBackSync(); }
 function obDone(){
   prefs.onboarded = true;
   savePrefs();
   $("onboard").style.display = "none";
+  snBackSync();
   if (typeof coachShow === "function") coachShow("fav");
 }
 $("ob-next").addEventListener("click", () => { if (ob.page < OB_PAGES.length - 1){ ob.page++; obRender(); } });
@@ -536,9 +537,62 @@ go = function(name){
   goV1(name);
   if (name === "home") renderHome();
   if (name === "settings" && !roster.length) coachShow("roster");
+  snBackSync();
 };
 renderHome();
 if (prefs.onboarded) coachShow("fav"); /* 온보딩 직후가 아닌 재방문 첫 홈에서 */
+
+/* ================================================================
+   뒤로가기 (안드로이드 하드웨어 · 브라우저 · 제스처)
+   여태 히스토리를 안 건드려서, 게임 중 뒤로가기 = 앱이 그대로 종료됐다.
+   홈이 아닐 땐 히스토리 엔트리를 하나 물어두고, 뒤로가기가 오면
+   [연출 삼킴 → 오버레이 → 게임 안쪽 레이어 → 화면] 딱 한 겹만 닫고 다시 문다.
+   홈에선 물어둔 게 없으니 브라우저 기본대로 종료 (원래 기대되는 동작).
+   게임 안쪽 레이어를 뒤로가기에 물리려면 그 닫기 버튼에 data-back만 달면 됨.
+   ================================================================ */
+const snBack = { armed: false, self: false };
+const snShown = (el) => !!el && el.getClientRects().length > 0;      /* display:none·미부착 판별 (fixed도 OK) */
+const snShownAll = (sel) => Array.from(document.querySelectorAll(sel)).filter(snShown);
+/* 건너뛰면 비밀이 새거나(폰 전달 가림막) 연출이 깨지는 것들 — 뒤로가기를 그냥 삼킨다 */
+const SN_BACK_BLOCK = ".splash, .pc-ov, .cd-ov, .ta-roll, .mp-poke";
+
+/* 한 겹만 닫는다. 닫았거나 삼켰으면 true → 화면은 그대로 둔다 */
+function snBackClose(){
+  if (snShownAll(SN_BACK_BLOCK).length) return true;
+  if (snShown($("onboard"))){ if (ob.page > 0) $("ob-prev").click(); return true; }
+  const vic = snShownAll(".victory-ov")[0];
+  if (vic){ vic.remove(); return true; }
+  /* 모달은 노드만 지우면 콜백이 안 돌아 게임 진행이 멈춘다 → 취소(없으면 확인) 버튼을 실제로 누름 */
+  const mods = snShownAll(".life-modal");
+  if (mods.length){
+    const inner = mods[mods.length - 1].querySelector(".inner");
+    const btn = inner && (inner.querySelector("button.ghost") || inner.querySelector("button"));
+    if (btn){ btn.click(); return true; }
+  }
+  if (snShown($("coach"))){ $("coach-ok").click(); return true; }
+  const scr = document.querySelector(".screen.on");
+  const inner = scr && scr.querySelector("[data-back]");             /* er 패널·mp 초대 플로우·이마 퀴즈 라운드 */
+  if (snShown(inner)){ inner.click(); return true; }
+  return false;
+}
+
+/* 지금 닫을 게 있으면 엔트리를 물고, 홈으로 돌아왔으면 반납한다 */
+function snBackSync(){
+  const need = !$("scr-home").classList.contains("on") || snShown($("onboard"));
+  if (need === snBack.armed) return;
+  snBack.armed = need;
+  if (need) history.pushState({ sn: 1 }, "");
+  else { snBack.self = true; history.back(); }                       /* 우리가 부른 back → 아래 핸들러가 무시 */
+}
+window.addEventListener("popstate", () => {
+  if (snBack.self){ snBack.self = false; return; }
+  snBack.armed = false;                                              /* 물어둔 엔트리가 소비됨 */
+  if (!snBackClose()){
+    const b = document.querySelector(".screen.on .back[data-go]");
+    if (b) b.click();          /* 상단 '← 홈'과 같은 경로 — 게스트 나가기 확인 등 기존 분기 그대로 재사용 */
+  }
+  snBackSync();                                                      /* 아직 홈이 아니면 다시 물어둔다 */
+});
 
 /* --- kitchen-sink: 홈 로고 7연타 진입 + 데모 콘텐츠 --- */
 (function kitchenInit(){

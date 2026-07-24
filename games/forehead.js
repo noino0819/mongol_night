@@ -15,7 +15,7 @@ snAddScreen("forehead", `
       <button class="btn mt" id="fh-start">이마에 대고 시작!</button>
     </div>
     <div id="fh-game" style="display:none" class="fh-stage">
-      <div class="fh-top"><span id="fh-score">0개 정답</span><span id="fh-timer">60</span><button class="fh-quit" id="fh-quit">✕ 끝내기</button></div>
+      <div class="fh-top"><span id="fh-score">0개 정답</span><span id="fh-timer">60</span><button class="fh-quit" id="fh-quit" data-back>✕ 끝내기</button></div>
       <div class="fh-word-area" id="fh-area"><div class="fh-word" id="fh-word">준비!</div></div>
       <div class="fh-controls">
         <button class="fh-pass" id="fh-pass">◀ 패스</button>
