@@ -47,10 +47,11 @@ assert.equal(erFixSave({ sc: 0, act: 7 }, ER_SCENARIOS), null);           /* 없
   assert.deepEqual(keep.inv, ["x"]);            /* 정상 세이브는 그대로 통과 */
 }
 
-/* 이어하기 무한사망 버그 방지 — 하트 0 하드코어 세이브 판정 + 신선한 체크포인트 재구성 */
-assert.equal(erIsDead({ mode: "hard", hearts: 0 }), true);
-assert.equal(erIsDead({ mode: "hard", hearts: 3 }), false);
-assert.equal(erIsDead({ mode: "soft", hearts: 0 }), false);   /* 소프트는 하트 미사용 → 죽음 아님 */
+/* 이어하기 무한사망 버그 방지 — 죽은 하드코어 세이브 판정(하트 0 또는 시간초과) + 신선한 체크포인트 재구성 */
+assert.equal(erIsDead({ mode: "hard", hearts: 0, tLeft: 100 }), true);   /* 하트 소진 */
+assert.equal(erIsDead({ mode: "hard", hearts: 3, tLeft: 0 }), true);     /* 하트 남아도 시간초과(오답 -30초로 tLeft=0) → 이어하면 즉시 재사망 */
+assert.equal(erIsDead({ mode: "hard", hearts: 3, tLeft: 200 }), false);  /* 살아있는 판 */
+assert.equal(erIsDead({ mode: "soft", hearts: 0, tLeft: 0 }), false);    /* 소프트는 하트·시간 미사용 → 죽음 아님 */
 assert.equal(erIsDead(null), false);
 {
   const a0 = ER_SCENARIOS[0].acts[0];

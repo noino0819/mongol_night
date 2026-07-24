@@ -1851,8 +1851,9 @@ function erFixSave(s, scens){
   s.hearts = Math.max(0, Math.min(a.hearts, s.hearts));   /* HUD의 하트 repeat()가 음수로 터지는 것 방지 */
   return s;
 }
-/* 하드코어에서 하트를 다 잃은(=이미 실패한) 세이브인가 — 이어하기 시 죽은 상태로 재진입해 무한 사망하는 것 방지 */
-function erIsDead(s){ return !!s && s.mode === "hard" && s.hearts <= 0; }
+/* 하드코어에서 하트를 다 잃은(=이미 실패한) 세이브인가 — 이어하기 시 죽은 상태로 재진입해 무한 사망하는 것 방지.
+   오답 -30초로 tLeft가 0까지 깎인 채(하트는 남아) 저장된 세이브도 같은 무한 사망(erTick 즉시 시간초과)이라 포함. */
+function erIsDead(s){ return !!s && s.mode === "hard" && (s.hearts <= 0 || s.tLeft <= 0); }
 /* 막의 신선한 체크포인트(풀 하트·풀 타임·진행 0). 실패 후 '다시 도전' 복귀·죽은 세이브 이어하기의 리셋 지점.
    로드/중도 상태를 스냅하면 하트·시간이 깎인 채 복귀해 무한 사망/시간초과가 됨 → 반드시 막 정의(act)에서 재구성.
    hintsTotal(누적 힌트)은 별점 산정용이라 이어감. */
@@ -2437,6 +2438,9 @@ function erActClear(){
 
 function erFail(msg){
   erTimersOff(); if (typeof snBgmStop === "function") snBgmStop(); erSnd("fail");
+  /* 아래 조사/입력·겹쳐맞추기 패널을 확실히 닫는다 — 상태·DOM 잔재가 다음 진입에 남던 것 방지 */
+  er.panel = null; er.asm = null;
+  const p = $("er-panel"); if (p){ p.style.display = "none"; p.innerHTML = ""; }
   $("er-play").style.display = "none";
   $("er-fail").style.display = "";
   $("er-fail-msg").textContent = msg;
