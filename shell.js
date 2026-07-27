@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v3.0.10";
+  const VER = "v3.0.11";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -396,8 +396,9 @@ function launchGame(g){
     pwaToast("🚧 " + g.name + "은(는) 준비 중이야, 곧 나와");
     return;
   }
-  if (roster.length < g.need){
-    alert("이 게임은 " + g.need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록해주세요 🙌");
+  const connected = typeof mpLive === "function" && mpLive();
+  if (roster.length < g.need && !connected){   /* 여러 폰 연결 중이면 연결된 폰이 참가자 → 로컬 일행 게이트 통과 (core.js [data-go] 경로와 동일) */
+    alert("이 게임은 " + g.need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록하거나, 📡 폰 연결로 붙여주세요 🙌");
     return;
   }
   prefs.recent = { id: g.id, when: Date.now(), n: roster.length };
