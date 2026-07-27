@@ -104,7 +104,10 @@ function mpDrawQr(cv, text){
 /* ---------- 카메라 · 스캔 ---------- */
 async function mpCam(){
   if (mp.stream && mp.stream.active) return mp.stream;
-  mp.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+  /* 해상도 힌트 → 촘촘한 QR도 칸이 안 뭉개짐 (저해상도로 열리는 폰 방지) */
+  mp.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } });
+  /* 안드로이드는 근접 QR 자동초점이 잘 안 잡혀 연속초점을 요청 (미지원이면 조용히 무시) */
+  try { await mp.stream.getVideoTracks()[0].applyConstraints({ advanced: [{ focusMode: "continuous" }] }); } catch (e) { /* 무시 */ }
   return mp.stream;
 }
 function mpCamOff(){
@@ -112,33 +115,46 @@ function mpCamOff(){
   const v = $("mp-video"); if (v) v.srcObject = null;
 }
 function mpStopScan(){ cancelAnimationFrame(mp.scanRAF); mp.scanRAF = 0; mpCamOff(); }
+/* 스캔 결과 문자열 처리 (BarcodeDetector·jsQR 공통) */
+function mpOnScan(text, expect, onOk, ts){
+  if (!text) return;
+  if (text.startsWith(expect)){
+    mpStopScan();
+    if (navigator.vibrate) navigator.vibrate(80);
+    snSfx("select");   /* QR 스캔 성공 */
+    onOk(text);
+  } else if (text.startsWith("SN1") && ts - mp.warnTs > 2500){
+    mp.warnTs = ts;
+    alert(expect === "SN1A" ? "이건 초대 QR이에요 — 게스트 폰의 답장 QR을 비춰 주세요" : "이건 답장 QR이에요 — 호스트 폰의 초대 QR을 비춰 주세요");
+  }
+}
 async function mpScan(expect, onOk){
   const stream = await mpCam();
   const video = $("mp-video");
   video.srcObject = stream;
   await video.play();
+  /* 안드로이드 크롬 네이티브 스캐너 — jsQR보다 빠르고 촘촘한 QR에 강함. 없으면(아이폰 등) jsQR 폴백 */
+  let bd = null;
+  try { if ("BarcodeDetector" in window) bd = new BarcodeDetector({ formats: ["qr_code"] }); } catch (e) { bd = null; }
   const cv = document.createElement("canvas");
   const g = cv.getContext("2d", { willReadFrequently: true });
-  let last = 0;
+  let last = 0, busy = false;
   const loop = (ts) => {
     mp.scanRAF = requestAnimationFrame(loop);
-    if (ts - last < 160 || video.readyState < 2 || !video.videoWidth) return;
+    if (ts - last < 160 || video.readyState < 2 || !video.videoWidth || busy) return;
     last = ts;
-    const s = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight)); /* 다운스케일 → 디코딩 속도 */
+    if (bd){ /* 네이티브: 비동기라 겹침 방지(busy), 중지 후 도착한 결과는 무시(mp.scanRAF) */
+      busy = true;
+      bd.detect(video).then((codes) => { busy = false; if (mp.scanRAF && codes && codes[0]) mpOnScan(codes[0].rawValue, expect, onOk, ts); })
+                      .catch(() => { busy = false; bd = null; }); /* 실패하면 jsQR로 폴백 */
+      return;
+    }
+    const s = Math.min(1, 960 / Math.max(video.videoWidth, video.videoHeight)); /* 다운스케일 완화 → 촘촘한 QR 칸 보존 */
     cv.width = video.videoWidth * s | 0; cv.height = video.videoHeight * s | 0;
     g.drawImage(video, 0, 0, cv.width, cv.height);
     const d = g.getImageData(0, 0, cv.width, cv.height);
     const r = jsQR(d.data, cv.width, cv.height, { inversionAttempts: "dontInvert" });
-    if (!r || !r.data) return;
-    if (r.data.startsWith(expect)){
-      mpStopScan();
-      if (navigator.vibrate) navigator.vibrate(80);
-      snSfx("select");   /* QR 스캔 성공 */
-      onOk(r.data);
-    } else if (r.data.startsWith("SN1") && ts - mp.warnTs > 2500){
-      mp.warnTs = ts;
-      alert(expect === "SN1A" ? "이건 초대 QR이에요 — 게스트 폰의 답장 QR을 비춰 주세요" : "이건 답장 QR이에요 — 호스트 폰의 초대 QR을 비춰 주세요");
-    }
+    if (r && r.data) mpOnScan(r.data, expect, onOk, ts);
   };
   mp.scanRAF = requestAnimationFrame(loop);
 }
