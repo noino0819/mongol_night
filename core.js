@@ -103,7 +103,7 @@ document.addEventListener("click", (e) => {
        게스트에겐 홈이 없으므로 뒤로가기(mpSyncBack이 '나가기'로 라벨 교체) = 방 나가기 확인 모달 */
     if (connected && typeof mpAmHost === "function" && !mpAmHost() && target !== "mp"){
       if (target === "home"){
-        snConfirm("🚪", "방에서 나갈까?", "다시 들어오려면 호스트의 초대 QR이 필요해", "나가기", () => { mpReset(); go("home"); });
+        snConfirm("🚪", "방에서 나갈까요?", "다시 들어오려면 호스트의 초대 QR이 필요해요", "나가기", () => { mpReset(); go("home"); });
       } else {
         mp.game = null;
         resetGame("mp"); go("mp");

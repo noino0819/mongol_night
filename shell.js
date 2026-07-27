@@ -54,14 +54,14 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v3.0.13";
+  const VER = "v3.0.14";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
   const badge = $("pwa-badge");
   const installBtn = $("pwa-install");
   /* 설정 화면 '앱으로 설치하기'는 항상 눌리므로, 실제 유도 로직이 세팅되기 전 기본 동작을 미리 깔아둠 */
-  pwa.installAction = () => pwaToast("설치 준비 중이야, 잠깐 뒤 다시 눌러줘");
+  pwa.installAction = () => pwaToast("설치 준비 중이에요, 잠깐 뒤 다시 눌러 주세요");
   const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   /* 카톡 등 인앱 브라우저: beforeinstallprompt 미발화(안드)·Safari 아님(iOS)이라 설치 불가 → 외부 브라우저로 탈출시킴 */
@@ -71,8 +71,8 @@ function snConfirm(em, tt, ds, okLabel, onOk){
       /* 안드로이드: 크롬으로 강제 오픈 (크롬 없으면 아무 일 없음 — 드문 케이스) */
       location.href = "intent://" + location.href.replace(/^https?:\/\//, "") + "#Intent;scheme=https;package=com.android.chrome;end";
     } else {
-      lifeModal("🌐", "브라우저로 열어줘",
-        "카톡 안에서는 설치·오프라인 저장이 안 돼.<br><br>1. 화면 <b>아래(또는 위) 메뉴 버튼</b>을 눌러<br>2. <b>Safari로 열기</b> / <b>다른 브라우저로 열기</b> 선택<br>3. 열린 브라우저에서 다시 <b>설치</b>를 눌러", null);
+      lifeModal("🌐", "브라우저로 열어 주세요",
+        "카톡 안에서는 설치·오프라인 저장이 안 돼요.<br><br>1. 화면 <b>아래(또는 위) 메뉴 버튼</b>을 눌러 주세요<br>2. <b>Safari로 열기</b> / <b>다른 브라우저로 열기</b>를 선택하세요<br>3. 열린 브라우저에서 다시 <b>설치</b>를 눌러 주세요", null);
     }
   };
 
@@ -108,12 +108,12 @@ function snConfirm(em, tt, ds, okLabel, onOk){
     };
     /* 설정 버튼용 수동 업데이트 — 토스트가 아직 안 떴어도 강제로 최신 확인 */
     pwa.manualUpdate = async (reg) => {
-      if (!navigator.onLine){ pwaToast("새 버전을 받으려면 인터넷에 연결해줘", null, null, { warn: true }); return; }
+      if (!navigator.onLine){ pwaToast("새 버전을 받으려면 인터넷에 연결해 주세요", null, null, { warn: true }); return; }
       pwa.autoApply = true;
       if (reg.waiting){ promptUpdate(reg.waiting); return; } /* 이미 대기 중 → 즉시 적용 */
       pwaToast("최신 버전 확인 중…");
       try { await reg.update(); }
-      catch (e){ pwa.autoApply = false; pwaToast("확인 실패 — 잠깐 뒤 다시 해줘", null, null, { warn: true }); return; }
+      catch (e){ pwa.autoApply = false; pwaToast("확인 실패 — 잠깐 뒤 다시 해 주세요", null, null, { warn: true }); return; }
       /* update() 후 새 워커가 있으면 updatefound→promptUpdate가 자동 적용. 없으면 최신 */
       if (reg.installing || reg.waiting){ pwaToast("새 버전 받는 중…"); }
       else { pwa.autoApply = false; pwaToast("이미 최신 버전이야 🌙"); }
@@ -130,7 +130,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
           if (navigator.serviceWorker.controller){
             promptUpdate(w);
           } else {
-            badgeOk("✅ 오프라인 저장 끝! 이제 비행기 모드에서도 돼");
+            badgeOk("✅ 오프라인 저장 끝! 이제 비행기 모드에서도 돼요");
           }
         });
       });
@@ -144,7 +144,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
       /* 성공 배지가 이미 퇴장했더라도 실패는 다시 보여준다 */
       badge.style.display = "";
       badge.classList.remove("ok", "bye");
-      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해줘";
+      badge.textContent = "⚠️ 오프라인 저장 실패 — 새로고침 해 주세요";
       badge.classList.add("err");
     });
     /* 첫 설치 때 clients.claim()도 controllerchange를 발화시키므로,
@@ -169,7 +169,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
     installBtn.textContent = "🌐 브라우저로 열기";
     installBtn.style.display = "";
     installBtn.addEventListener("click", openExternal);
-    pwaToast("카톡 안에선 설치·오프라인이 안 돼", "🌐 브라우저로 열기", openExternal);
+    pwaToast("카톡 안에선 설치·오프라인이 안 돼요", "🌐 브라우저로 열기", openExternal);
     pwa.installAction = openExternal; /* 온보딩 '앱으로 설치하기'도 탈출로 연결 */
     return;
   }
@@ -198,10 +198,10 @@ function snConfirm(em, tt, ds, okLabel, onOk){
       /* 크로미움인데 설치 프롬프트가 없음 = 대개 이미 설치돼 있음(설치된 앱엔 beforeinstallprompt를 안 쏨).
          ponytail: UA 휴리스틱 — 확실한 판정은 manifest related_applications+getInstalledRelatedApps 필요하나
          배포 절대경로를 몰라 생략. 아래 폴백 문구로 '조건 미충족'인 드문 케이스도 커버 */
-      lifeModal("🎉", "이미 설치돼 있어",
-        "새로 설치 안 해도 돼! <b>홈 화면(또는 앱 목록)</b>의 <b>초원의 밤</b> 아이콘을 눌러서 열면 끝.<br><br><span style='color:var(--dim)'>아이콘이 안 보이면 브라우저를 껐다 켠 뒤 다시 눌러줘.</span>", null);
+      lifeModal("🎉", "이미 설치돼 있어요",
+        "새로 설치 안 해도 돼요! <b>홈 화면(또는 앱 목록)</b>의 <b>초원의 밤</b> 아이콘을 눌러서 열면 끝이에요.<br><br><span style='color:var(--dim)'>아이콘이 안 보이면 브라우저를 껐다 켠 뒤 다시 눌러 주세요.</span>", null);
     } else {
-      pwaToast("이 브라우저에선 설치 안내가 없어 — 폰의 크롬/사파리로 열어봐");
+      pwaToast("이 브라우저에선 설치 안내가 없어요 — 폰의 크롬/사파리로 열어 보세요");
     }
   };
   installBtn.addEventListener("click", pwa.installAction);
@@ -221,10 +221,10 @@ function savePrefs(){
 
 /* --- 온보딩 (프로토타입 OB 데이터) --- */
 const OB_PAGES = [
-  { t:"와이파이? 필요 없어", s:"비행기 모드에서도 전부 돌아가는 파티게임 20종", scene:[["fox",4],["fire",5],["bor",4]] },
+  { t:"와이파이? 필요 없어요", s:"비행기 모드에서도 전부 돌아가는 파티게임 20종", scene:[["fox",4],["fire",5],["bor",4]] },
   { t:"폰 하나면 충분", s:"돌려가며 하는 패스앤플레이. 비밀은 꾹 눌러 확인!", scene:[["bor",4],["phone",5],["wolf",4]] },
   { t:"가볍게도, 진하게도", s:"5분 폭탄 돌리기부터 40분 어드벤처까지", scene:[["dice",4],["mole",5],["tengri",4]] },
-  { t:"홈 화면에 설치하면 완성", s:"설치해 두면 앱 아이콘으로 바로 실행돼", scene:[["arrowdn",4],["bor",5]] }
+  { t:"홈 화면에 설치하면 완성", s:"설치해 두면 앱 아이콘으로 바로 실행돼요", scene:[["arrowdn",4],["bor",5]] }
 ];
 const ob = { page: 0 };
 function obRender(){
@@ -253,7 +253,7 @@ $("ob-install").addEventListener("click", () => { obDone(); if (pwa.installActio
 $("set-install").addEventListener("click", () => { if (pwa.installAction) pwa.installAction(); });
 $("set-update").addEventListener("click", () => {
   if (pwa.manualUpdate && pwa.reg) pwa.manualUpdate(pwa.reg);
-  else pwaToast("이 브라우저에선 업데이트 확인이 안 돼");
+  else pwaToast("이 브라우저에선 업데이트 확인이 안 돼요");
 });
 
 /* --- 일행 영속화 --- */
@@ -310,9 +310,9 @@ renderChips();
 
   /* 데이터 초기화: 2단계 확인 */
   $("set-reset").addEventListener("click", () => {
-    mbAsk("🗑️", "데이터를 초기화할까?", "즐겨찾기·설정·일행·세이브가 전부 사라져",
+    mbAsk("🗑️", "데이터를 초기화할까요?", "즐겨찾기·설정·일행·세이브가 전부 사라져요",
       "초기화 진행", "그대로 두기",
-      () => mbAsk("⚠️", "진짜 마지막 확인이야", "되돌릴 수 없어. 온보딩부터 다시 시작해",
+      () => mbAsk("⚠️", "진짜 마지막 확인이에요", "되돌릴 수 없어요. 온보딩부터 다시 시작해요",
         "전부 지우기", "그대로 두기",
         () => {
           try {
@@ -330,22 +330,22 @@ renderChips();
    ================================================================ */
 const SN_CATS = [
   { id:"psych", emoji:"🕵️", name:"심리전", spr:"fox", games:[
-    { id:"liar",     go:"liar",      need:3, name:"라이어",        spr:"fox",      desc:"말로 속이고 눈치로 잡아",       p:[3,8],  t:15 },
+    { id:"liar",     go:"liar",      need:3, name:"라이어",        spr:"fox",      desc:"말로 속이고 눈치로 잡아요",     p:[3,8],  t:15 },
     { id:"mafia",    go:"mafia",     need:4, name:"마피아",        spr:"crow",     desc:"밤이 되면 누군가 사라진다",     p:[4,10], t:20 },
     { id:"were",     go:"wolf",      need:4, name:"늑대인간",      spr:"wolf",     desc:"보름달 아래 정체 숨기기",       p:[4,10], t:25 } ] },
   { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
-    { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐",     p:[2,6],  t:10 },
-    { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
+    { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐요",   p:[2,6],  t:10 },
+    { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨요",            p:[3,10], t:5 },
     { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
-    { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
-    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 },
+    { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐가 있을까요",       p:[3,8],  t:10 },
+    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀요",            p:[2,8],  t:10 },
     { id:"colorhunt",go:"cf",        need:0, name:"색찾기",        spr:"rooster",  desc:"카메라로 목표색 찾기 · 폰 여럿",  p:[2,8],  t:10 } ] },
   { id:"draw", emoji:"🎨", name:"그림", spr:"rabbit", games:[
     { id:"relay",    go:"drawrelay", need:3, name:"그림 릴레이",   spr:"rabbit",   desc:"그림으로 전하는 전화게임",      p:[3,10], t:15 },
-    { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마",        p:[3,8],  t:15 } ] },
+    { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마세요",    p:[3,8],  t:15 } ] },
   { id:"board", emoji:"🎲", name:"보드·두뇌", spr:"bor", games:[
     { id:"journey",  go:"life",      need:2, name:"몽골 대장정 2.0", spr:"bor",    desc:"초원 횡단 보드 레이스",         p:[2,6],  t:40 },
-    { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아라",         p:[2,2],  t:10 },
+    { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아요",         p:[2,2],  t:10 },
     { id:"dicebet",  go:"lv",        need:2, name:"주사위 배팅",   spr:"badger",   desc:"눈치로 거는 상금 독식전",       p:[2,5],  t:15 },
     { id:"vegas",    go:"vg",        need:0, name:"라스베가스",    spr:"hawk",     desc:"카지노 6곳 지폐 쟁탈전 · 폰 여럿",  p:[2,6],  t:20 },
     { id:"baseball", go:"nb",        need:2, name:"숫자야구",      spr:"crane",    desc:"3자리 숫자 추리 대결",          p:[2,4],  t:15 },
@@ -354,11 +354,11 @@ const SN_CATS = [
     { id:"balance",  go:"balance",   need:0, name:"밸런스 게임",   spr:"camel",    desc:"A냐 B냐 그것이 문제",           p:[2,10], t:10 },
     { id:"tele",     go:"tele",      need:3, name:"텔레파시",      spr:"owl2",     desc:"같은 생각이면 승리",            p:[3,10], t:10 },
     { id:"urimal",   go:"um",        need:2, name:"우리말 겨루기", spr:"crane",    desc:"맞춤법으로 서열 정리",     p:[2,10], t:15 },
-    { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려",            p:[2,10], t:5 },
+    { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려요",          p:[2,10], t:5 },
     { id:"quiz",     go:"gq",        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
   { id:"story", emoji:"📜", name:"스토리", spr:"tengri", games:[
     { id:"gobi",     go:"ta",        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 },
-    { id:"teller",   go:"gm",        need:2, name:"이야기꾼의 밤", spr:"fire",     desc:"네가 GM, 앱은 상황과 주사위만",  p:[2,8],  t:25 } ] }
+    { id:"teller",   go:"gm",        need:2, name:"이야기꾼의 밤", spr:"fire",     desc:"내가 GM, 앱은 상황과 주사위만",  p:[2,8],  t:25 } ] }
 ];
 const SN_GAME_BY_ID = {};
 SN_CATS.forEach((c) => c.games.forEach((g) => { SN_GAME_BY_ID[g.id] = g; }));
@@ -374,9 +374,9 @@ function haptic(pattern){
 
 /* --- 코치마크 --- */
 const COACH_TEXTS = {
-  fav: "게임 카드를 길게 누르면 즐겨찾기 ⭐ 에 등록돼",
-  secret: "비밀은 꾹 누르는 동안만 보여 — 손 떼면 바로 잠겨",
-  roster: "여기서 일행을 등록하면 모든 게임에서 그대로 쓰여"
+  fav: "게임 카드를 길게 누르면 즐겨찾기 ⭐ 에 등록돼요",
+  secret: "비밀은 꾹 누르는 동안만 보여요 — 손 떼면 바로 잠겨요",
+  roster: "여기서 일행을 등록하면 모든 게임에서 그대로 쓰여요"
 };
 let coachCur = null;
 function coachShow(key){
@@ -676,8 +676,8 @@ snBackSync();
   /* 트리거 */
   $("ks-cd").addEventListener("click", () => snCountdown(() => pwaToast("시작!")));
   $("ks-vic").addEventListener("click", () => snVictory("bor"));
-  $("ks-upd").addEventListener("click", () => pwaToast("🌙 새 버전 도착!", "새로고침", () => pwaToast("데모라서 진짜로는 안 껐어")));
-  document.querySelectorAll(".ks-toast").forEach((b) => b.addEventListener("click", () => pwaToast("토스트는 2.4초 뒤에 사라져")));
+  $("ks-upd").addEventListener("click", () => pwaToast("🌙 새 버전 도착!", "새로고침", () => pwaToast("데모라서 진짜로는 안 껐어요")));
+  document.querySelectorAll(".ks-toast").forEach((b) => b.addEventListener("click", () => pwaToast("토스트는 2.4초 뒤에 사라져요")));
 })();
 
 /* --- 공통 연출: 폰 전달 가림막 (비밀 전달 게임 공용) --- */

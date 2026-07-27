@@ -5,7 +5,11 @@
    호스트가 별(스타) 중심이 되어 게스트별 1:1 연결을 들고 중계한다.
    ponytail: 자동 재연결 없음(끊기면 재초대) — 게임 붙일 때 필요해지면 추가. */
 
-let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0, wake: null, ka: 0 };
+let mp = { role: null, name: "", spr: "bor", peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: "bor", rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0, wake: null, ka: 0, room: null, myCode: null, pasteExpect: null, pasteOnOk: null };
+
+/* 방 이름 — 깨지거나 재시작됐을 때 "어느 방이었는지" 눈으로 확인할 가시적 앵커 (호스트가 만들어 게스트에 전파) */
+const MP_ROOM_WORDS = ["게르", "초원", "별밤", "낙타", "은하", "달빛", "설산", "바람", "호수", "모닥불"];
+function mpMakeRoom(){ return MP_ROOM_WORDS[Math.floor(Math.random() * MP_ROOM_WORDS.length)] + "-" + (Math.floor(Math.random() * 90) + 10); }
 
 /* 아바타로 쓸 캐릭터 스프라이트 (오브젝트 제외, 동물·텡그리 20종) */
 const MP_AVATARS = ["bor", "fox", "wolf", "crow", "hawk", "hedgehog", "mole", "rooster", "goat", "squirrel", "rabbit", "otter", "turtle", "badger", "crane", "camel", "owl2", "marmot", "owlprof", "tengri"];
@@ -113,8 +117,19 @@ async function mpCam(){
 function mpCamOff(){
   if (mp.stream){ mp.stream.getTracks().forEach((t) => t.stop()); mp.stream = null; }
   const v = $("mp-video"); if (v) v.srcObject = null;
+  const z = $("mp-zoom"); if (z){ z.style.display = "none"; z.oninput = null; }
 }
-function mpStopScan(){ cancelAnimationFrame(mp.scanRAF); mp.scanRAF = 0; mpCamOff(); }
+/* 카메라 줌 슬라이더 — 하드웨어 줌을 지원하는 폰에서만 노출 (촘촘한 QR을 당겨서 크게 잡게) */
+function mpZoom(stream){
+  const el = $("mp-zoom"), track = stream.getVideoTracks()[0];
+  const caps = track.getCapabilities ? track.getCapabilities() : {};
+  if (!caps.zoom){ el.style.display = "none"; return; }
+  el.min = caps.zoom.min; el.max = caps.zoom.max; el.step = caps.zoom.step || 0.1;
+  el.value = (track.getSettings().zoom) || caps.zoom.min;
+  el.style.display = "";
+  el.oninput = () => { try { track.applyConstraints({ advanced: [{ zoom: +el.value }] }); } catch (e) { /* 무시 */ } };
+}
+function mpStopScan(){ cancelAnimationFrame(mp.scanRAF); mp.scanRAF = 0; mp.pasteExpect = null; mpCamOff(); }
 /* 스캔 결과 문자열 처리 (BarcodeDetector·jsQR 공통) */
 function mpOnScan(text, expect, onOk, ts){
   if (!text) return;
@@ -129,10 +144,18 @@ function mpOnScan(text, expect, onOk, ts){
   }
 }
 async function mpScan(expect, onOk){
-  const stream = await mpCam();
+  mp.pasteExpect = expect; mp.pasteOnOk = onOk; mpCodeUI(); /* 코드 붙여넣기 폴백은 카메라와 무관하게 항상 열어둠 */
+  let stream;
+  try { stream = await mpCam(); }
+  catch (e){ /* 카메라를 아예 못 열면 코드 붙여넣기로만 진행 */
+    $("mp-cam").style.display = "none"; mpCodeUI(); $("mp-code-paste").open = true;
+    alert("카메라를 못 열었어요" + (e && e.name === "NotAllowedError" ? " (권한 거부)" : "") + " — 아래 ‘코드로 붙여넣기’로 연결해 주세요");
+    return;
+  }
   const video = $("mp-video");
   video.srcObject = stream;
   await video.play();
+  mpZoom(stream);
   /* 안드로이드 크롬 네이티브 스캐너 — jsQR보다 빠르고 촘촘한 QR에 강함. 없으면(아이폰 등) jsQR 폴백 */
   let bd = null;
   try { if ("BarcodeDetector" in window) bd = new BarcodeDetector({ formats: ["qr_code"] }); } catch (e) { bd = null; }
@@ -168,13 +191,24 @@ function mpFlow(tag, msg){
   $("mp-step-msg").textContent = msg;
   $("mp-qr").style.display = "none";
   $("mp-cam").style.display = "none";
+  mp.myCode = null; mp.pasteExpect = null; mpCodeUI(); /* 새 단계 진입 → 코드 UI 초기화 */
 }
 function mpShowQr(code, tag, msg){
   mpFlow(tag, msg);
   mpDrawQr($("mp-qr"), code);
   $("mp-qr").style.display = "";
+  mp.myCode = code; mpCodeUI(); /* 이 QR을 코드로도 복사 가능하게 */
 }
 function mpShowCam(){ $("mp-cam").style.display = ""; }
+/* 코드 복사/붙여넣기 컨트롤을 현재 단계(복사할 코드 있음 / 스캔 중)에 맞춰 노출 */
+function mpCodeUI(){
+  const copy = !!mp.myCode, paste = !!mp.pasteExpect;
+  $("mp-code-copy").style.display = copy ? "" : "none";
+  if (!copy){ const o = $("mp-code-out"); o.style.display = "none"; o.value = ""; }
+  $("mp-code-paste").style.display = paste ? "" : "none";
+  if (!paste){ $("mp-code-paste").open = false; $("mp-code-in").value = ""; }
+  $("mp-code").style.display = (copy || paste) ? "" : "none";
+}
 
 /* ---------- 연결 공통 ---------- */
 function mpNewPc(){ return new RTCPeerConnection({ iceServers: [] }); }
@@ -272,7 +306,7 @@ function mpRoster(){
   const on = mp.peers.filter((p) => p.on);
   const names = [mp.name].concat(on.map((p) => p.name || "게스트"));
   const sprs = [mp.spr].concat(on.map((p) => p.spr || MP_DEF_SPR));
-  mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs }));
+  mp.peers.forEach((p) => mpSend(p.chan, { t: "roster", names, sprs, room: mp.room }));
   if (typeof mpGamePeers === "function") mpGamePeers(); /* 여러 폰 게임에 참가자 변동 통지 (net.js) */
 }
 async function mpInvite(){
@@ -347,7 +381,7 @@ async function mpJoin(){
           if (msg.t === "ping") mpSend(mp.hostChan, { t: "pong", ts: msg.ts });
           if (msg.t === "pong"){ mp.rtt = Math.max(1, Math.round(performance.now() - msg.ts)); mpRoom(); }
           if (msg.t === "poke") mpPoke(String(msg.from || "?").slice(0, 8), msg.emo);
-          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mp.rosterSprs = (msg.sprs || []).map(mpSprOk); mpRoom(); }
+          if (msg.t === "roster"){ mp.hostName = String(msg.names[0] || "호스트").slice(0, 8); mp.hostSpr = mpSprOk(msg.sprs && msg.sprs[0]); mp.rosterNames = msg.names.map((n) => String(n).slice(0, 8)); mp.rosterSprs = (msg.sprs || []).map(mpSprOk); if (msg.room) mp.room = String(msg.room).slice(0, 16); mpRoom(); }
           if (typeof mpGameRecv === "function") mpGameRecv(mp.hostName || "호스트", msg); /* nav·게임 메시지 라우팅 (net.js) */
         };
       };
@@ -392,6 +426,10 @@ function mpChip(name, spr){
 }
 function mpRoom(){
   mpView("mp-room");
+  const rn = $("mp-room-name"); /* 방이름 배너 — 재시작·재접속 때 "같은 방인지" 눈으로 확인 */
+  if (mp.room){ rn.style.display = ""; rn.textContent = ""; rn.append(document.createTextNode("방 "));
+    const b = document.createElement("b"); b.textContent = mp.room; rn.append(b); } /* mp.room: 호스트 상수생성 or 원격값 slice → textContent (XSS 안전) */
+  else rn.style.display = "none";
   const box = $("mp-peers");
   box.innerHTML = "";
   if (mp.role === "host"){
@@ -431,7 +469,7 @@ function mpReset(){
   mp.peers.forEach((p) => { try { p.pc.close(); } catch (e) { /* 무시 */ } });
   if (mp.hostPc){ try { mp.hostPc.close(); } catch (e) { /* 무시 */ } }
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } }
-  mp = { role: null, name: "", spr: mpSprOk(prefs.mpSpr), peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: MP_DEF_SPR, rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0 };
+  mp = { role: null, name: "", spr: mpSprOk(prefs.mpSpr), peers: [], hostChan: null, hostPc: null, hostName: "", hostSpr: MP_DEF_SPR, rosterNames: null, rosterSprs: null, rtt: null, stream: null, scanRAF: 0, timers: [], warnTs: 0, room: null, myCode: null, pasteExpect: null, pasteOnOk: null };
   /* 대표로 저장해둔 이름·캐릭터 미리 채우기 */
   if (prefs.mpName) $("mp-name").value = prefs.mpName;
   mpRenderAvatars();
@@ -453,6 +491,7 @@ function mpEnter(){
 $("mp-host-btn").addEventListener("click", () => {
   if (!("RTCPeerConnection" in window) || !("CompressionStream" in window)) return alert("이 폰 브라우저는 연결 기능을 지원하지 않아요");
   mp.role = "host";
+  mp.room = mpMakeRoom();
   mp.name = ($("mp-name").value.trim() || "호스트").slice(0, 8);
   prefs.mpName = $("mp-name").value.trim(); savePrefs();
   mpInvite();
@@ -468,6 +507,21 @@ $("mp-flow-cancel").addEventListener("click", () => {
   mpStopScan();
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } mp.pendingPc = null; }
   if (mp.role === "host" && mp.peers.length) mpRoom(); else mpReset();
+});
+/* 코드 복사 — 카메라 대신 코드로 연결할 때 내 초대/답장 코드를 복사 (오프라인이면 카톡 등으로 전달) */
+$("mp-code-copy").addEventListener("click", async () => {
+  if (!mp.myCode) return;
+  try { await navigator.clipboard.writeText(mp.myCode); snSfx("select"); alert("연결코드를 복사했어요 — 상대 폰의 붙여넣기 칸에 넣어 주세요"); }
+  catch (e){ const o = $("mp-code-out"); o.style.display = ""; o.value = mp.myCode; o.focus(); o.select();
+    alert("자동 복사가 안 돼요 — 아래 칸의 코드를 길게 눌러 전체 선택·복사해 주세요"); }
+});
+/* 코드 붙여넣기 — 스캔 대신 상대 코드를 넣어 연결 (QR 스캔과 같은 경로로 처리) */
+$("mp-code-go").addEventListener("click", () => {
+  const v = ($("mp-code-in").value || "").trim();
+  if (!v) return;
+  if (!v.startsWith("SN1")){ alert("연결코드 형식이 아니에요 — 상대 폰의 코드를 그대로 붙여넣어 주세요"); return; }
+  if (!mp.pasteExpect) return;
+  mpOnScan(v, mp.pasteExpect, mp.pasteOnOk, performance.now());
 });
 $("mp-invite-more").addEventListener("click", mpInvite);
 $("mp-ping").addEventListener("click", () => {

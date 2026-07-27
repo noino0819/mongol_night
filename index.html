@@ -622,6 +622,11 @@
   .mp-emo button{flex:0 0 auto;background:var(--night2);border:2px solid var(--line);border-radius:10px;padding:6px;line-height:0;cursor:pointer}
   .mp-poke{position:fixed;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;font-size:min(64px,12vw);font-weight:800;color:var(--milk);z-index:80;pointer-events:none;animation:mpPokePop .3s steps(3) both}
   .mp-poke span{font-size:18px}
+  .mp-zoom{position:absolute;left:12%;right:12%;bottom:8px;width:76%;accent-color:var(--fire)}
+  #mp-code{margin-bottom:10px}
+  .mp-code-sum{font-size:13px;color:var(--dim);cursor:pointer;padding:8px 0;text-align:center}
+  .mp-room-name{display:flex;align-items:center;gap:8px;justify-content:center;background:var(--card);border:1.5px solid var(--fire);border-radius:12px;padding:12px;margin-bottom:14px;font-weight:800;font-size:15px;color:var(--milk)}
+  .mp-room-name b{color:var(--fire);letter-spacing:.02em;font-size:18px}
   @keyframes mpPokePop{from{transform:scale(.4)}to{transform:scale(1)}}
 </style>
 </head>
@@ -801,10 +806,20 @@
       <span class="tag" id="mp-step-tag"></span>
       <div class="hint" id="mp-step-msg" style="margin:0"></div>
       <canvas id="mp-qr" style="display:none"></canvas>
-      <div class="mp-cam" id="mp-cam" style="display:none"><video id="mp-video" playsinline muted></video><div class="mp-cam-frame"></div></div>
+      <div class="mp-cam" id="mp-cam" style="display:none"><video id="mp-video" playsinline muted></video><div class="mp-cam-frame"></div><input id="mp-zoom" class="mp-zoom" type="range" min="1" max="1" step="0.1" value="1" style="display:none"></div>
+      <div id="mp-code" style="display:none">
+        <button class="btn ghost" id="mp-code-copy" style="display:none;margin-bottom:8px">내 연결코드 복사</button>
+        <textarea id="mp-code-out" class="mp-input" rows="2" readonly style="display:none;margin-bottom:8px"></textarea>
+        <details id="mp-code-paste" style="display:none">
+          <summary class="mp-code-sum">카메라가 안 잡히면 — 코드로 붙여넣기</summary>
+          <textarea id="mp-code-in" class="mp-input" rows="2" placeholder="상대 폰에서 복사한 연결코드를 붙여넣어요" style="margin:8px 0"></textarea>
+          <button class="btn" id="mp-code-go">코드로 연결하기</button>
+        </details>
+      </div>
       <button class="btn ghost" id="mp-flow-cancel" data-back>그만두기</button>
     </div>
     <div id="mp-room" style="display:none">
+      <div id="mp-room-name" class="mp-room-name" style="display:none"></div>
       <div class="field"><label id="mp-room-label">연결된 폰</label><div id="mp-peers"></div></div>
       <div class="field" id="mp-roster-field" style="display:none"><label>이 방의 캐릭터</label><div id="mp-roster" class="mp-roster"></div></div>
       <button class="btn" id="mp-invite-more">게스트 초대</button>
