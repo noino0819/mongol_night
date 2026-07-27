@@ -549,6 +549,9 @@ if (prefs.onboarded) coachShow("fav"); /* 온보딩 직후가 아닌 재방문 �
    (어차피 재입장할 때도 리셋을 돈다). mp만 제외 — 얘 리셋은 mpEnter(), 즉 '입장'이다. */
 function snLeave(from, to){
   if (from && from !== to && from !== "mp" && SN_RESETS[from]) SN_RESETS[from]();
+  /* mp는 리셋을 '입장'(mpEnter)에서 돌지만, 연결 전 flow(초대/스캔)에서 상단 '홈'으로 이탈하면
+     카메라·스캔 RAF가 방치돼 카메라가 켜진 채 남는다 → 연결 없을 때만 스캔 정리 (프라이버시) */
+  if (from === "mp" && to !== "mp" && typeof mpLive === "function" && !mpLive() && typeof mpStopScan === "function") mpStopScan();
   snBgmStop();
 }
 
