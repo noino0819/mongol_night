@@ -222,6 +222,9 @@ function mpKeepalive(){
 function mpFail(e){
   alert("연결 준비에 실패했어요" + (e && e.name === "NotAllowedError" ? " — 카메라 허용이 필요해요" : ""));
   mpStopScan();
+  /* 준비 중이던 연결 정리 — 안 닫으면 재시도 때마다 이전 RTCPeerConnection이 방치됨 */
+  if (mp.hostPc){ try { mp.hostPc.close(); } catch (e2) { /* 무시 */ } mp.hostPc = null; }
+  if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e2) { /* 무시 */ } mp.pendingPc = null; }
   mp.peers.length || mp.hostChan ? mpRoom() : mpView("mp-role");
 }
 

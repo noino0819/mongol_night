@@ -110,13 +110,7 @@ document.addEventListener("click", (e) => {
       }
       return;
     }
-    if (target !== "home"){
-      const need = { liar: 3, mafia: 4, choseong: 0, balance: 0, roulette: 2, fruit: 2, omok: 0, forehead: 0, life: 2, drawrelay: 3, catchmind: 3, wolf: 4, bomb: 3, tele: 3, ta: 2 }[target] || 0;
-      if (roster.length < need && !connected){ /* 여러 폰 연결 중이면 등록 일행 대신 연결된 폰이 참가자 → 게이트 통과 */
-        alert("이 게임은 " + need + "명 이상 필요해요!\n설정(⚙️)에서 일행을 등록하거나, 📡 폰 연결로 붙여주세요 🙌");
-        return;
-      }
-    }
+    /* 인원 게이트는 홈 카드 경로(shell.js launchGame·SN_CATS need)가 담당 — 게임은 [data-go]로 진입하지 않음 */
     if (target === "home" && typeof mpAmHost === "function" && mpAmHost() && connected){ mp.game = null; mpNav("home"); } /* 호스트가 나가면 게스트도 연결방으로 */
     resetGame(target);
     go(target);
