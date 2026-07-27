@@ -3,6 +3,8 @@
 import { createRequire } from "module";
 import assert from "assert";
 const require = createRequire(import.meta.url);
+/* vg.js는 로드 시 셸 전역(snAddScreen 등)을 호출 — node require용으로 no-op 스텁 주입 후 순수 로직만 추출 */
+globalThis.snAddScreen = globalThis.snAddCss = globalThis.snAddSprites = globalThis.snRegisterGame = () => {};
 const { vgWinnerOrder, vgDeal } = require("../games/vg.js");
 
 /* 1. 배당 순서 — 단독 최다 / 동률 상쇄 / 차순위 승계 */

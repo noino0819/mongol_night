@@ -16,14 +16,14 @@ assert(nbValid("012", 3) && !nbValid("112", 3) && !nbValid("12", 3) && !nbValid(
 
 /* --- 승패 상태머신: 실제 nbSubmitGuess 를 스텁 환경에서 구동 --- */
 const nbSubmitGuess = new Function(
-  "nb", "nbJudge", "nbValid", "haptic", "nbRenderLogs", "nbBeginTurn", "nbEnd",
+  "nb", "nbJudge", "nbValid", "haptic", "nbRenderLogs", "nbBeginTurn", "nbEnd", "snSfx",
   "return (" + grab("nbSubmitGuess") + ")"
 );
 function drive(secretA, secretB, guessesA, guessesB){
   // 턴 순서: A(0),B(1),A,B... A는 secretB를, B는 secretA를 맞힌다
   const nb = { digits: 3, secret: [secretA, secretB], logs: [[], []], turn: 0, solved: [0, 0], finalPending: false, entry: "" };
   let ended = null, ai = 0, bi = 0;
-  const submit = nbSubmitGuess(nb, nbJudge, nbValid, () => {}, () => {}, () => { pull(); }, () => { ended = nb; });
+  const submit = nbSubmitGuess(nb, nbJudge, nbValid, () => {}, () => {}, () => { pull(); }, () => { ended = nb; }, () => {});
   function pull(){
     if (ended) return;
     nb.entry = nb.turn === 0 ? guessesA[ai++] : guessesB[bi++];

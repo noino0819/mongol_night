@@ -287,7 +287,7 @@ function mbNextUnit(){
     cur.skip = false;
     cur.turns++;
     mbRender("");
-    lifeModal("😴", cur.label + " 한 턴 쉬기", "이번 차례는 통과!", mbAfterTurn);
+    lifeModal("😴", escHtml(cur.label) + " 한 턴 쉬기", "이번 차례는 통과!", mbAfterTurn);
     return;
   }
   mb.busy = false;
@@ -306,7 +306,7 @@ function mbEndTurn(wasDouble){
   const cur = mb.units[mb.turn];
   if (wasDouble && cur.alive && !cur.jail){
     mb.busy = false;
-    lifeModal("🎲", "더블!", cur.label + " 한 번 더 굴리세요!", () => { mbRender(""); });
+    lifeModal("🎲", "더블!", escHtml(cur.label) + " 한 번 더 굴리세요!", () => { mbRender(""); });
     return;
   }
   cur.turns++;
@@ -447,7 +447,7 @@ function mbResolveTile(cur, dbl){
       const toll = z.t * (mb.ger[i] ? 2 : 1);
       if (cur.freepass > 0){
         cur.freepass--;
-        lifeModal("🎫", "통행료 면제권 사용!", owner.label + "의 " + t.nm + " 통행료 " + toll + " 면제!", () => mbEndTurn(dbl));
+        lifeModal("🎫", "통행료 면제권 사용!", escHtml(owner.label) + "의 " + t.nm + " 통행료 " + toll + " 면제!", () => mbEndTurn(dbl));
         return;
       }
       mbPay(cur, owner, toll, t.nm, dbl);
@@ -496,11 +496,11 @@ function mbDuel(cur, dbl){
   const game = MB_DUELS[Math.floor(Math.random() * MB_DUELS.length)];
   const a = cur.members[Math.floor(Math.random() * cur.members.length)];
   const b = rival.members[Math.floor(Math.random() * rival.members.length)];
-  mbAsk("⚔️", cur.label + " vs " + rival.label,
-    "대표 선수: <b>" + a + "</b> vs <b>" + b + "</b><br><br>" + game + "<br><br>판돈: 🐑 3마리 — 지금 실제로 대결하세요!",
-    cur.label.slice(0, 8) + " 승!", rival.label.slice(0, 8) + " 승!",
-    () => { const t = Math.min(3, rival.sheep); rival.sheep -= t; cur.sheep += t; snSfx("coin"); lifeModal("🏆", cur.label + " 승리!", "양 " + t + "마리 획득!", () => mbEndTurn(dbl)); },
-    () => { const t = Math.min(3, cur.sheep); cur.sheep -= t; rival.sheep += t; lifeModal("😭", rival.label + " 승리!", "양 " + t + "마리 강탈당함...", () => mbEndTurn(dbl)); });
+  mbAsk("⚔️", escHtml(cur.label) + " vs " + escHtml(rival.label),
+    "대표 선수: <b>" + escHtml(a) + "</b> vs <b>" + escHtml(b) + "</b><br><br>" + game + "<br><br>판돈: 🐑 3마리 — 지금 실제로 대결하세요!",
+    escHtml(cur.label.slice(0, 8)) + " 승!", escHtml(rival.label.slice(0, 8)) + " 승!",
+    () => { const t = Math.min(3, rival.sheep); rival.sheep -= t; cur.sheep += t; snSfx("coin"); lifeModal("🏆", escHtml(cur.label) + " 승리!", "양 " + t + "마리 획득!", () => mbEndTurn(dbl)); },
+    () => { const t = Math.min(3, cur.sheep); cur.sheep -= t; rival.sheep += t; lifeModal("😭", escHtml(rival.label) + " 승리!", "양 " + t + "마리 강탈당함...", () => mbEndTurn(dbl)); });
 }
 function mbPay(cur, owner, toll, landName, dbl){
   const myIdx = mb.units.indexOf(cur);
