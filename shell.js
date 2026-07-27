@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v3.0.17";
+  const VER = "v3.0.18";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -330,22 +330,22 @@ renderChips();
    ================================================================ */
 const SN_CATS = [
   { id:"psych", emoji:"🕵️", name:"심리전", spr:"fox", games:[
-    { id:"liar",     go:"liar",      need:3, name:"라이어",        spr:"fox",      desc:"말로 속이고 눈치로 잡아요",     p:[3,8],  t:15 },
+    { id:"liar",     go:"liar",      need:3, name:"라이어",        spr:"fox",      desc:"말로 속이고 눈치로 잡아",       p:[3,8],  t:15 },
     { id:"mafia",    go:"mafia",     need:4, name:"마피아",        spr:"crow",     desc:"밤이 되면 누군가 사라진다",     p:[4,10], t:20 },
     { id:"were",     go:"wolf",      need:4, name:"늑대인간",      spr:"wolf",     desc:"보름달 아래 정체 숨기기",       p:[4,10], t:25 } ] },
   { id:"speed", emoji:"⚡", name:"스피드", spr:"mole", games:[
-    { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐요",   p:[2,6],  t:10 },
-    { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨요",            p:[3,10], t:5 },
+    { id:"fruit",    go:"fruit",     need:2, name:"과일 종!",      spr:"hedgehog", desc:"진짜 할리갈리, 합 5면 종 쳐",     p:[2,6],  t:10 },
+    { id:"bomb",     go:"bomb",      need:3, name:"폭탄 돌리기",   spr:"mole",     desc:"터지기 전에 넘겨",              p:[3,10], t:5 },
     { id:"buzzer",   go:"bz",        need:2, name:"버저 퀴즈",     spr:"rooster",  desc:"먼저 누르면 임자",              p:[2,8],  t:15 },
-    { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐가 있을까요",       p:[3,8],  t:10 },
-    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀요",            p:[2,8],  t:10 },
+    { id:"forehead", go:"forehead",  need:0, name:"이마 퀴즈",     spr:"goat",     desc:"내 이마에 뭐 있게",             p:[3,8],  t:10 },
+    { id:"choseong", go:"choseong",  need:0, name:"초성 퀴즈",     spr:"squirrel", desc:"ㄱㄴ만 보고 맞혀",              p:[2,8],  t:10 },
     { id:"colorhunt",go:"cf",        need:0, name:"색찾기",        spr:"rooster",  desc:"카메라로 목표색 찾기 · 폰 여럿",  p:[2,8],  t:10 } ] },
   { id:"draw", emoji:"🎨", name:"그림", spr:"rabbit", games:[
     { id:"relay",    go:"drawrelay", need:3, name:"그림 릴레이",   spr:"rabbit",   desc:"그림으로 전하는 전화게임",      p:[3,10], t:15 },
-    { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마세요",    p:[3,8],  t:15 } ] },
+    { id:"drawq",    go:"catchmind", need:3, name:"그림 퀴즈",     spr:"otter",    desc:"내 그림 실력을 믿지 마",        p:[3,8],  t:15 } ] },
   { id:"board", emoji:"🎲", name:"보드·두뇌", spr:"bor", games:[
     { id:"journey",  go:"life",      need:2, name:"몽골 대장정 2.0", spr:"bor",    desc:"초원 횡단 보드 레이스",         p:[2,6],  t:40 },
-    { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아요",         p:[2,2],  t:10 },
+    { id:"omok",     go:"omok",      need:0, name:"오목",          spr:"turtle",   desc:"다섯 알을 먼저 놓아라",         p:[2,2],  t:10 },
     { id:"dicebet",  go:"lv",        need:2, name:"주사위 배팅",   spr:"badger",   desc:"눈치로 거는 상금 독식전",       p:[2,5],  t:15 },
     { id:"vegas",    go:"vg",        need:0, name:"라스베가스",    spr:"hawk",     desc:"카지노 6곳 지폐 쟁탈전 · 폰 여럿",  p:[2,6],  t:20 },
     { id:"baseball", go:"nb",        need:2, name:"숫자야구",      spr:"crane",    desc:"3자리 숫자 추리 대결",          p:[2,4],  t:15 },
@@ -354,11 +354,11 @@ const SN_CATS = [
     { id:"balance",  go:"balance",   need:0, name:"밸런스 게임",   spr:"camel",    desc:"A냐 B냐 그것이 문제",           p:[2,10], t:10 },
     { id:"tele",     go:"tele",      need:3, name:"텔레파시",      spr:"owl2",     desc:"같은 생각이면 승리",            p:[3,10], t:10 },
     { id:"urimal",   go:"um",        need:2, name:"우리말 겨루기", spr:"crane",    desc:"맞춤법으로 서열 정리",     p:[2,10], t:15 },
-    { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려요",          p:[2,10], t:5 },
+    { id:"roulette", go:"roulette",  need:2, name:"복불복 룰렛",   spr:"marmot",   desc:"운명의 화살을 돌려",            p:[2,10], t:5 },
     { id:"quiz",     go:"gq",        need:2, name:"상식퀴즈",      spr:"owlprof",  desc:"초원의 골든벨",                 p:[2,10], t:20 } ] },
   { id:"story", emoji:"📜", name:"스토리", spr:"tengri", games:[
     { id:"gobi",     go:"ta",        need:2, name:"고비의 별",     spr:"tengri",   desc:"텡그리와 떠나는 3일 밤",        p:[2,6],  t:35 },
-    { id:"teller",   go:"gm",        need:2, name:"이야기꾼의 밤", spr:"fire",     desc:"내가 GM, 앱은 상황과 주사위만",  p:[2,8],  t:25 } ] }
+    { id:"teller",   go:"gm",        need:2, name:"이야기꾼의 밤", spr:"fire",     desc:"네가 GM, 앱은 상황과 주사위만",  p:[2,8],  t:25 } ] }
 ];
 const SN_GAME_BY_ID = {};
 SN_CATS.forEach((c) => c.games.forEach((g) => { SN_GAME_BY_ID[g.id] = g; }));
