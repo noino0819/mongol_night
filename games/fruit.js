@@ -10,9 +10,14 @@ snAddScreen("fruit", `
         <div class="seg" id="fruit-players"></div>
       </div>
       <div class="field" id="fruit-lag" style="display:none">
-        <label>지연 보정 <b id="fruit-lag-val" style="color:var(--fire)"></b></label>
-        <input type="range" id="fruit-lag-range" min="0" max="500" step="50" style="width:100%">
-        <p class="hint" style="margin:4px 0 0">여러 폰은 호스트가 살짝 유리해요. 각 폰이 <b>본 순간→누른 순간</b>(반응속도)으로 겨루게 보정해요. <b>0이면 끔</b>(먼저 도착한 폰 우선). 값이 클수록 느린 폰까지 기다려요 — 직접 눌러보고 맞춰요.</p>
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="fruit-lag-auto"> 지연 자동 보정 <b id="fruit-lag-meas" style="color:var(--fire);font-size:12px"></b>
+        </label>
+        <div id="fruit-lag-manual">
+          <label>수동: 대기창 <b id="fruit-lag-val" style="color:var(--fire)"></b></label>
+          <input type="range" id="fruit-lag-range" min="0" max="500" step="50" style="width:100%">
+        </div>
+        <p class="hint" style="margin:4px 0 0">여러 폰은 호스트가 살짝 유리해요. 각 폰의 <b>반응속도</b>(본 순간→누른 순간)로 겨루게 보정해요. 자동은 5초마다 측정된 지연에 맞추고, 수동은 <b>0=끔</b>(먼저 도착한 폰 우선)부터 직접 조절해요.</p>
       </div>
       <button class="btn mt" id="fruit-start">카드 돌려! 시작!</button>
     </div>
@@ -79,7 +84,14 @@ const FRUITS = ["strawberry","banana","kiwi","grape"]; /* SPR 스프라이트 �
 const FRUIT_DIST = [[1,5],[2,3],[3,3],[4,2],[5,1]];
 const FZ_LAYOUT = { 2:["bc","tc"], 3:["bc","tl","tr"], 4:["bl","br","tl","tr"], 5:["bl","br","tl","tr","lm"], 6:["bl","br","tl","tr","lm","rm"] };
 let fr = { sel: [], players: [], decks: [], faceup: [], turn: 0, locked: false, flipLock: false, running: false, multi: false, toId: null, flId: null, lastRender: 0, votes: [], voteId: null };
-function fruitLagMs(){ const v = localStorage.getItem("fruit_lag"); return v == null ? 250 : +v; }
+function fruitLagAuto(){ return (localStorage.getItem("fruit_lag") || "auto") === "auto"; }
+function mpMaxRtt(){ return (typeof mp === "object" && mp && mp.peers) ? mp.peers.reduce((m, p) => Math.max(m, p.rtt || 0), 0) : 0; }
+/* 대기창(ms): auto면 측정 최대 RTT를 50 단위로 올림(연결 전엔 200 폴백), 아니면 저장값(0=끔) */
+function fruitLagMs(){
+  const v = localStorage.getItem("fruit_lag");
+  if (v == null || v === "auto"){ const r = mpMaxRtt(); return r ? Math.min(500, Math.ceil(r / 50) * 50) : 200; }
+  return +v;
+}
 let frMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(frMode) */
 
 function fruitReset(){
@@ -94,10 +106,16 @@ function fruitReset(){
   const lag = $("fruit-lag"), lr = $("fruit-lag-range"), lv = $("fruit-lag-val");
   if (lag){
     lag.style.display = frM === "multi" ? "" : "none";
-    lr.value = fruitLagMs();
-    const show = () => lv.textContent = (+lr.value ? lr.value + "ms" : "끔");
+    const auto = fruitLagAuto();
+    $("fruit-lag-auto").checked = auto;
+    $("fruit-lag-manual").style.opacity = auto ? .4 : 1;
+    lr.disabled = auto;
+    lr.value = auto ? fruitLagMs() : (+localStorage.getItem("fruit_lag") || 0);
+    const show = () => lv.textContent = (auto ? "자동 " + fruitLagMs() + "ms" : (+lr.value ? lr.value + "ms" : "끔"));
     show();
-    lr.oninput = () => { localStorage.setItem("fruit_lag", lr.value); show(); };
+    const r = mpMaxRtt(); $("fruit-lag-meas").textContent = r ? "· 측정 최대 " + r + "ms" : "· 측정 중…";
+    $("fruit-lag-auto").onchange = () => { localStorage.setItem("fruit_lag", $("fruit-lag-auto").checked ? "auto" : String(lr.value || 0)); fruitReset(); };
+    lr.oninput = () => { localStorage.setItem("fruit_lag", String(lr.value)); show(); };
   }
   const box = $("fruit-players");
   box.innerHTML = "";
