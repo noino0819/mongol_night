@@ -171,10 +171,10 @@ function drReveal(){
   $("dr-chain").innerHTML = dr.chain.map((c, i) => {
     const label = c.type === "word" ? "✍️ 제시어" : c.type === "draw" ? "🎨 그림" : "🤔 추측";
     const body = c.type === "draw" ? '<img src="' + c.v + '" alt="그림">' : '<div class="tx">' + escHtml(c.v) + '</div>';
-    return '<div class="dr-item"><div class="by">' + (i + 1) + '. ' + label + ' — ' + c.by + '</div>' + body + '</div>';
+    return '<div class="dr-item"><div class="by">' + (i + 1) + '. ' + label + ' — ' + escHtml(c.by) + '</div>' + body + '</div>';
   }).join("");
 }
-function escHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+/* escHtml은 core.js에 공용 정의 (중복 제거 — 단일 소스) */
 
 /* --- 캔버스 드로잉 --- */
 function drCanvasInit(){

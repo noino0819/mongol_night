@@ -167,7 +167,7 @@ $("cm-godraw").addEventListener("click", () => {
 function cmRenderScores(){
   const drawerIdx = cm.turn % cm.players.length;
   $("cm-scores").innerHTML = cm.players.map((n, i) =>
-    '<div class="sp' + (i === drawerIdx ? " now" : "") + '">' + n + ' ' + cm.scores[i] + '점</div>'
+    '<div class="sp' + (i === drawerIdx ? " now" : "") + '">' + escHtml(n) + ' ' + cm.scores[i] + '점</div>'
   ).join("");
 }
 holdReveal($("cm-peek"),
@@ -211,7 +211,7 @@ function cmEnd(){
   const rank = cm.players.map((n, i) => ({ n, s: cm.scores[i] })).sort((a, b) => b.s - a.s);
   const medals = ["🥇","🥈","🥉"];
   $("cm-rank").innerHTML = '<div class="lbl">그림 퀴즈 왕</div><div class="val" style="font-size:19px;line-height:2">' +
-    rank.map((r, i) => (medals[i] || "·") + " " + r.n + " — " + r.s + "점").join("<br>") + '</div>';
+    rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — " + r.s + "점").join("<br>") + '</div>';
 }
 $("cm-again").addEventListener("click", cmReset);
 

@@ -146,9 +146,9 @@ function teReveal(){
     const pts = g.members.length >= 2 ? g.members.length : 0;
     g.members.forEach(i => te.scores[i] += pts);
     return '<div class="mb-teamcard"><b>"' + escHtml(g.label) + '" — ' + (pts ? "각 +" + pts + "점 ✨" : "0점 (혼자만...)") + '</b><span>' +
-      g.members.map(i => te.players[i]).join(", ") + '</span></div>';
+      g.members.map(i => escHtml(te.players[i])).join(", ") + '</span></div>';
   }).join("");
-  $("te-scores").innerHTML = te.players.map((n, i) => '<div class="sp">' + n + ' ' + te.scores[i] + '점</div>').join("");
+  $("te-scores").innerHTML = te.players.map((n, i) => '<div class="sp">' + escHtml(n) + ' ' + te.scores[i] + '점</div>').join("");
   $("te-next").textContent = (te.q + 1 >= te.rounds) ? "최종 결과 보기 →" : "다음 문제 →";
 }
 $("te-next").addEventListener("click", () => {
@@ -161,7 +161,7 @@ function teEnd(){
   const rank = te.players.map((n, i) => ({ n, s: te.scores[i] })).sort((a, b) => b.s - a.s);
   const medals = ["🥇","🥈","🥉"];
   $("te-rank").innerHTML = '<div class="lbl">텔레파시 마스터</div><div class="val" style="font-size:18px;line-height:2">' +
-    rank.map((r, i) => (medals[i] || "·") + " " + r.n + " — " + r.s + "점").join("<br>") + '</div>';
+    rank.map((r, i) => (medals[i] || "·") + " " + escHtml(r.n) + " — " + r.s + "점").join("<br>") + '</div>';
 }
 $("te-again").addEventListener("click", teReset);
 snRegisterGame("tele", teReset);

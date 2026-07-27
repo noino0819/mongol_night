@@ -96,6 +96,7 @@ function vgRoll(){
   vg.rollSeq++; /* 새 굴림 표식 — 모든 폰이 이 번호로 연출 1회만 재생 */
 }
 function vgPlace(face){
+  if (!Number.isInteger(face) || face < 1 || face > 6) return;   /* 게스트 피어가 보낸 face 검증 — 상속 속성(constructor 등)·NaN 인덱싱 차단 */
   if (!vg.roll || !vg.roll.counts[face]) return;
   const c = vg.roll.counts[face];
   const cas = vg.casinos[face - 1];

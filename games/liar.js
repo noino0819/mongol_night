@@ -50,6 +50,7 @@ const liarEsc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").re
 
 /* core.js resetGame("liar") 진입점 — 셋업 화면 + 모드 토글 */
 function liarReset(){
+  if (liarState && liarState.timerId){ clearInterval(liarState.timerId); liarState.timerId = null; }   /* 화면 이탈 시 타이머 정리 — 안 그러면 홈에서도 초읽기·alarm이 계속 돎 */
   $("liar-setup").style.display = "";
   $("liar-pass").style.display = "none";
   $("liar-play").style.display = "none";

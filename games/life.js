@@ -144,9 +144,12 @@ const MB_DUELS = [
 ];
 let mb = {
   mode:"solo", teamN:2, sel:[], teamAssign:[], limit:14,
-  units:[], turn:0, busy:false, doubles:0, owner:{}, ger:{}
+  units:[], turn:0, busy:false, doubles:0, owner:{}, ger:{}, animId:null, tid:null
 };
+/* 주사위·이동 타이머 정리 — 굴리는 중 화면 이탈 시 홈에서 결과 모달이 뜨는 걸 막음 (snLeave가 lifeReset 호출) */
+function mbTimersOff(){ clearInterval(mb.animId); mb.animId=null; clearTimeout(mb.tid); mb.tid=null; }
 function lifeReset(){
+  mbTimersOff(); mb.busy = false;   /* 굴리는 중 이탈해도 타이머 정리 (snLeave 경유) */
   $("life-setup").style.display = ""; $("life-game").style.display = "none"; $("life-end").style.display = "none";
   const box = $("life-players");
   box.innerHTML = "";
@@ -173,7 +176,7 @@ function mbAssignTeams(){
   pool.forEach((n, i) => mb.teamAssign[i % mb.teamN].push(n));
   $("mb-teamview").innerHTML = mb.teamAssign.map((mem, i) =>
     '<div class="mb-teamcard"><b><i style="background:' + LIFE_COLORS[i] + '"></i>' + MB_TEAM_NAMES[i] + '</b><span>' +
-    (mem.length ? mem.join(", ") : "(인원 부족)") + '</span></div>'
+    (mem.length ? mem.map(escHtml).join(", ") : "(인원 부족)") + '</span></div>'
   ).join("");
 }
 (function initMbSetup(){
@@ -232,7 +235,7 @@ function mbRender(diceText, moving){
   $("mb-strip").innerHTML = mb.units.map((u, i) => {
     const lands = Object.keys(mb.owner).filter(k => mb.owner[k] === i).length;
     return '<div class="sp' + (i === mb.turn ? " now" : "") + (u.alive ? "" : " dead") + '"><i style="background:' + u.color + '"></i>' +
-      u.label + ' 🐑' + u.sheep + ' ⛰️' + lands + (u.freepass ? " 🎫" : "") + '</div>';
+      escHtml(u.label) + ' 🐑' + u.sheep + ' ⛰️' + lands + (u.freepass ? " 🎫" : "") + '</div>';
   }).join("");
   const cells = [];
   const tileAt = {};
@@ -263,8 +266,8 @@ function mbRender(diceText, moving){
   }
   const roller = cur.members[cur.rollIdx % cur.members.length];
   const center = '<div class="mb-center">' +
-    '<div class="whom" style="color:' + cur.color + '">' + cur.label + '</div>' +
-    '<div class="roller">🎲 ' + roller + ' 굴릴 차례</div>' +
+    '<div class="whom" style="color:' + cur.color + '">' + escHtml(cur.label) + '</div>' +
+    '<div class="roller">🎲 ' + escHtml(roller) + ' 굴릴 차례</div>' +
     '<div class="dice" id="mb-dice">' + (diceText || "") + '</div>' +
     '<div class="info">' + (mb.limit - cur.turns) + '턴 남음' + (cur.dbl ? " · 🔥이동 2배" : "") + (cur.jail ? " · 🏜️조난 " + cur.jail + "턴" : "") + '</div>' +
     '</div>';
@@ -318,17 +321,17 @@ $("mb-roll").addEventListener("click", () => {
   let ticks = 0;
   const dice = $("mb-dice");
   if (dice) dice.classList.add("mb-rolling");
-  const anim = setInterval(() => {
+  mb.animId = setInterval(() => {
     const d = $("mb-dice");
     if (d) d.textContent = MB_DICE[Math.floor(Math.random() * 6)] + MB_DICE[Math.floor(Math.random() * 6)];
     ticks++;
     if (ticks >= 10){
-      clearInterval(anim);
+      clearInterval(mb.animId); mb.animId = null;
       snSfx("pop");
       const dbl = d1 === d2;
       const d2el = $("mb-dice");
       if (d2el){ d2el.classList.remove("mb-rolling"); d2el.textContent = MB_DICE[d1 - 1] + MB_DICE[d2 - 1] + (dbl ? " 🔥" : ""); }
-      setTimeout(() => mbResolveRoll(cur, d1 + d2, dbl), 550);
+      mb.tid = setTimeout(() => mbResolveRoll(cur, d1 + d2, dbl), 550);
     }
   }, 70);
 });
@@ -374,7 +377,7 @@ function mbMove(cur, steps, dbl){
     if (dir > 0 && cur.pos === 0) salary = true; // 출발지 통과
     remaining--;
     mbRender("", true);
-    setTimeout(hop, 130);
+    mb.tid = setTimeout(hop, 130);
   };
   hop();
 }
@@ -514,13 +517,13 @@ function mbPay(cur, owner, toll, landName, dbl){
   }
   if (cur.sheep >= toll){
     cur.sheep -= toll; owner.sheep += toll;
-    lifeModal("💸", landName + " 통행료!", owner.label + "에게 양 " + toll + "마리 지급" + soldMsg, () => mbEndTurn(dbl));
+    lifeModal("💸", landName + " 통행료!", escHtml(owner.label) + "에게 양 " + toll + "마리 지급" + soldMsg, () => mbEndTurn(dbl));
   } else {
     const rest = cur.sheep;
     owner.sheep += rest; cur.sheep = 0;
     cur.alive = false;
     cur.bankruptOrder = mb.units.filter(u => !u.alive).length;
-    lifeModal("💀", cur.label + " 파산!", "전 재산(" + rest + ")을 넘기고 대장정에서 탈락..." + soldMsg, mbAfterTurn);
+    lifeModal("💀", escHtml(cur.label) + " 파산!", "전 재산(" + rest + ")을 넘기고 대장정에서 탈락..." + soldMsg, mbAfterTurn);
   }
 }
 function mbAsk(em, tt, ds, aLabel, bLabel, onA, onB){
@@ -544,7 +547,7 @@ function mbSettle(){
   $("life-rank").innerHTML = '<div class="lbl">최종 목축왕</div><div class="val" style="font-size:17px;line-height:2">' +
     rank.map((r, i) => {
       const lands = Object.keys(mb.owner).filter(k => mb.owner[k] === mb.units.indexOf(r)).length;
-      return (medals[i] || "·") + " " + r.label + " — " + (r.alive ? "총자산 " + mbAssets(r) + " (🐑" + r.sheep + " · ⛰️" + lands + ")" : "💀 파산");
+      return (medals[i] || "·") + " " + escHtml(r.label) + " — " + (r.alive ? "총자산 " + mbAssets(r) + " (🐑" + r.sheep + " · ⛰️" + lands + ")" : "💀 파산");
     }).join("<br>") + '</div>';
 }
 function lifeModal(em, tt, ds, onClose){

@@ -165,7 +165,7 @@ $("wf-start").addEventListener("click", () => {
   if (snMode(wfMode) === "multi") return wfStartMulti();
   if (wf.sel.length < 4) return alert("4명 이상 필요해요!");
   if (wfSpecialCount() > wf.sel.length + 3) return alert("특수 역할이 카드 수(인원+3장)보다 많아요! 역할을 몇 개 꺼주세요");
-  wf.order = shuffle(wf.sel);
+  wf.order = shuffle(wf.sel).map(wfSafeName);   /* 이름 새니타이즈 한 번 — 이후 모든 렌더 사이트 XSS 안전 (multi 경로와 동일) */
   wf.cards = shuffle(wfRoleList(wf.order.length)); /* 앞 N장 = 플레이어, 뒤 3장 = 가운데 */
   wf.final = wf.cards.slice();
   wf.i = 0; wf.robber = null; wf.tmSwap = null; wf.drunk = null; wf.votes = [];

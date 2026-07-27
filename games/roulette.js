@@ -61,7 +61,7 @@ function rouBurst(emoji){
   }
 }
 
-let spinning = false;
+let spinning = false, rouTid = null;
 $("rou-spin").addEventListener("click", () => {
   if (spinning || roster.length < 2) return;
   spinning = true;
@@ -73,7 +73,7 @@ $("rou-spin").addEventListener("click", () => {
   (function tick(){
     el.textContent = roster[ticks % roster.length];
     ticks++;
-    if (ticks < total){ delay *= 1.09; if (delay > 110) snSfx("spin"); setTimeout(tick, delay); } // ponytail: 초반 빠른 구간은 스킵, 감속(느려지는) 구간만 틱 — 남발 방지
+    if (ticks < total){ delay *= 1.09; if (delay > 110) snSfx("spin"); rouTid = setTimeout(tick, delay); } // ponytail: 초반 빠른 구간은 스킵, 감속(느려지는) 구간만 틱 — 남발 방지
     else {
       const r = ROU_HITS[Math.floor(Math.random() * ROU_HITS.length)];
       $("rou-tag").textContent = r.q;
@@ -111,4 +111,4 @@ $("rou-list-reset").addEventListener("click", () => {
   $("rou-list-edit").value = PENALTIES.join("\n");
   $("rou-list-saved").textContent = "기본값으로 복원됨";
 });
-snRegisterGame("roulette", function(){ $("rou-name").textContent="···"; $("rou-name").className="roulette-name"; $("rou-penalty").textContent=""; $("rou-tag").textContent="오늘의 주인공은?"; });
+snRegisterGame("roulette", function(){ if (rouTid){ clearTimeout(rouTid); rouTid = null; } spinning = false; $("rou-name").textContent="···"; $("rou-name").className="roulette-name"; $("rou-penalty").textContent=""; $("rou-tag").textContent="오늘의 주인공은?"; });

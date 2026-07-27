@@ -1,4 +1,6 @@
 "use strict";
+/* 사용자·피어 입력을 innerHTML에 넣기 전 이스케이프하는 공용 헬퍼 (기반 파일에 정의 — 항상 로드 보장) */
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 /* ================= 데이터 ================= */
 const WORDS = {
   "몽골 스페셜": ["게르","마두금","수태차","허르헉","고비사막","유목민","독수리 사냥꾼","아이락","울란바토르","양떼","별똥별","낙타 트레킹","테를지","홉스골","승마","초원","샤가이 놀이","보르츠","칭기즈칸","오보"],
@@ -146,7 +148,8 @@ function renderChips(){
   roster.forEach((n, i) => {
     const c = document.createElement("div");
     c.className = "chip";
-    c.innerHTML = n + " <b>✕</b>";
+    c.append(n, " ");                                   /* 이름은 textNode로 — 사용자 입력이라 innerHTML 금지(XSS 방지) */
+    const x = document.createElement("b"); x.textContent = "✕"; c.append(x);
     c.addEventListener("click", () => { roster.splice(i, 1); renderChips(); saveRoster(); });
     box.appendChild(c);
   });
@@ -172,7 +175,7 @@ function runPassPhase(container, order, secretFn, onDone){
     const sec = secretFn(idx);
     container.innerHTML =
       '<div class="who-label">지금 볼 사람</div>' +
-      '<div class="who">' + name + ' <small>(' + (idx+1) + '/' + order.length + ')</small></div>' +
+      '<div class="who">' + escHtml(name) + ' <small>(' + (idx+1) + '/' + order.length + ')</small></div>' +
       '<div class="hint" style="margin:0">다른 사람은 화면을 보지 마세요!</div>' +
       '<button class="hold-btn" id="hb"><div class="sub">🤫</div><div class="big">꾹 누르면<br>보여요</div><div class="sub">손을 떼면 사라집니다</div></button>' +
       '<button class="btn pass-next" id="pn" disabled>확인했어요, 다음 사람에게 →</button>';
