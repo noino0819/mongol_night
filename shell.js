@@ -54,7 +54,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
 
 (function pwaInit(){
   /* 버전 단일 소스 — 홈·설정 푸터(.app-version) 모두 채움. CI가 __BUILD__를 커밋 SHA로 치환(로컬은 생략) */
-  const VER = "v3.0.14";
+  const VER = "v3.0.15";
   const BUILD = "__BUILD__";
   const verText = VER + (BUILD.includes("_") ? "" : " · " + BUILD);
   document.querySelectorAll(".app-version").forEach((el) => { el.textContent = verText; });
@@ -116,7 +116,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
       catch (e){ pwa.autoApply = false; pwaToast("확인 실패 — 잠깐 뒤 다시 해 주세요", null, null, { warn: true }); return; }
       /* update() 후 새 워커가 있으면 updatefound→promptUpdate가 자동 적용. 없으면 최신 */
       if (reg.installing || reg.waiting){ pwaToast("새 버전 받는 중…"); }
-      else { pwa.autoApply = false; pwaToast("이미 최신 버전이야 🌙"); }
+      else { pwa.autoApply = false; pwaToast("이미 최신 버전이에요 🌙"); }
     };
     navigator.serviceWorker.register("sw.js").then((reg) => {
       pwa.reg = reg;
@@ -161,7 +161,7 @@ function snConfirm(em, tt, ds, okLabel, onOk){
   if (standalone){
     /* 이미 앱으로 실행 중 — 설정의 설치 버튼은 숨기고, 눌러도 안내만 */
     const si = $("set-install"); if (si) si.style.display = "none";
-    pwa.installAction = () => pwaToast("이미 앱으로 실행 중이야 🎉");
+    pwa.installAction = () => pwaToast("이미 앱으로 실행 중이에요 🎉");
     return;
   }
   if (inApp){
@@ -393,7 +393,7 @@ $("coach-ok").addEventListener("click", () => {
 /* --- 게임 실행 (필터/카드/최근/즐겨찾기 공용 경로) --- */
 function launchGame(g){
   if (!g.go){
-    pwaToast("🚧 " + g.name + "은(는) 준비 중이야, 곧 나와");
+    pwaToast("🚧 " + g.name + "은(는) 준비 중이에요, 곧 나올게요");
     return;
   }
   const connected = typeof mpLive === "function" && mpLive();
