@@ -9,6 +9,11 @@ snAddScreen("fruit", `
         <label>참여자 선택 (탭해서 켜고 끄기, 2~6명)</label>
         <div class="seg" id="fruit-players"></div>
       </div>
+      <div class="field" id="fruit-lag" style="display:none">
+        <label>지연 보정 <b id="fruit-lag-val" style="color:var(--fire)"></b></label>
+        <input type="range" id="fruit-lag-range" min="0" max="500" step="50" style="width:100%">
+        <p class="hint" style="margin:4px 0 0">여러 폰은 호스트가 살짝 유리해요. 각 폰이 <b>본 순간→누른 순간</b>(반응속도)으로 겨루게 보정해요. <b>0이면 끔</b>(먼저 도착한 폰 우선). 값이 클수록 느린 폰까지 기다려요 — 직접 눌러보고 맞춰요.</p>
+      </div>
       <button class="btn mt" id="fruit-start">카드 돌려! 시작!</button>
     </div>
     <div id="fruit-game" style="display:none">
@@ -73,17 +78,27 @@ const FRUITS = ["strawberry","banana","kiwi","grape"]; /* SPR 스프라이트 �
 /* 정식 할리갈리 분포: 과일당 1개×5장, 2개×3장, 3개×3장, 4개×2장, 5개×1장 = 14장 × 4과일 = 56장 */
 const FRUIT_DIST = [[1,5],[2,3],[3,3],[4,2],[5,1]];
 const FZ_LAYOUT = { 2:["bc","tc"], 3:["bc","tl","tr"], 4:["bl","br","tl","tr"], 5:["bl","br","tl","tr","lm"], 6:["bl","br","tl","tr","lm","rm"] };
-let fr = { sel: [], players: [], decks: [], faceup: [], turn: 0, locked: false, flipLock: false, running: false, multi: false, toId: null, flId: null };
+let fr = { sel: [], players: [], decks: [], faceup: [], turn: 0, locked: false, flipLock: false, running: false, multi: false, toId: null, flId: null, lastRender: 0, votes: [], voteId: null };
+function fruitLagMs(){ const v = localStorage.getItem("fruit_lag"); return v == null ? 250 : +v; }
 let frMode = null; /* 유저 토글 선택(null=자동) — 실제 모드는 snMode(frMode) */
 
 function fruitReset(){
   clearTimeout(fr.toId); fr.toId = null;
   clearTimeout(fr.flId); fr.flId = null;
+  clearTimeout(fr.voteId); fr.voteId = null; fr.votes = [];
   fr.running = false; fr.locked = false; fr.flipLock = false; fr.multi = false;
   const ov = $("fruit-mp"); if (ov) ov.style.display = "none"; /* 여러 폰 오버레이 치우기 */
   $("fruit-setup").style.display = ""; $("fruit-game").style.display = "none"; $("fruit-result").style.display = "none";
   const frM = snMode(frMode);
   snModeBar($("fruit-setup"), frM, (m) => { frMode = m; fruitReset(); });
+  const lag = $("fruit-lag"), lr = $("fruit-lag-range"), lv = $("fruit-lag-val");
+  if (lag){
+    lag.style.display = frM === "multi" ? "" : "none";
+    lr.value = fruitLagMs();
+    const show = () => lv.textContent = (+lr.value ? lr.value + "ms" : "끔");
+    show();
+    lr.oninput = () => { localStorage.setItem("fruit_lag", lr.value); show(); };
+  }
   const box = $("fruit-players");
   box.innerHTML = "";
   if (frM === "multi"){
@@ -202,7 +217,7 @@ function fruitSumOK(){
   return Object.values(sums).some(v => v === 5);
 }
 function fruitFlipTurn(i){
-  if (!fr.running || fr.locked || fr.flipLock) return;
+  if (!fr.running || fr.locked || fr.flipLock || fr.voteId) return;
   if (i !== fr.turn) return; /* 자기 차례 아니면 무시 (종 오발 방지) */
   if (!fr.decks[i].length) return fruitNextTurn();
   fr.faceup[i].push(fr.decks[i].pop());
@@ -220,6 +235,22 @@ function fruitNextTurn(){
     if (fruitAlive(j) && fr.decks[j].length){ fr.turn = j; fruitRenderTurn(); return; }
   }
   fruitEnd(); /* 전원 덱 소진 → 카드 많은 순 정산 */
+}
+/* 여러 폰 종 판정 — 각 폰이 자기 로컬 델타(본 순간→누른 순간)를 보내고, 호스트가 수집창 동안
+   모아 가장 빠른 반응을 승자로. 네트워크 지연·시계오차가 상쇄돼 호스트 편애가 사라짐.
+   창(ms)은 설정 슬라이더로 조절, 0이면 끔(먼저 도착한 폰 우선 = 옛 방식). */
+function fruitBellVote(i, rt){
+  if (!fr.running || fr.locked) return;
+  const win = fruitLagMs();
+  if (win <= 0) return fruitBell(i, null); /* 보정 OFF */
+  fr.votes.push({ i, rt: Math.max(0, +rt || 0) });
+  if (fr.voteId) return; /* 수집창 이미 열림 */
+  fr.voteId = setTimeout(() => {
+    fr.voteId = null;
+    const w = fr.votes.reduce((a, b) => b.rt < a.rt ? b : a);
+    fr.votes = [];
+    fruitBell(w.i, null);
+  }, win); // ponytail: 반응시간 기반 보정, 정밀 필요시 RTT핑 도입
 }
 function fruitBell(i, zone){
   if (!fr.running || fr.locked) return;
@@ -297,7 +328,7 @@ function fruitHostMsg(from, m){
   const i = fr.players.indexOf(from);
   if (i < 0) return;
   if (m.t === "flip") fruitFlipTurn(i);
-  else if (m.t === "bell") fruitBell(i, null);
+  else if (m.t === "bell") fruitBellVote(i, m.rt);
 }
 /* 게스트에 필요한 전부: 각자 맨 윗장 + 덱 수 + 차례 + 메시지 */
 function fruitSnap(){
@@ -339,6 +370,7 @@ function fruitMpShow(m){
     return;
   }
   const my = m.players.indexOf(mp.name);
+  fr.lastRender = performance.now(); /* 반응시간 기준점: 이 폰이 새 판을 본 순간 */
   el.innerHTML = "";
   const msg = document.createElement("div");
   msg.style.cssText = "min-height:22px;text-align:center;font-weight:700;color:var(--fire)";
@@ -387,7 +419,10 @@ function fruitMpShow(m){
   bell.style.cssText = "flex:1;font-size:17px";
   bell.textContent = "🔔 종!";
   bell.disabled = !m.running || my < 0;
-  bell.addEventListener("pointerdown", (e) => { e.preventDefault(); haptic(30); if (mpAmHost()) fruitBell(my, null); else mpToHost({ t: "bell" }); });
+  bell.addEventListener("pointerdown", (e) => { e.preventDefault(); haptic(30);
+    const rt = Math.max(0, performance.now() - (fr.lastRender || performance.now()));
+    if (mpAmHost()) fruitBellVote(my, rt); else mpToHost({ t: "bell", rt });
+  });
   bell.addEventListener("contextmenu", (e) => e.preventDefault());
   btns.append(flip, bell);
   el.appendChild(btns);

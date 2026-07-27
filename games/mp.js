@@ -203,6 +203,7 @@ function mpShowCam(){ $("mp-cam").style.display = ""; }
 /* 코드 복사/붙여넣기 컨트롤을 현재 단계(복사할 코드 있음 / 스캔 중)에 맞춰 노출 */
 function mpCodeUI(){
   const copy = !!mp.myCode, paste = !!mp.pasteExpect;
+  $("mp-code-share").style.display = (copy && "share" in navigator) ? "" : "none"; /* 카톡 등으로 바로 보내기 (지원 폰만) */
   $("mp-code-copy").style.display = copy ? "" : "none";
   if (!copy){ const o = $("mp-code-out"); o.style.display = "none"; o.value = ""; }
   $("mp-code-paste").style.display = paste ? "" : "none";
@@ -288,7 +289,7 @@ function mpWireHostPeer(peer){
     mpWake(true);
     mpKeepalive();
     snSfx("coin");   /* 게스트 폰 입장 성공 */
-    mpFlash("🔗 폰 연결됨!");
+    mpFlash("폰 연결됨!");
     mpRoom();
     mpRoster();
   };
@@ -374,7 +375,7 @@ async function mpJoin(){
       };
       pc.ondatachannel = (e) => {
         mp.hostChan = e.channel;
-        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); snSfx("coin"); mpFlash("🔗 연결 완료!"); mpRoom(); };   /* 호스트 연결 성공 */
+        e.channel.onopen = () => { opened = true; localStorage.setItem("snMpWas", "guest:" + Date.now()); mpWake(true); mpSend(e.channel, { t: "hi", name: mp.name, spr: mp.spr }); snSfx("coin"); mpFlash("연결 완료!"); mpRoom(); };   /* 호스트 연결 성공 */
         e.channel.onclose = () => { alert("호스트와 연결이 끊겼어요"); mpReset(); };
         e.channel.onmessage = (ev) => {
           let msg; try { msg = JSON.parse(ev.data); } catch (err) { return; }
@@ -444,7 +445,7 @@ function mpRoom(){
     mp.peers.forEach((p) => box.append(mpPeerRow(p.name || "게스트", p.on, p.rtt, p.spr)));
     $("mp-invite-more").style.display = "";
     $("mp-roster-field").style.display = "none"; /* 호스트는 위 연결 행이 이미 전원(실상태) */
-    $("mp-leave").textContent = "🚪 방 닫기 (전원 연결 해제)";
+    $("mp-leave").textContent = "방 닫기 (전원 연결 해제)";
     $("mp-room-hint").textContent = "게스트 폰은 같은 Wi-Fi에 붙인 뒤 [참가하기]로 들어오면 돼요. 게임은 ← 홈에서 골라 시작하면 전원이 따라와요";
   } else {
     $("mp-room-label").textContent = "대기방 · 내 연결";
@@ -454,7 +455,7 @@ function mpRoom(){
     const rbox = $("mp-roster"); rbox.innerHTML = "";
     (mp.rosterNames || []).forEach((n, i) => rbox.append(mpChip(n, (mp.rosterSprs || [])[i])));
     $("mp-roster-field").style.display = mp.rosterNames && mp.rosterNames.length ? "" : "none";
-    $("mp-leave").textContent = "🚪 방 나가기";
+    $("mp-leave").textContent = "방 나가기";
     $("mp-room-hint").textContent = "호스트가 게임을 고르면 이 폰도 자동으로 따라가요 — 화면 켜둔 채 기다려 주세요";
   }
   if (typeof mpSyncBack === "function") mpSyncBack(); /* 게스트: 뒤로가기 숨김·라벨 교체 (net.js) */
@@ -508,6 +509,12 @@ $("mp-flow-cancel").addEventListener("click", () => {
   if (mp.pendingPc){ try { mp.pendingPc.close(); } catch (e) { /* 무시 */ } mp.pendingPc = null; }
   if (mp.role === "host" && mp.peers.length) mpRoom(); else mpReset();
 });
+/* 코드 보내기 — 카톡·메시지 등 OS 공유로 바로 전달 (인터넷 될 때 카메라 없이 연결) */
+$("mp-code-share").addEventListener("click", async () => {
+  if (!mp.myCode) return;
+  try { await navigator.share({ title: "초원의 밤 연결코드", text: mp.myCode }); }
+  catch (e){ /* 사용자 취소 등 → 무시 */ }
+});
 /* 코드 복사 — 카메라 대신 코드로 연결할 때 내 초대/답장 코드를 복사 (오프라인이면 카톡 등으로 전달) */
 $("mp-code-copy").addEventListener("click", async () => {
   if (!mp.myCode) return;
@@ -560,7 +567,7 @@ $("mp-leave").addEventListener("click", () => {
   const fresh = Date.now() - +m[2] < 3 * 3600e3;
   mpReset(); /* 플래그 제거 + role 화면 준비 */
   if (!fresh) return;
-  $("mp-reload-warn").textContent = "📴 앱이 재시작되면서 방 연결이 끊겼어요 — " + (m[1] === "host" ? "방을 다시 만들고 게스트를 초대해 주세요" : "호스트의 초대 QR로 다시 들어가 주세요");
+  $("mp-reload-warn").textContent = "앱이 재시작되면서 방 연결이 끊겼어요 — " + (m[1] === "host" ? "방을 다시 만들고 게스트를 초대해 주세요" : "호스트의 초대 QR로 다시 들어가 주세요");
   $("mp-reload-warn").style.display = "";
   go("mp");
 })();
